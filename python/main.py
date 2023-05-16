@@ -12,12 +12,12 @@ cv2.imshow("random", randomm)  # 画好随机位置的图像
 
 
 # 随机resize
-resize_randomm = cv2.resize(randomm, (randint(200, 1000),randint(200,1000)))
-# cv2.imshow("resize", resize_randomm)  #
-img,loc= T.FindTreasure(resize_randomm)
-
-cv2.imshow("0",img)
-print(loc)
+# resize_randomm = cv2.resize(randomm, (randint(200, 200),randint(200,2000)))
+# # cv2.imshow("resize", resize_randomm)  #
+# img,loc= T.FindTreasure(resize_randomm)
+#
+# cv2.imshow("0",img)
+# print(loc)
 cv2.waitKey(0)
 
 

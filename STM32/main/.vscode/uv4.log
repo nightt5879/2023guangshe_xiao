@@ -1,0 +1,51 @@
+Load "e:\\robot\\51\\code_32\\Projects\\2023guangshe\\STM32\\main\\Objects\\project.axf" 
+Set JLink Project File to "e:\robot\51\code_32\Projects\2023guangshe\STM32\main\JLinkSettings.ini"* JLink Info: Device "STM32F100C8" selected.
+
+JLink info:
+------------
+DLL: V7.82 , compiled Oct 13 2022 13:32:51
+Firmware: J-Link OB-STM32F072-CortexM compiled Jan  7 2019 14:09:37
+Hardware: V1.00
+Feature(s) : GDB, RDI, FlashBP, FlashDL, JFlash, RDDI 
+
+* JLink Info: InitTarget() start
+* JLink Info: InitTarget() end
+* JLink Info: Found SW-DP with ID 0x1BA01477
+* JLink Info: DPv0 detected
+* JLink Info: CoreSight SoC-400 or earlier
+* JLink Info: Scanning AP map to find all available APs
+* JLink Info: AP[1]: Stopped AP scan as end of AP map has been reached
+* JLink Info: AP[0]: AHB-AP (IDR: 0x14770011)
+* JLink Info: Iterating through AP map to find AHB-AP to use
+* JLink Info: AP[0]: Core found
+* JLink Info: AP[0]: AHB-AP ROM base: 0xE00FF000
+* JLink Info: CPUID register: 0x411FC231. Implementer code: 0x41 (ARM)
+* JLink Info: Found Cortex-M3 r1p1, Little endian.
+* JLink Info: FPUnit: 6 code (BP) slots and 2 literal slots
+* JLink Info: CoreSight components:
+* JLink Info: ROMTbl[0] @ E00FF000
+* JLink Info: [0][0]: E000E000 CID B105E00D PID 001BB000 SCS
+* JLink Info: [0][1]: E0001000 CID B105E00D PID 001BB002 DWT
+* JLink Info: [0][2]: E0002000 CID B105E00D PID 000BB003 FPB
+* JLink Info: [0][3]: E0000000 CID B105E00D PID 001BB001 ITM
+* JLink Info: [0][4]: E0040000 CID B105900D PID 001BB923 TPIU-Lite
+ROMTableAddr = 0xE00FF000
+* JLink Info: Reset: Halt core after reset via DEMCR.VC_CORERESET.
+* JLink Info: Reset: Reset device via AIRCR.SYSRESETREQ.
+
+Target info:
+------------
+Device: STM32F100C8
+VTarget = 3.300V
+State of Pins: TCK: 0, TDI: 0, TDO: 1, TMS: 1, TRES: 1, TRST: 1
+Hardware-Breakpoints: 6
+Software-Breakpoints: 8192
+Watchpoints:          4
+JTAG speed: 2000 kHz
+
+Erase Done.Programming Done.Verify OK.* JLink Info: Reset: Halt core after reset via DEMCR.VC_CORERESET.
+* JLink Info: Reset: Reset device via AIRCR.SYSRESETREQ.
+Application running ...
+* JLink Info: OnDisconnectTarget() start
+* JLink Info: OnDisconnectTarget() end
+Flash Load finished at 22:06:32
