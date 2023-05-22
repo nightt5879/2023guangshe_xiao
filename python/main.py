@@ -19,6 +19,7 @@ img,loc= T.FindTreasure(resize_randomm)
 # cv2.imshow("0",img)
 print(loc)
 cv2.waitKey(0)
+#dfasdgadgad
 
 
 
