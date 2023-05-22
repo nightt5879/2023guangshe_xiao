@@ -699,6 +699,11 @@
               <FileType>1</FileType>
               <FilePath>.\User\Delay.c</FilePath>
             </File>
+            <File>
+              <FileName>Timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\Timer.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

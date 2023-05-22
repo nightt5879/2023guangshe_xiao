@@ -1,6 +1,7 @@
 #include "stm32f10x.h"                  // Device header
 #include "CountSensor.h"
 
+
 uint16_t CountSensor_Count_1;
 uint16_t CountSensor_Count_2;
 

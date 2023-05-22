@@ -32,3 +32,5 @@
 .\objects\main.o: User\GPIO.h
 .\objects\main.o: User\OLED.h
 .\objects\main.o: User\CountSensor.h
+.\objects\main.o: User\Timer.h
+.\objects\main.o: User\Delay.h
