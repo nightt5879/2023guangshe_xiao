@@ -111,3 +111,4 @@ class Treasure():
                     location.append(ell[0])
                 # print(str(S1) + "    " + str(S2)+"   "+str(ell[0][0])+"   "+str(ell[0][1]))
         return img,location
+
