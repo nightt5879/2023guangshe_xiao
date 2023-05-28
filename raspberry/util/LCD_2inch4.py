@@ -173,5 +173,7 @@ class LCD_2inch4(lcdconfig.RaspberryPi):
         self.SetWindows ( 0, 0, self.width, self.height)
         self.digital_write(self.DC_PIN,self.GPIO.HIGH)
         for i in range(0,len(_buffer),4096):
-            self.spi_writebyte(_buffer[i:i+4096])	
+            self.spi_writebyte(_buffer[i:i+4096])
+
+
         

@@ -1,23 +1,41 @@
-# 导入Python的RPi.GPIO模块，该模块提供控制Raspberry Pi GPIO通道的能力。
-import RPi.GPIO as GPIO
+from control import gpio
+import time
+from YYJ import Vision
+import cv2
+# wb = cv2.xphoto.createSimpleWB()
 
-# 设置GPIO编号模式为BOARD模式，该模式下引脚是按照物理位置进行编号的。
-GPIO.setmode(GPIO.BOARD)
+def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax):
+    # 初始化摄像头
+    Cam = Vision.Camera(0, 320, 240)
+    # 初始化PID模块
+    PWM_L = PWM_R = 0  # 赋初值
+    while True:
+        Cam.ReadImg(0, 320, 0, 150)
+        #de
+        Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
+        Cam.ShowImg(Cam.Img)
+        Cam.ShowImg(Dst, 'Dst')
+        # print(Centre[100])
+        # Now = Centre[Line]  # 现在的值
+        # Future = Centre[Line - 10]  # “未来”要去到的值
+        # D = Future - Now  # 差值
+        sum = Sum[Line - 60] + Sum[Line - 40]  # 黑色像素点的数量
+        # Sum = Sum[Line] + Sum[Line - 20]  # 黑色像素点的数量
+        # if Sum >= SumMax:
+        #     break
+        print(Centre[100],sum)
+        Cam.Delay(1)
 
-# 假设我们将GPIO引脚12设为输入
-pin_number = 12
 
-# 设置GPIO引脚为输入模式，使用GPIO内置的上拉电阻。
-# 这意味着当开关未被按下时，引脚将被读取为HIGH。
-GPIO.setup(pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# 无限循环，持续检查引脚状态
-while True:
-    # GPIO.input函数读取指定GPIO引脚的值，HIGH或者LOW。
-    input_state = GPIO.input(pin_number)
-    print(input_state)
-    # 如果input_state为False，说明引脚状态为LOW，即开关被按下。
-    if input_state == False:
-        print('Button Pressed')
-        # 使用time.sleep进行延迟，以防止同时检测到多次按钮按下。
-        time.sleep(0.2)
+if __name__ == '__main__':
+    K = 0.5
+    Kp = 2
+    Ki = 0
+    Kd = 0
+    Line = 120
+    SumMax = 350
+    PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax)
+    for i in range (100):
+        S = gpio.Screen()
+        S.screen_display("hellodfdf" + str(i))
+        time.sleep(0.5)
