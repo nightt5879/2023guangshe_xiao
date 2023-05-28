@@ -1,42 +1,51 @@
-#include "stm32f10x.h"
-#include "PWM.h"
-#include "GPIO.h"
-#include "OLED.h"
-#include "CountSensor.h"
-#include "Timer.h"
+#include "stm32f10x.h"                  // Device header
 #include "Delay.h"
+#include "OLED.h"
+#include "Serial.h"
+//#include "Key.h"
 
-extern uint16_t speed_1,speed_2;
-extern uint16_t CountSensor_Count_1,CountSensor_Count_2;
-uint16_t G1,G2;
+uint8_t KeyNum;
+
 int main(void)
 {
-	PWM_Init();
-	GPIOInit();
 	OLED_Init();
-	CountSensor_Init();
-	// Timer_Init();
-	OLED_ShowString(1, 1, "Count1:");
-	OLED_ShowString(2, 1, "Count2:");
-	GPIO_Set(1);
-	GPIO_Set(4);
-	PWM_SetCompara(1,400);
-	PWM_SetCompara(2,400);
-	Delay_ms(1000);
-	GPIO_Set(2);
-	Delay_ms(1000);
-	GPIO_Set(1);
+//	Key_Init();
+	Serial_Init();
+	
+	OLED_ShowString(1, 1, "TxPacket");
+	OLED_ShowString(3, 1, "RxPacket");
+	
+	Serial_TxPacket[0] = 0x01;
+	Serial_TxPacket[1] = 0x02;
+	Serial_TxPacket[2] = 0x03;
+	Serial_TxPacket[3] = 0x04;
+	
 	while (1)
 	{
-		OLED_ShowNum(1, 8, CountSensor_Count_1, 5);
-		OLED_ShowNum(2, 8, CountSensor_Count_2, 5);
-		// G1 = CountSensor_Get_1();
-		// G2 = CountSensor_Get_2();
-		// OLED_ShowNum(1, 8, G1, 5);
-		// OLED_ShowNum(2, 8, G2, 5);
-		// if(G1 > 500)
-		// 	GPIO_Set(3);
-		// if(G2 > 500)
-		// 	GPIO_Set(6);
+//		KeyNum = Key_GetNum();
+//		if (KeyNum == 1)
+//		{
+//			Serial_TxPacket[0] ++;
+//			Serial_TxPacket[1] ++;
+//			Serial_TxPacket[2] ++;
+//			Serial_TxPacket[3] ++;
+//			
+//			Serial_SendPacket();
+//			
+//			OLED_ShowHexNum(2, 1, Serial_TxPacket[0], 2);
+//			OLED_ShowHexNum(2, 4, Serial_TxPacket[1], 2);
+//			OLED_ShowHexNum(2, 7, Serial_TxPacket[2], 2);
+//			OLED_ShowHexNum(2, 10, Serial_TxPacket[3], 2);
+//		}
+		
+		if (Serial_GetRxFlag() == 1)
+		{
+			OLED_ShowHexNum(2, 1, Serial_RxPacket[4], 2);
+			OLED_ShowHexNum(2, 4, Serial_RxPacket[5], 2);
+			OLED_ShowHexNum(4, 1, Serial_RxPacket[0], 2);
+			OLED_ShowHexNum(4, 4, Serial_RxPacket[1], 2);
+			OLED_ShowHexNum(4, 7, Serial_RxPacket[2], 2);
+			OLED_ShowHexNum(4, 10, Serial_RxPacket[3], 2);
+		}
 	}
 }

@@ -28,9 +28,7 @@
 .\objects\main.o: .\Library\stm32f10x_usart.h
 .\objects\main.o: .\Library\stm32f10x_wwdg.h
 .\objects\main.o: .\Library\misc.h
-.\objects\main.o: User\PWM.h
-.\objects\main.o: User\GPIO.h
-.\objects\main.o: User\OLED.h
-.\objects\main.o: User\CountSensor.h
-.\objects\main.o: User\Timer.h
 .\objects\main.o: User\Delay.h
+.\objects\main.o: User\OLED.h
+.\objects\main.o: User\Serial.h
+.\objects\main.o: E:\robot\51\keil\keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

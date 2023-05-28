@@ -704,6 +704,11 @@
               <FileType>1</FileType>
               <FilePath>.\User\Timer.c</FilePath>
             </File>
+            <File>
+              <FileName>Serial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\Serial.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
