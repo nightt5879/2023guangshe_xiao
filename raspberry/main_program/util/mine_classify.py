@@ -42,7 +42,7 @@ class MinesClassifier:
         output_tensor = output_tensor.numpy()
         e_x = np.exp(output_tensor.squeeze() - np.max(output_tensor.squeeze()))
         pro = e_x / e_x.sum()
-        return np.argmax(pro)
+        return np.argmax(pro),pro
 
 
 
