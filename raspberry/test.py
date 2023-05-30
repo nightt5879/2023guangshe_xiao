@@ -1,11 +1,11 @@
-import cv2
-
 import move
 import time
 from control import gpio
 from YYJ import Vision
 from YYJ import GPIO_RPi
 from move import path
+from main_program.util.mine_classify import MinesClassifier
+import cv2
 from util import LCD_2inch4
 
 # init all the modules
@@ -24,7 +24,8 @@ def turn_right_90(time_move):
     time.sleep(time_move)
     c.car_stop()
 
-def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax,SumMin,base_speed,break_mod =0,break_time = 0,back_mod = 0):
+def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax,SumMin,base_speed,break_mod =0,break_time = 0,back_mod = 0
+                    ,user_max_time = 2):
     # 初始化摄像头
     # global Cam
     global one_path_done
@@ -36,7 +37,7 @@ def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax,SumMin,base_speed,break_mod =0,bre
     max_time = 0
     # 初始化PID模块
     PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
-    for i in range (5):  # Clear the buffer.
+    for i in range (1):  # Clear the buffer.
         Cam.ReadImg(0, 320, 0, 150)
         cv2.waitKey(1)
     while True:
@@ -48,26 +49,34 @@ def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax,SumMin,base_speed,break_mod =0,bre
         # image = image.filter(ImageFilter.SHARPEN)
         # disp.ShowImage(image)
         # print(Centre[Line],sum)
-        Now = int((Centre[Line] + Centre[Line - 10])/2) # 现在的值
+        Now = int((Centre[Line] +
+                   Centre[Line - 5] + Centre[Line + 5] +
+                   Centre[Line - 4] + Centre[Line + 4] +
+                   Centre[Line - 3] + Centre[Line + 3] +
+                   Centre[Line - 2] + Centre[Line + 2] +
+                   Centre[Line - 1] + Centre[Line + 1])/11) # 十个附近点的值求平均
         Future = Centre[Line - 10]  # “未来”要去到的值
         D = Future - Now  # 差值
         PWM = PID.OneDin(Now)
         pwm = int(PWM)
         # print(pwm)
-        sum = Sum[Line - 50] + Sum[Line - 40] + Sum[Line - 45]  # 黑色像素点的数量
-        if sum >= SumMax:
+        sum = int((Sum[Line - 101] + Sum[Line - 102] + Sum[Line - 103]  +\
+              Sum[Line - 104] + Sum[Line - 105] + Sum[Line - 106]  +\
+              Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        if sum >= SumMax and break_flag > 40:  # 不要再刚转弯开始巡线就break
             max_time += 1
             # c.car_stop()
             # print("out max")
             # print(sum)
             # break
-        elif max_time >= 2:  # enough max time
+        elif max_time >= user_max_time:  # enough max time
             break
-        elif sum <= SumMin and one_path_done == 1:
-            one_path_done = 0
-            c.car_stop()
-            break
+        # elif sum <= SumMin and one_path_done == 1 and break_mod == 0:
+        #     one_path_done = 0
+        #     c.car_stop()
+        #     break
         if break_mod == 1 and break_flag >= break_time:
+            print("break time max")
             c.car_stop()
             break
         pwm_1 = base_speed - pwm
@@ -82,7 +91,7 @@ def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax,SumMin,base_speed,break_mod =0,bre
         break_flag += 1
         Cam.Delay(1)
     # Cam.Release()
-    print('Tracking done')
+    # print('Tracking done')
 
 def slove_path(path):
     """
@@ -97,11 +106,12 @@ def slove_path(path):
     non_intersection_points = [(9, 1), (11, 3), (1, 5), (7, 5), (19, 7), (9, 9), (11, 9), (15, 9), (5, 11), (9, 11),
                                (11, 11), (1, 13), (13, 15), (19, 15), (9, 17), (11, 19)]
     # 11,1 1,3 13,5 15,7 3,9 17,11 5,13 7,15 19,17 9,19
-    fork_road = [(11,1), (1,3), (13,5), (15,7), (3,9), (17,11), (5,13), (7,15), (19,17), (9,19)]
-    #1，1 19，5 15，7 1，15 5，13 19，19
-    long_length_path = [(1,1), (19,5), (15,7), (1,15), (5,13), (19,19),(7,7),(13,13)]  # it means those path need one more move step the other are the short length path
-    for i in range (9): # 9 paths
-        for j in range (len(path[i])):  # path points
+    fork_road = [(11, 1), (1, 3), (13, 5), (15, 7), (3, 9), (17, 11), (5, 13), (7, 15), (19, 17), (9, 19)]
+    # 1，1 19，5 15，7 1，15 5，13 19，19
+    long_length_path = [(1, 1), (19, 5), (15, 7), (1, 15), (5, 13), (19, 19), (7, 7),
+                        (13, 13)]  # it means those path need one more move step the other are the short length path
+    for i in range(len(path)):  # 9 paths
+        for j in range(len(path[i])):  # path points
             if path[i][j]["now_xy"] not in non_intersection_points:
                 one_path.append(path[i][j]["move_mode"])
         if path[i][j]["now_xy"] in long_length_path and path[i][j]["move_mode"] == "前进":
@@ -111,17 +121,19 @@ def slove_path(path):
             one_path.append("短线")
         move_list.append(one_path)
         one_path = []
-        # below is change the turning car way
-        for i in range(len(move_list) - 1):
-            if move_list[i+1][0] == "左转" and move_list[i+1][1]  =="左转":
-                #no need the turning
-                move_list[i+1].pop(0)
-                move_list[i+1].pop(0)
-            # change the direction
-            elif move_list[i+1][0] == "左转":
-                move_list[i+1][0] = "右转"
-            elif move_list[i+1][0] == "右转":
-                move_list[i+1][0] = "左转"
+    # print(move_list)
+    for i in range(len(move_list) - 1):
+        # print(i+1)
+        # print(move_list[i+1][0])
+        if move_list[i + 1][0] == "左转" and move_list[i + 1][1] == "左转":
+            # no need the turning
+            move_list[i + 1].pop(0)
+            move_list[i + 1].pop(0)
+        # change the direction
+        elif move_list[i + 1][0] == "左转":
+            move_list[i + 1][0] = "右转"
+        elif move_list[i + 1][0] == "右转":
+            move_list[i + 1][0] = "左转"
     return move_list
 
 def hit_the_treasure(hit_treasure_time):
@@ -136,15 +148,22 @@ def hit_the_treasure(hit_treasure_time):
 
 def right_90():
     c.car_stop()
-    time.sleep(0.5)
-    turn_right_90(0.45)
-    time.sleep(0.5)
-    c.car_stop()
+    # time.sleep(0.5)
+    turn_right_90(0.43)
+    # time.sleep(0.5)
+    # c.car_stop()
 
 def left_90():
     c.car_stop()
+    # time.sleep(0.5)
+    turn_left_90(0.43)
+    # time.sleep(0.5)
+    # c.car_stop()
+
+def left_90_with_stop(turn_time = 0.43):
+    c.car_stop()
     time.sleep(0.5)
-    turn_left_90(0.45)
+    turn_left_90(turn_time)
     time.sleep(0.5)
     c.car_stop()
 
@@ -152,17 +171,17 @@ if __name__ == '__main__':
     move_list = slove_path(path)
     #below is the pid value
     K = 0.5
-    Kp = 2
+    Kp = 5
     Ki = 0
-    Kd = 3
-    Line = 60
-    SumMax = 450
+    Kd = 5
+    Line = 120
+    SumMax = 400
     SumMin = 100
     treasure_corner = 0
     one_path_done = 0  #in case for the stop on the midele of the path
     speed = 400
-    break_time_long = 100
-    break_time_short = 40
+    break_time_long = 60  #110
+    break_time_short = 50
     # hit_the_treasure(0.7)
     # print(move_list[0])
     # print(move_list[1])
@@ -172,12 +191,14 @@ if __name__ == '__main__':
     # turn_right_90(0.4)
     # time.sleep(0.2)
     # PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400, break_mod=1, break_time=break_time_)
+    # print(move_list[3])
+    # PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400, break_mod=1, break_time=break_time_long)
     # exit()
     c.car_forward(400,400)
     time.sleep(1)
     c.car_stop()
     for i in range (len(move_list)):
-        i += 6
+        # i += 1
         print(i)
         for j in range (len(move_list[i])):
             if j == len(move_list[i])-1:
@@ -188,17 +209,17 @@ if __name__ == '__main__':
                 c.car_forward(400,400)
                 time.sleep(0.3)
                 c.car_stop()
-                time.sleep(0.5)
+                # time.sleep(0.5)
             elif move_list[i][j] == "左转":
                 treasure_corner = 1
                 left_90()
-                print("turn left done")
-                time.sleep(0.5)
+                # print("turn left done")
+                # time.sleep(0.5)
             elif move_list[i][j] == "右转":
                 treasure_corner = 1
                 right_90()
-                print("turn right done")
-                time.sleep(0.5)
+                # print("turn right done")
+                # time.sleep(0.5)
         #finish one path
         if i == len(move_list)-1: #it mean it is the last path
             c.car_forward(400,400)
@@ -206,25 +227,50 @@ if __name__ == '__main__':
             c.car_stop()
             break
         if move_list[i][j] == "长线":  #
-            PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax,SumMin,400,break_mod=1,break_time=break_time_long)
-            # detect the treasure
-            hit_the_treasure(0.7)
-            left_90()
-            left_90()
-        elif move_list[i][j] == "短线": # done short line need to back to the cross road
-            PIDLineTracking(K = 0.5, Kp = 2, Ki = 0, Kd = 3, Line = 60, SumMax = 450,SumMin = 100 ,base_speed = 400,
-                            break_mod=1,break_time=break_time_short)
-            # detect the treasure
             c.car_stop()
-            time.sleep(0.5)
-            hit_the_treasure(0.7)
-            left_90()
-            left_90()
-            PIDLineTracking(K = 0.5, Kp = 3, Ki = 0, Kd = 0, Line = 60, SumMax = 450,SumMin = 100 ,base_speed = 300
-                            , back_mod = 0)  # back to the cross road
+            time.sleep(0.3)
+            # print("start long line")
+            PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax + 5000,SumMin,400,break_mod=1,break_time=break_time_long,user_max_time=5)
+            # print("long line done")
+            # detect the treasure
+            if treasure = "fake":  # 掉头就跑
+                left_90_with_stop()
+                left_90_with_stop(0.43)
+            elif treasure = "true": # hit the treasure
+                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=350,
+                                break_mod=1, break_time=break_time_short)
+                c.car_stop()
+                time.sleep(0.5)
+                hit_the_treasure(0.7)
+                left_90_with_stop()
+                left_90_with_stop(0.43)
+        elif move_list[i][j] == "短线": # done short line need to back to the cross road
+            c.car_stop()
+            time.sleep(0.3)
+            # 观察宝藏
+            if treasure = "fake":
+                if move_list[i+1][0] == "前进":  # 需要掉头
+                    left_90_with_stop()
+                    left_90_with_stop(0.4)
+                # 反转，因为没有撞宝藏 所以车头没有倒转
+                elif move_list[i+1][0] == "左转":
+                    move_list[i+1][0] = "右转"
+                elif move_list[i+1][0] == "右转":
+                    move_list[i+1][0] = "左转"
+            elif treasure = "real":
+                PIDLineTracking(K = 0.5, Kp = 5, Ki = 0, Kd = 3, Line = 120, SumMax = 450,SumMin = 100 ,base_speed = 350,
+                                break_mod=1,break_time=break_time_short)
+                # detect the treasure
+                c.car_stop()
+                time.sleep(0.5)
+                hit_the_treasure(0.7)
+                left_90_with_stop()
+                left_90_with_stop(0.4)
+                PIDLineTracking(K = 0.5, Kp = 5, Ki = 0, Kd = 2, Line = 120, SumMax = 450,SumMin = 100 ,base_speed = 350
+                                , back_mod = 0)  # back to the cross road
 
-            c.car_forward(400, 400)
-            time.sleep(0.5)
+                c.car_forward(400, 400)
+                time.sleep(0.3)
             # left_90()
             # left_90()
             c.car_stop()

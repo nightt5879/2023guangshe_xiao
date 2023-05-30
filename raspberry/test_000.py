@@ -25,7 +25,9 @@ def PIDLineTracking(K, Kp, Ki, Kd,Line,SumMax):
         # Now = Centre[Line]  # 现在的值
         # Future = Centre[Line - 10]  # “未来”要去到的值
         # D = Future - Now  # 差值
-        sum = Sum[Line - 50] + Sum[Line - 40] + Sum[Line - 45]  # 黑色像素点的数量
+        sum = int((Sum[Line - 101] + Sum[Line - 102] + Sum[Line - 103] + \
+                   Sum[Line - 104] + Sum[Line - 105] + Sum[Line - 106] + \
+                   Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         # Sum = Sum[Line] + Sum[Line - 20]  # 黑色像素点的数量
         # if Sum >= SumMax:
         #     break
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     Ki = 0
     Kd = 0
     Line = 120
-    SumMax = 350
+    SumMax = 400
     PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax)
     time.sleep(1)
     print("done")
