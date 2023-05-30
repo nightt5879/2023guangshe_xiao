@@ -120,7 +120,7 @@ def slove_path(path):
             # change the direction
             elif move_list[i+1][0] == "左转":
                 move_list[i+1][0] = "右转"
-            elif move_list[i+1][0] == "右转转":
+            elif move_list[i+1][0] == "右转":
                 move_list[i+1][0] = "左转"
     return move_list
 
