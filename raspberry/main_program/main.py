@@ -13,7 +13,7 @@ from control import gpio
 from move import path
 
 
-def button_with_wait() -> str:
+def button_with_wait():
     """
     按下按钮后，等待一段时间，如果没有再次按下按钮，就返回one_press 此时对应的是红队
     如果再次按下按钮，就返回two_press 此时对应的是蓝队
@@ -58,7 +58,7 @@ def button_with_wait() -> str:
     return button
 
 
-def select_team() -> str:
+def select_team():
     """
     选择队伍 按一下是红队 按两下是蓝队
     :return: red or blue
@@ -78,7 +78,7 @@ def select_team() -> str:
     return team_of
 
 
-def slove_path(path, hit_flag="hit") -> list:
+def slove_path(path, hit_flag="hit"):
     """
     根据路径规划的结果，进行路径的解决,每次只解决一条路径（使用pop取出 ）
     :param path: 输入的路径
@@ -410,7 +410,7 @@ if __name__ == '__main__':
                 hit_the_treasure(0.7)
                 left_90_with_stop()
                 left_90_with_stop(0.43)
-        elif move_list[i][j] == "短线":  # done short line need to back to the cross road
+        elif move_list[0][j] == "短线":  # done short line need to back to the cross road
             c.car_stop()
             time.sleep(0.3)
             # 观察宝藏

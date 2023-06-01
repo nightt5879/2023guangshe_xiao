@@ -300,7 +300,7 @@ if __name__ == '__main__':
             print(treasure)
             if treasure == "fake":  # 掉头就跑
                 left_90_with_stop()
-                left_90_with_stop(0.43)
+                left_90_with_stop(0.50)
             elif treasure == "true":  # hit the treasure
                 PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=350,
                                 break_mod=1, break_time=break_time_short + 30)
