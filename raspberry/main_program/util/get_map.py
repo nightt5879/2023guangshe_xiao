@@ -169,8 +169,8 @@ def get_loc():
     """
     T = Treasure(1)
 
-    cap = cv2.VideoCapture("./videos/output.avi")
-    # cap = cv2.VideoCapture(1)
+    # cap = cv2.VideoCapture("./videos/output.avi")
+    cap = cv2.VideoCapture(1)
     while True:
         success, img = cap.read()
         show_lcd(img)
@@ -190,7 +190,7 @@ def get_loc():
                         # print(loc)
                         return loc
 
-                    else:
+                    elif key == "j":
                         # 如果只是单击以下按键，那就跳过这张图片继续进行识别
                         continue
         cv2.waitKey(25)  # 按数字0就是前进1帧
