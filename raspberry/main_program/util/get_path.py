@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import math
-from time import time
 import itertools
-
+from copy import deepcopy
+import random
 
 
 def get_obs(small_labyrinth_file="./img/small_labyrinth.png"):
@@ -22,7 +22,10 @@ def get_obs(small_labyrinth_file="./img/small_labyrinth.png"):
     return obs
 
 
-obs = get_obs()
+if __name__ == '__main__':
+    obs = get_obs(small_labyrinth_file="../img/small_labyrinth.png")
+else:
+    obs = get_obs()
 
 
 class Env:
@@ -73,7 +76,6 @@ class ADStar:
         self.eps = eps
         self.OPEN[self.s_goal] = self.Key(self.s_goal)
         self.CLOSED, self.INCONS = set(), dict()
-
 
     def run(self):
 
@@ -484,9 +486,6 @@ def get_distance(now_x, now_y, car_direct):
     return tuple(relate_distance)
 
 
-
-
-
 def get_path(s_start, s_goal, car_direct, just_get_distance=False):
     """
     获取路径、路径长度、小车最终朝向
@@ -497,7 +496,7 @@ def get_path(s_start, s_goal, car_direct, just_get_distance=False):
     :param just_get_distance: 是否是仅需要路径长度
     :return:
     """
-    path, total_distance, car_direct = ADStar(s_start, s_goal, car_direct, 
+    path, total_distance, car_direct = ADStar(s_start, s_goal, car_direct,
                                               just_get_distance=just_get_distance).run()
     return path, total_distance, car_direct
 
@@ -513,22 +512,22 @@ def get_distances(begin_point: tuple, target_point: tuple, mine_points: list) ->
     """
     # 定义一个字典用于存储所有距离
     distance_dict = {}
-
+    num_mines = len(mine_points)
     # 先计算起点和8个宝藏的距离, 计算终点和8个宝藏的距离
-    for i in range(8):
+    for i in range(num_mines):
         # 起点到每个点之间的距离
         distance_dict[(i, -1)] = \
-            get_path(mine_points[i], begin_point, car_direct='上',  just_get_distance=True)[1]
+            get_path(mine_points[i], begin_point, car_direct='上', just_get_distance=True)[1]
 
         # 每个点到终点的距离
         distance_dict[(i, -2)] = \
-            get_path(mine_points[i], target_point, car_direct='上',  just_get_distance=True)[1]
+            get_path(mine_points[i], target_point, car_direct='上', just_get_distance=True)[1]
 
     # 计算8个宝藏两两之间的距离
-    for i in range(7):
-        for j in range(i + 1, 8):
+    for i in range(num_mines - 1):
+        for j in range(i + 1, num_mines):
             distance_dict[tuple(sorted([i, j]))] = \
-                get_path(mine_points[i], mine_points[j], car_direct='上',  just_get_distance=True)[1]
+                get_path(mine_points[i], mine_points[j], car_direct='上', just_get_distance=True)[1]
 
     return distance_dict
 
@@ -549,8 +548,8 @@ def brute_force_tsp(begin_point: tuple, target_point: tuple, mine_points: list) 
     # 初始化最短路径为None
     shortest_path = None
     # 暴力枚举遍历所有可能的路径, 计算路径总长度,最终得到最短的路径
+    # print(mine_points)
     for path in itertools.permutations(range(len(mine_points))):  # 遍历所有可能的排列，即所有可能的路径
-
         cur_dist = sum(distance_dict[tuple(sorted([path[i], path[i + 1]]))] for i in range(len(path) - 1))  # 计算该路径的总距离
         cur_dist += distance_dict[(path[0], -1)] + distance_dict[(path[-1], -2)]
         if cur_dist < min_dist:
@@ -588,14 +587,17 @@ def get_total_path(begin_point: tuple, target_point: tuple, mine_points: list, s
     return total_path
 
 
-def fine_tune_mine(begin_point, target_point, mine_points: list, optimize):
+def fine_tune_mine(begin_point, target_point, mine_points: list, optimize, ori_mine_points):
     """
     计算每个宝藏距离周围墙壁的距离, 偏移宝藏的坐标点以防止小车直接与宝藏相撞, 并且记录小车最终正确朝向
+    :param begin_point:
+    :param target_point:
     :param mine_points: 所有宝藏位置
+    :param optimize:
+    :param ori_mine_points: 后面需要修改宝藏位置, 所以先把原有宝藏位置存储下来
     :return:
     """
-    # 后面需要修改宝藏位置, 所以先把原有宝藏位置存储下来
-    ori_mine_points = mine_points.copy()
+
     if optimize is False:
 
         for i in range(len(mine_points)):
@@ -604,12 +606,12 @@ def fine_tune_mine(begin_point, target_point, mine_points: list, optimize):
             if dis[0] != 0:
                 # 向上。y+1
                 mine_points[i] = [(mine_points[i][0], mine_points[i][1] + 2), "下"]
-            elif dis[1] != 0:
-                # 向右 。x+1
-                mine_points[i] = [(mine_points[i][0] + 2, mine_points[i][1]), "左"]
             elif dis[2] != 0:
-                # 向下 y-1
+                # 向右 。x+1
                 mine_points[i] = [(mine_points[i][0], mine_points[i][1] - 2), "上"]
+            elif dis[1] != 0:
+                # 向下 y-1
+                mine_points[i] = [(mine_points[i][0] + 2, mine_points[i][1]), "左"]
             elif dis[3] != 0:
                 # 向左 x-1
                 mine_points[i] = [(mine_points[i][0] - 2, mine_points[i][1]), "右"]
@@ -617,6 +619,7 @@ def fine_tune_mine(begin_point, target_point, mine_points: list, optimize):
                 print("出错了")
                 exit()
         # 把原有宝藏的位置也设置成墙壁, 防止小车穿越宝藏点
+
         obs.update(set(ori_mine_points))
         # 使用暴力枚举法解决旅行商问题求出小车前往的宝藏顺序
         shortest_path, min_dist = brute_force_tsp(begin_point, target_point, mine_points)
@@ -628,7 +631,9 @@ def fine_tune_mine(begin_point, target_point, mine_points: list, optimize):
         path_num = 1
         # 先修改那些周围只有一个白色块的宝藏的坐标
         for i in range(len(mine_points)):
+
             dis = get_distance(mine_points[i][0], mine_points[i][1], "上")
+
             white_block_num = 4 - dis.count(0)
             path_num *= white_block_num
 
@@ -714,31 +719,139 @@ def fine_tune_mine(begin_point, target_point, mine_points: list, optimize):
         return choose_path, choose_point
 
 
-def get_paths(mine_points, begin_point=(19, 1), target_point=(1, 19), optimize=False):
+def get_paths(mine_points, eight_mines, begin_point=(19, 1), target_point=(1, 19), optimize=False, car_direct='上'):
     """
 
     :param mine_points: 所有宝藏的位置, 这里起点是左上角并且x和y单位是白色块
     :param begin_point: 起点坐标, 右下角
+    :param eight_mines: 八个宝藏。用于更新obs
     :param target_point: 终点坐标, 左上角
     :param optimize: 是否进一步优化使得路径真正最短,这会导致运行速度变慢
     :param plot: 是否画图
     :return:
     """
-
-    # 把宝藏位置转换成我们所需的正确的宝藏格式
-    mine_points = [(x * 2 - 1, (11 - y) * 2 - 1) for (x, y) in mine_points]
+    ori_mine_points = mine_points.copy()
 
     # 计算每个宝藏距离周围墙壁的距离, 偏移宝藏的坐标点以防止小车直接与宝藏相撞, 并且记录小车最终正确朝向
-    shortest_path, mine_points = fine_tune_mine(begin_point, target_point, mine_points, optimize)
+    shortest_path, mine_points = fine_tune_mine(begin_point, target_point, mine_points, optimize, eight_mines)
 
-    total_path = get_total_path(begin_point, target_point, mine_points, shortest_path)
+    total_path = get_total_path(begin_point, target_point, mine_points, shortest_path, car_direct=car_direct)
+    # for path in total_path:
+    #     print(path[-1])
+    # print("---")
+    # 给原来的宝藏列表增加一个象限信息
+    for i in shortest_path:
+        x, y = ori_mine_points[i]
 
-    return total_path
+        if 10 > x:
+            if 10 > y:
+                mine_points[i].append(3)
+            else:
+                mine_points[i].append(2)
+        else:
+            if 10 > y:
+                mine_points[i].append(4)
+            else:
+                mine_points[i].append(1)
+    quadrant_mines = []
+    ori_mines = []
+    for index in shortest_path:
+        quadrant_mines.append(mine_points[index])
+        ori_mines.append(ori_mine_points[index])
+    return total_path, quadrant_mines, ori_mines
 
+
+class pathPlaner:
+    def __init__(self, mine_points):
+        # 把宝藏位置转换成我们所需的正确的宝藏格式
+        self.eight_mines = [(x * 2 - 1, (11 - y) * 2 - 1) for (x, y) in mine_points]
+        self.paths, self.quadrant_mines, self.ori_mines = get_paths(self.eight_mines.copy(), self.eight_mines.copy(),
+                                                                    optimize=False)
+
+        self.ori_paths = deepcopy(self.paths)
+
+    def update_paths(self):
+        """
+        当你找到一个宝藏后,如果发现这个宝藏是我们的宝藏,那你就把paths列表作为输入参数放到这个函数里面
+        这个函数就会自动为你更新你的路径,除去不需要搜索的宝藏
+        :param index_mine: 当前到达第几个宝藏
+        :return:
+        """
+        index = len(self.quadrant_mines) - len(self.paths)
+        now_xy, car_direct, quadrant = self.quadrant_mines[index]
+        # 删除已经遇到过的宝藏
+        for i in range(index + 1):
+            self.quadrant_mines.pop(0)
+            self.ori_mines.pop(0)
+        # 删除一些为探索过但是确定是对方宝藏的宝藏
+        for i in range(len(self.ori_mines)):
+            if self.quadrant_mines[i][2] == quadrant:
+                self.quadrant_mines.pop(i)
+                self.ori_mines.pop(i)
+                break
+
+        if len(self.quadrant_mines) == 0:
+
+            path, _, _ = get_path(now_xy, (1, 19), car_direct)
+            self.paths = [path]
+
+        else:
+            global obs
+            obs = get_obs()
+            self.paths, self.quadrant_mines, self.ori_mines = get_paths(self.ori_mines, self.eight_mines, optimize=False,
+                                                                        begin_point=now_xy,
+                                                                        car_direct=car_direct)
+
+    def update_paths_add(self):
+        pass
+
+
+
+def car_move(move_mode):
+    pass
+
+
+def mine_classify():
+    if random.random() > 0.5:
+        return 'red', True
+    return 'blue', False
+
+
+def hit_mine():
+    pass
 
 
 if __name__ == '__main__':
+    # 一开始五分钟内得到的我们的队伍颜色,蓝色或者红色
+    our_color = 'red'
+    # 一开始五分钟内得到的所有宝藏的位置
     mine_points = [(3, 3), (4, 5), (3, 6), (2, 9), (7, 6), (8, 5), (8, 8), (9, 2)]
-    paths = get_paths(mine_points, optimize=True)
-    print(paths)
+    # 初始化路径规划类,其中planner.paths就是规划的路径
+    planer = pathPlaner(mine_points)
+    print(planer.paths)
+    exit()
+    while True:
+        # 取总路径中第一个路径为当前要走的路径
+        now_path = planer.paths.pop(0)
+        for move_obj in now_path:
+            # 遍历路径中的第一个指令
+            move_mode = move_obj['move_mode']
+            # 根据move_mode。小车做出指定动作：前进、左转、右转
+            car_move(move_mode)
+        # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
+        if len(planer.paths) == 0:
+            # 让小车继续直走一段距离然后就走出迷宫了
+            car_move("前进")
+            break
+        else:
+            # 宝藏识别.返回识别到的颜色以及是否是真宝藏
+            color, truth = mine_classify()
+            # 如果识别出来的颜色和你的队伍颜色相同
+            if color == our_color:
+                # 更新以下总路径。看看同象限内是否还有其他宝藏没有搜索。如果有的话就删除那个宝藏。因为那个宝藏必定是对方的
+                planer.update_paths()
+                # 如果这个是真宝藏。那就前进一格撞它然后在退后一格
+                if truth:
+                    hit_mine()
+
 
