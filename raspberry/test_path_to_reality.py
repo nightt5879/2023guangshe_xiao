@@ -49,7 +49,7 @@ def slove_path(path,hit_flag = "hit"):
         pass
     return move_list
 
-one_path = path[4]
+one_path = path[0]
 move = slove_path(one_path,"hit")
 print(move)
 # print(len(move))
