@@ -1,61 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="pi@192.168.235.80:22 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
-    <option name="confirmBeforeUploading" value="false" />
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="pi@192.168.1.103:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.1.103:22 password (13)">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.1.103:22 password (2)">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.1.103:22 password (3)">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.136.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.2.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.204.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="pi@192.168.230.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
@@ -66,21 +65,13 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="pi@192.168.235.80:22 password (2)">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="pi@192.168.249.80:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/Desktop/guangshe2023" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
     </serverData>
-    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>
