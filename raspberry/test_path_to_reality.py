@@ -4,7 +4,7 @@ path_0 = path[0][0]
 # print(path[0][2]["now_xy"])
 # print(len(path[0]))
 
-def slove_path(path):
+def slove_path(path,hit_flag = "hit"):
     """
     Args:
         :param path: input standard path data.
@@ -21,33 +21,37 @@ def slove_path(path):
     # 1，1 19，5 15，7 1，15 5，13 19，19
     long_length_path = [(1, 1), (19, 5), (15, 7), (1, 15), (5, 13), (19, 19), (7, 7),
                         (13, 13)]  # it means those path need one more move step the other are the short length path
-    for i in range(9):  # 9 paths
-        for j in range(len(path[i])):  # path points
-            if path[i][j]["now_xy"] not in non_intersection_points:
-                one_path.append(path[i][j]["move_mode"])
-        if path[i][j]["now_xy"] in long_length_path and path[i][j]["move_mode"] == "前进":
-            one_path.pop()
-            one_path.append("长线")
-        else:
-            one_path.append("短线")
-        move_list.append(one_path)
-        one_path = []
+    for j in range(len(path)):  # path points
+        if path[j]["now_xy"] not in non_intersection_points:
+            one_path.append(path[j]["move_mode"])
+    if path[j]["now_xy"] in long_length_path and path[j]["move_mode"] == "前进":
+        one_path.pop()
+        one_path.append("长线")
+    else:
+        one_path.append("短线")
+    move_list.append(one_path)
+    one_path = []
     print(move_list)
-    for i in range(len(move_list) - 1):
+    # if hit the treasure, the car turnover.so it need to change the direction
+    if hit_flag == "hit":
         # print(i+1)
         # print(move_list[i+1][0])
-        if move_list[i + 1][0] == "左转" and move_list[i + 1][1] == "左转":
+        if move_list[0][0] == "左转" and move_list[0][1] == "左转":
             # no need the turning
-            move_list[i + 1].pop(0)
-            move_list[i + 1].pop(0)
+            move_list[0].pop(0)
+            move_list[0].pop(0)
         # change the direction
-        elif move_list[i + 1][0] == "左转":
-            move_list[i + 1][0] = "右转"
-        elif move_list[i + 1][0] == "右转":
-            move_list[i + 1][0] = "左转"
+        elif move_list[0][0] == "左转":
+            move_list[0][0] = "右转"
+        elif move_list[0][0] == "右转":
+            move_list[0][0] = "左转"
+    elif hit_flag == "no_hit":
+        pass
     return move_list
 
-move = slove_path(path)
+one_path = path[4]
+move = slove_path(one_path,"hit")
+print(move)
 # print(len(move))
 # print(move[0],len(move[0]))
 # for i in range(len(move)):
