@@ -49,7 +49,7 @@ def button_with_wait():
         # 如果按键被按下
         # if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
         #     print('Button is not pressed')
-        if press_flag == 1 and GPIO.input(BUTTON_PIN) == GPIO.HIGH:  # 按下松开后开始计时
+        if press_flag == 1 and GPIO.input(BUTTON_PIN) == GPIO.HIGH:  #按下松开后开始计时
             press_time += 1
         if GPIO.input(BUTTON_PIN) == GPIO.LOW:
             time.sleep(0.1) # 按键消除抖动
