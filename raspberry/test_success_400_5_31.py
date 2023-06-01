@@ -256,18 +256,6 @@ if __name__ == '__main__':
     speed = 400
     break_time_long = 60  # 110
     break_time_short = 50
-    # hit_the_treasure(0.7)
-    # print(move_list[0])
-    # print(move_list[1])
-    # PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax,SumMin,speed)
-    # c.car_forward(400,400)
-    # time.sleep(0.3)
-    # turn_right_90(0.4)
-    # time.sleep(0.2)
-    # PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400, break_mod=1, break_time=break_time_)
-    # print(move_list[3])
-    # PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400, break_mod=1, break_time=break_time_long)
-    # exit()
     c.car_forward(400, 400)
     time.sleep(1)
     c.car_stop()
