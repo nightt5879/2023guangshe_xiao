@@ -5,8 +5,8 @@ result = None
 
 
 class Lidar:
-    def __init__(self, model_path):
-        self.result = popen(model_path="../model/ultra_simple --channel --serial /dev/ttyAMA0 115200")
+    def __init__(self, model_path="../model/ultra_simple --channel --serial /dev/ttyAMA0 115200"):
+        self.result = popen(model_path)
         for i in range(6):
             self.result.buffer.readline().decode("utf8")
 
