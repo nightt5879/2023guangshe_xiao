@@ -1,6 +1,6 @@
 from time import time
 from util.get_map import get_loc
-from util.get_path import get_paths
+from util.get_path import pathPlaner
 from util.lidar import Lidar
 from util.mine_classify import MinesClassifier
 # 摄像头捕获视频识别出宝藏位置
