@@ -100,7 +100,7 @@ class Car:
         self.data[6] = 0x00
         self.car_com1.write(self.data)
 
-    def car_turn_left_6050(self,turn_angel):
+    def car_turn_right_6050(self,turn_angel):
         """
         the car turn right with mpu6050
         :param turn_angel: the turn angel
