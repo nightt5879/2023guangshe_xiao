@@ -87,6 +87,32 @@ class Car:
         self.data[6] = right_speed & 0xFF
         self.car_com1.write(self.data)
 
+    def car_turn_left_6050(self,turn_angel):
+        """
+        the car turn left with mpu6050
+        :param turn_angel: the turn angel
+        """
+        self.data[1] = 0x05
+        self.data[2] = 0x00
+        self.data[3] = turn_angel >> 8
+        self.data[4] = turn_angel & 0xFF
+        self.data[5] = 0x00
+        self.data[6] = 0x00
+        self.car_com1.write(self.data)
+
+    def car_turn_left_6050(self,turn_angel):
+        """
+        the car turn right with mpu6050
+        :param turn_angel: the turn angel
+        """
+        self.data[1] = 0x05
+        self.data[2] = 0x01
+        self.data[3] = turn_angel >> 8
+        self.data[4] = turn_angel & 0xFF
+        self.data[5] = 0x00
+        self.data[6] = 0x00
+        self.car_com1.write(self.data)
+
 class Infrared:
     def __init__(self):
         """
