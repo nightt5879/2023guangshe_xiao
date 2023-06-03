@@ -13,7 +13,7 @@ uint8_t KeyNum;
 uint16_t G1 = 0 ,G2 = 0;
 uint8_t ID;
 int16_t AX, AY, AZ, GX, GY, GZ;
-int16_t start_GZ,acc_GZ = 0,del; //del represents the difference value.
+int32_t start_GZ,acc_GZ = 0,del; //del represents the difference value.
 int main(void)
 {
 	Serial_Init();
@@ -39,9 +39,9 @@ int main(void)
 	// PWM_SetCompara(2,400);
 	while (1)
 	{
-		OLED_ShowSignedNum(2, 1,start_GZ, 5);
-		OLED_ShowSignedNum(3, 1, GZ, 5);
-		OLED_ShowSignedNum(4, 1, acc_GZ, 5);
+		// OLED_ShowSignedNum(2, 1,start_GZ, 5);
+		// OLED_ShowSignedNum(3, 1, GZ, 5);
+		// OLED_ShowSignedNum(4, 1, acc_GZ, 5);
 		// below are the serial port
 		if (Serial_GetRxFlag() == 1)  //get the data from serial port
 		{
@@ -80,7 +80,10 @@ int main(void)
 			}
 			else if (Serial_RxPacket[0] == 0x05)
 			{
-				MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+				for	(int i = 1;i < 6;i++)  // get the 6050 data for 5 times
+				{
+					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+				}
 				start_GZ = GZ;
 				if (Serial_RxPacket[1] == 0x00) //turning left
 				{
@@ -92,23 +95,33 @@ int main(void)
 					GPIO_Set(2);
 					GPIO_Set(4);
 				}
-				PWM_SetCompara(1,400);
-				PWM_SetCompara(2,400);
+				PWM_SetCompara(1,500);
+				PWM_SetCompara(2,500);
 				while(1)  // get the 6050 data
 				{
-					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-					del = GZ - start_GZ;
-					if (fabs(del) > 20)  //Filter out noise.
-					{
-						acc_GZ += del;
-					}
+//					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+//					del = GZ - start_GZ;
+//					OLED_ShowSignedNum(2, 1,start_GZ, 5);
+//					OLED_ShowSignedNum(3, 1, GZ, 5);
+//					OLED_ShowSignedNum(4, 1, acc_GZ, 5);
+//					if (fabs(del) > 200)  //Filter out noise.
+//					{
+//						acc_GZ += del;
+//					}
 					if (fabs(acc_GZ) > G1)
 					{
 						// stop the car
 						GPIO_Set(3);
 						GPIO_Set(6);
+						acc_GZ = 0; // reset the acc_GZ
 						break;
 					}
+					acc_GZ ++;
+					Delay_ms(10000);
+					GPIO_Set(3);
+					GPIO_Set(6);
+					acc_GZ = 0; // reset the acc_GZ
+					break;
 				}
 			}
 		}
