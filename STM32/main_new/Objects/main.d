@@ -34,3 +34,5 @@
 .\objects\main.o: E:\robot\51\keil\keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: .\Hardware\GPIO.h
 .\objects\main.o: .\Hardware\PWM.h
+.\objects\main.o: .\Hardware\MPU6050.h
+.\objects\main.o: E:\robot\51\keil\keil_v5\ARM\ARMCC\Bin\..\include\math.h

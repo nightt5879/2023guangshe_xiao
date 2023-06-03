@@ -4,62 +4,113 @@
 #include "Serial.h"
 #include "GPIO.h"
 #include "PWM.h"
+#include "MPU6050.h"
+#include "math.h"
 
 //#include "Key.h"
 
 uint8_t KeyNum;
 uint16_t G1 = 0 ,G2 = 0;
+uint8_t ID;
+int16_t AX, AY, AZ, GX, GY, GZ;
+int16_t start_GZ,acc_GZ = 0,del; //del represents the difference value.
 int main(void)
 {
 	Serial_Init();
 	PWM_Init();
 	GPIOInit();
 	OLED_Init();
-	// CountSensor_Init();
-	// // Timer_Init();
-	OLED_ShowString(1, 1, "Count1:");
-//	GPIO_Set(1);
-//	GPIO_Set(4);
-	PWM_SetCompara(1,400);
-	PWM_SetCompara(2,400);
-	// Delay_ms(1000);
-	// GPIO_Set(2);
-	// Delay_ms(1000);
+	MPU6050_Init();
+	OLED_ShowString(1, 1, "ID:");
+	ID = MPU6050_GetID();
+	OLED_ShowHexNum(1, 4, ID, 2);
+
+	// turning test
 	// GPIO_Set(1);
+	// GPIO_Set(5);
+	// PWM_SetCompara(1,400);
+	// PWM_SetCompara(2,400);
+	// Delay_ms(1000);
+	// GPIO_Set(3);
+	// GPIO_Set(6);
+	// GPIO_Set(1);
+	// GPIO_Set(5);
+	// PWM_SetCompara(1,400);
+	// PWM_SetCompara(2,400);
 	while (1)
 	{
+		OLED_ShowSignedNum(2, 1,start_GZ, 5);
+		OLED_ShowSignedNum(3, 1, GZ, 5);
+		OLED_ShowSignedNum(4, 1, acc_GZ, 5);
+		// below are the serial port
 		if (Serial_GetRxFlag() == 1)  //get the data from serial port
 		{
 			OLED_ShowString(2, 1, "Count2:");
 			G1 = Serial_RxPacket[2] << 8 | Serial_RxPacket[3];
 			G2 = Serial_RxPacket[4] << 8 | Serial_RxPacket[5];
-			if(Serial_RxPacket[0] == 0x00 && Serial_RxPacket[1] == 0x00) //the car stop
+			if (Serial_RxPacket[0] != 0x05)  // it mean not the base move
 			{
-				GPIO_Set(3);
-				GPIO_Set(6);
+				if(Serial_RxPacket[0] == 0x00 && Serial_RxPacket[1] == 0x00) //the car stop
+				{
+					GPIO_Set(3);
+					GPIO_Set(6);
+				}
+				else if (Serial_RxPacket[0] == 0x01 && Serial_RxPacket[1] == 0x00) //the car forward
+				{
+					GPIO_Set(1);
+					GPIO_Set(4);
+				}
+				else if (Serial_RxPacket[0] == 0x02 && Serial_RxPacket[1] == 0x00) //the car back
+				{
+					GPIO_Set(2);
+					GPIO_Set(5);
+				}
+				else if (Serial_RxPacket[0] == 0x03 && Serial_RxPacket[1] == 0x00) //the car turn left
+				{
+					GPIO_Set(1);
+					GPIO_Set(5);
+				}
+				else if (Serial_RxPacket[0] == 0x04 && Serial_RxPacket[1] == 0x00) //the car turn right
+				{
+					GPIO_Set(2);
+					GPIO_Set(4);
+				}
+				PWM_SetCompara(1,G1);
+				PWM_SetCompara(2,G2);
 			}
-			else if (Serial_RxPacket[0] == 0x01 && Serial_RxPacket[1] == 0x00) //the car forward
+			else if (Serial_RxPacket[0] == 0x05)
 			{
-				GPIO_Set(1);
-				GPIO_Set(4);
+				MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+				start_GZ = GZ;
+				if (Serial_RxPacket[1] == 0x00) //turning left
+				{
+					GPIO_Set(1); 
+					GPIO_Set(5);
+				}
+				else if (Serial_RxPacket[1] == 0x01) // turning right
+				{
+					GPIO_Set(2);
+					GPIO_Set(4);
+				}
+				PWM_SetCompara(1,400);
+				PWM_SetCompara(2,400);
+				while(1)  // get the 6050 data
+				{
+					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+					del = GZ - start_GZ;
+					if (fabs(del) > 20)  //Filter out noise.
+					{
+						acc_GZ += del;
+					}
+					if (fabs(acc_GZ) > G1)
+					{
+						// stop the car
+						GPIO_Set(3);
+						GPIO_Set(6);
+						break;
+					}
+				}
 			}
-			else if (Serial_RxPacket[0] == 0x02 && Serial_RxPacket[1] == 0x00) //the car back
-			{
-				GPIO_Set(2);
-				GPIO_Set(5);
-			}
-			else if (Serial_RxPacket[0] == 0x03 && Serial_RxPacket[1] == 0x00) //the car turn left
-			{
-				GPIO_Set(1);
-				GPIO_Set(5);
-			}
-			else if (Serial_RxPacket[0] == 0x04 && Serial_RxPacket[1] == 0x00) //the car turn right
-			{
-				GPIO_Set(2);
-				GPIO_Set(4);
-			}
-			PWM_SetCompara(1,G1);
-			PWM_SetCompara(2,G2);
 		}
 	}
 }

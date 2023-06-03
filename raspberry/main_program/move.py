@@ -19,6 +19,8 @@ class Car:
         0x02,0x00:back
         0x03,0x00:turn left
         0x04,0x00:turn right
+        0x05,0x00:turn left with mpu6050 (the fourth and fifth digits are the angle)
+        0X05,0X01:turn right with mpu6050 (the fourth and fifth digits are the angle)
         """
 
     def car_stop(self):
