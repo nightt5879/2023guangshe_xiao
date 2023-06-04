@@ -19,8 +19,9 @@ class Car:
         0x02,0x00:back
         0x03,0x00:turn left
         0x04,0x00:turn right
-        0x05,0x00:turn left with mpu6050 (the fourth and fifth digits are the angle)
-        0X05,0X01:turn right with mpu6050 (the fourth and fifth digits are the angle)
+        0x05,0x11:turn left with mpu6050 (the fourth and fifth digits are the angle)
+        0X05,0X21:turn right with mpu6050 (the fourth and fifth digits are the angle)
+        0x06,0x00:let the car go forward with the mpu6050s
         """
 
     def car_stop(self):
@@ -93,24 +94,32 @@ class Car:
         :param turn_angel: the turn angel
         """
         self.data[1] = 0x05
-        self.data[2] = 0x00
+        self.data[2] = 0x11
         self.data[3] = turn_angel >> 8
         self.data[4] = turn_angel & 0xFF
         self.data[5] = 0x00
         self.data[6] = 0x00
         self.car_com1.write(self.data)
 
-    def car_turn_left_6050(self,turn_angel):
+    def car_turn_right_6050(self,turn_angel):
         """
         the car turn right with mpu6050
         :param turn_angel: the turn angel
         """
         self.data[1] = 0x05
-        self.data[2] = 0x01
+        self.data[2] = 0x21
         self.data[3] = turn_angel >> 8
         self.data[4] = turn_angel & 0xFF
         self.data[5] = 0x00
         self.data[6] = 0x00
+        self.car_com1.write(self.data)
+
+    def car_forward_6050(self):
+        """
+        the car go forward with mpu6050
+        """
+        self.data[1] = 0x06
+        self.data[2] = 0x00
         self.car_com1.write(self.data)
 
 class Infrared:

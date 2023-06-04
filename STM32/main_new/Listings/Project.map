@@ -1007,7 +1007,7 @@ Image Symbol Table
     i.fmax                                   0x08001b24   Section        0  fmax.o(i.fmax)
     i.fmin                                   0x08001b66   Section        0  fmin.o(i.fmin)
     i.main                                   0x08001ba8   Section        0  main.o(i.main)
-    .constdata                               0x08001e80   Section     1520  oled.o(.constdata)
+    .constdata                               0x08001f90   Section     1520  oled.o(.constdata)
     .data                                    0x20000000   Section       20  stm32f10x_rcc.o(.data)
     APBAHBPrescTable                         0x20000000   Data          16  stm32f10x_rcc.o(.data)
     ADCPrescTable                            0x20000010   Data           4  stm32f10x_rcc.o(.data)
@@ -1183,10 +1183,10 @@ Image Symbol Table
     car_forward                              0x08001885   Thumb Code   592  main.o(i.car_forward)
     fmax                                     0x08001b25   Thumb Code    66  fmax.o(i.fmax)
     fmin                                     0x08001b67   Thumb Code    66  fmin.o(i.fmin)
-    main                                     0x08001ba9   Thumb Code   656  main.o(i.main)
-    OLED_F8x16                               0x08001e80   Data        1520  oled.o(.constdata)
-    Region$$Table$$Base                      0x08002470   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08002490   Number         0  anon$$obj.o(Region$$Table)
+    main                                     0x08001ba9   Thumb Code   924  main.o(i.main)
+    OLED_F8x16                               0x08001f90   Data        1520  oled.o(.constdata)
+    Region$$Table$$Base                      0x08002580   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x080025a0   Number         0  anon$$obj.o(Region$$Table)
     Serial_TxPacket                          0x20000014   Data           4  serial.o(.data)
     Serial_RxPacket                          0x20000018   Data           6  serial.o(.data)
     Serial_RxFlag                            0x2000001e   Data           1  serial.o(.data)
@@ -1222,9 +1222,9 @@ Memory Map of the image
 
   Image Entry point : 0x080000ed
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00002514, Max: 0x00010000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00002624, Max: 0x00010000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00002490, Max: 0x00010000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000025a0, Max: 0x00010000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -1341,20 +1341,20 @@ Memory Map of the image
     0x08001884   0x08001884   0x000002a0   Code   RO         3694    i.car_forward       main.o
     0x08001b24   0x08001b24   0x00000042   Code   RO         3888    i.fmax              m_ws.l(fmax.o)
     0x08001b66   0x08001b66   0x00000042   Code   RO         3890    i.fmin              m_ws.l(fmin.o)
-    0x08001ba8   0x08001ba8   0x000002d8   Code   RO         3695    i.main              main.o
-    0x08001e80   0x08001e80   0x000005f0   Data   RO         3305    .constdata          oled.o
-    0x08002470   0x08002470   0x00000020   Data   RO         3973    Region$$Table       anon$$obj.o
+    0x08001ba8   0x08001ba8   0x000003e8   Code   RO         3695    i.main              main.o
+    0x08001f90   0x08001f90   0x000005f0   Data   RO         3305    .constdata          oled.o
+    0x08002580   0x08002580   0x00000020   Data   RO         3973    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08002490, Size: 0x00000488, Max: 0x00005000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080025a0, Size: 0x00000488, Max: 0x00005000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x08002490   0x00000014   Data   RW         1805    .data               stm32f10x_rcc.o
-    0x20000014   0x080024a4   0x0000000d   Data   RW         3408    .data               serial.o
-    0x20000021   0x080024b1   0x00000007   PAD
-    0x20000028   0x080024b8   0x0000005c   Data   RW         3696    .data               main.o
-    0x20000084   0x08002514   0x00000004   PAD
+    0x20000000   0x080025a0   0x00000014   Data   RW         1805    .data               stm32f10x_rcc.o
+    0x20000014   0x080025b4   0x0000000d   Data   RW         3408    .data               serial.o
+    0x20000021   0x080025c1   0x00000007   PAD
+    0x20000028   0x080025c8   0x0000005c   Data   RW         3696    .data               main.o
+    0x20000084   0x08002624   0x00000004   PAD
     0x20000088        -       0x00000400   Zero   RW            1    STACK               startup_stm32f10x_md.o
 
 
@@ -1367,7 +1367,7 @@ Image component sizes
 
          0          0          0          0          0       4532   core_cm3.o
        168         20          0          0          0       1066   gpio.o
-      1400        152          0         92          0       2493   main.o
+      1672        156          0         92          0       2645   main.o
        132         22          0          0          0     204947   misc.o
        632         36          0          0          0     222126   mpu6050.o
        932         22       1520          0          0       8885   oled.o
@@ -1384,7 +1384,7 @@ Image component sizes
        328         28          0          0          0      45501   system_stm32f10x.o
 
     ----------------------------------------------------------------------
-      6238        454       1788        132       1028     578561   Object Totals
+      6510        458       1788        132       1028     578713   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         18          0          0          7          4          0   (incl. Padding)
 
@@ -1440,15 +1440,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      7572        470       1788        132       1028     575585   Grand Totals
-      7572        470       1788        132       1028     575585   ELF Image Totals
-      7572        470       1788        132          0          0   ROM Totals
+      7844        474       1788        132       1028     575737   Grand Totals
+      7844        474       1788        132       1028     575737   ELF Image Totals
+      7844        474       1788        132          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 9360 (   9.14kB)
+    Total RO  Size (Code + RO Data)                 9632 (   9.41kB)
     Total RW  Size (RW Data + ZI Data)              1160 (   1.13kB)
-    Total ROM Size (Code + RO Data + RW Data)       9492 (   9.27kB)
+    Total ROM Size (Code + RO Data + RW Data)       9764 (   9.54kB)
 
 ==============================================================================
 

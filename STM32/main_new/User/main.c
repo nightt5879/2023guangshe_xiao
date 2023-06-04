@@ -80,7 +80,40 @@ int main(void)
 				PWM_SetCompara(1,G1);
 				PWM_SetCompara(2,G2);
 			}
-			else if (Serial_RxPacket[0] == 0x05)
+			else if (Serial_RxPacket[0] == 0x05 && Serial_RxPacket[1] == 0x11)
+			{
+				OLED_ShowString(2, 4, "in");
+				for	(int i = 1;i < 6;i++)  // get the 6050 data for 5 times
+				{
+					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+				}
+				start_GZ = GZ;
+				GPIO_Set(1); 
+				GPIO_Set(5);
+				PWM_SetCompara(1,500);
+				PWM_SetCompara(2,500);
+				while(1)  // get the 6050 data
+				{
+					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+					del = GZ - start_GZ;
+					OLED_ShowSignedNum(2, 1,start_GZ, 5);
+					OLED_ShowSignedNum(3, 1, GZ, 5);
+					OLED_ShowSignedNum(4, 1, acc_GZ, 5);
+					if (fabs(del) > 400)  //Filter out noise.
+					{
+						acc_GZ += (int)(del/10);
+					}
+					if (fabs(acc_GZ) > G1)
+					{
+						// stop the car
+						GPIO_Set(3);
+						GPIO_Set(6);
+						acc_GZ = 0; // reset the acc_GZ
+						break;
+					}
+				}
+			}
+			else if (Serial_RxPacket[0] == 0x05 && Serial_RxPacket[1] == 0x21)
 			{
 				OLED_ShowString(3, 1, "carmove222");
 				for	(int i = 1;i < 6;i++)  // get the 6050 data for 5 times
@@ -88,16 +121,8 @@ int main(void)
 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
 				}
 				start_GZ = GZ;
-				if (Serial_RxPacket[1] == 0x00) //turning left
-				{
-					GPIO_Set(1); 
-					GPIO_Set(5);
-				}
-				else if (Serial_RxPacket[1] == 0x01) // turning right
-				{
-					GPIO_Set(2);
-					GPIO_Set(4);
-				}
+				GPIO_Set(2);
+				GPIO_Set(4);;
 				PWM_SetCompara(1,500);
 				PWM_SetCompara(2,500);
 				while(1)  // get the 6050 data
