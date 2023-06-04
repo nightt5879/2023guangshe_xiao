@@ -25,23 +25,8 @@ int main(void)
 	ID = MPU6050_GetID();
 	OLED_ShowHexNum(1, 4, ID, 2);
 
-	// turning test
-	// GPIO_Set(1);
-	// GPIO_Set(5);
-	// PWM_SetCompara(1,400);
-	// PWM_SetCompara(2,400);
-	// Delay_ms(1000);
-	// GPIO_Set(3);
-	// GPIO_Set(6);
-	// GPIO_Set(1);
-	// GPIO_Set(5);
-	// PWM_SetCompara(1,400);
-	// PWM_SetCompara(2,400);
 	while (1)
 	{
-		// OLED_ShowSignedNum(2, 1,start_GZ, 5);
-		// OLED_ShowSignedNum(3, 1, GZ, 5);
-		// OLED_ShowSignedNum(4, 1, acc_GZ, 5);
 		// below are the serial port
 		if (Serial_GetRxFlag() == 1)  //get the data from serial port
 		{
@@ -112,7 +97,7 @@ int main(void)
 					OLED_ShowSignedNum(4, 1, acc_GZ, 5);
 					if (fabs(del) > 400)  //Filter out noise.
 					{
-						acc_GZ += del;
+						acc_GZ += (int)(del/10);
 					}
 					if (fabs(acc_GZ) > G1)
 					{
@@ -122,12 +107,6 @@ int main(void)
 						acc_GZ = 0; // reset the acc_GZ
 						break;
 					}
-//					acc_GZ ++;
-//					Delay_ms(1000);
-//					GPIO_Set(3);
-//					GPIO_Set(6);
-//					acc_GZ = 0; // reset the acc_GZ
-//					break;
 				}
 			}
 		}
