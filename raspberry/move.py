@@ -21,6 +21,7 @@ class Car:
         0x04,0x00:turn right
         0x05,0x00:turn left with mpu6050 (the fourth and fifth digits are the angle)
         0X05,0X01:turn right with mpu6050 (the fourth and fifth digits are the angle)
+        0x06,0x00:let the car go forward with the mpu6050s
         """
 
     def car_stop(self):
@@ -111,6 +112,14 @@ class Car:
         self.data[4] = turn_angel & 0xFF
         self.data[5] = 0x00
         self.data[6] = 0x00
+        self.car_com1.write(self.data)
+
+    def car_forward_6050(self):
+        """
+        the car go forward with mpu6050
+        """
+        self.data[1] = 0x06
+        self.data[2] = 0x00
         self.car_com1.write(self.data)
 
 class Infrared:
