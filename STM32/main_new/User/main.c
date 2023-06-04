@@ -15,10 +15,10 @@ uint8_t ID;
 int16_t AX, AY, AZ, GX, GY, GZ;
 int32_t start_GZ,acc_GZ = 0,del; //del represents the difference value.
 // 定义PID控制器的参数
-double K = 3.0;  // 控制器增益
-double Kp = 2.0;  // 比例增益
+double K = 5.0;  // 控制器增益
+double Kp = 1.0;  // 比例增益
 double Ki = 0.0;  // 积分增益
-double Kd = 5.0;  // 微分增益
+double Kd = 20.0;  // 微分增益
 
 // 定义PID控制器的状态
 double prev_error = 0.0;  // 上一次的误差
