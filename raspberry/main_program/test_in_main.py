@@ -92,7 +92,6 @@ def slove_path(path, hit_flag="hit"):
                                (11, 11), (1, 13), (13, 15), (19, 15), (9, 17), (11, 19),
                                (17,5), (17,19), (3,1), (3,15),
                                (3,1), (3,15), (17,5), (17,19),(7,9),(13,11)]                   # 统一 所有的非交叉路口+直走都去掉
-
     # 11,1 1,3 13,5 15,7 3,9 17,11 5,13 7,15 19,17 9,19
     fork_road = [(11, 1), (1, 3), (13, 5), (15, 7), (3, 9), (17, 11), (5, 13), (7, 15), (19, 17), (9, 19)]
     # 1，1 19，5 15，7 1，15 5，13 19，19
@@ -110,11 +109,8 @@ def slove_path(path, hit_flag="hit"):
         one_path.append("短线")
     move_list.append(one_path)
     print("origin:",move_list)
-    one_path = []
     # if hit the treasure, the car turnover.so it need to change the direction
     if hit_flag == "hit":
-        # print(i+1)
-        # print(move_list[i+1][0])
         if move_list[0][0] == "左转" and move_list[0][1] == "左转":
             # no need the turning
             move_list[0].pop(0)
@@ -163,10 +159,6 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         Cam.ShowImg(Cam.Img)
         Cam.ShowImg(Dst, 'Dst')
-        image = Dst
-        # image = image.filter(ImageFilter.SHARPEN)
-        # disp.ShowImage(image)
-        # print(Centre[Line],sum)
         Now = int((Centre[Line] +
                    Centre[Line - 5] + Centre[Line + 5] +
                    Centre[Line - 4] + Centre[Line + 4] +
@@ -182,16 +174,8 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
                    Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         if sum >= SumMax and break_flag > non_break_time:  # 不要再刚转弯开始巡线就break
             max_time += 1
-            # c.car_stop()
-            # print("out max")
-            # print(sum)
-            # break
         elif max_time >= user_max_time:  # enough max time
             break
-        # elif sum <= SumMin and one_path_done == 1 and break_mod == 0:
-        #     one_path_done = 0
-        #     c.car_stop()
-        #     break
         if break_mod == 1 and break_flag >= break_time:
             print("break time max")
             c.car_stop()
@@ -207,47 +191,6 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
             c.car_back(pwm_1, pwm_2)
         break_flag += 1
         Cam.Delay(1)
-    # Cam.Release()
-    # print('Tracking done')
-
-def right_90():
-    """
-    右转90度
-    :return: no return
-    """
-    # c.car_stop()
-    c.car_turn_right_6050(5000)
-    print("turn right")
-    # c.car_turn_right(500, 500)
-    # time.sleep(0.47)
-    # c.car_stop()
-
-
-def left_90():
-    """
-    左转90度
-    :return: no return
-    """
-    # c.car_stop()
-    c.car_turn_left_6050(5000)
-    # c.car_turn_left(500, 500)
-    # time.sleep(0.47)
-    # c.car_stop()
-
-
-def left_90_with_stop(turn_time=0.43):
-    """
-    左转90度，带停止 这样比较稳定
-    :param turn_time: 旋转的时间
-    :return:
-    """
-    c.car_stop()
-    time.sleep(0.5)
-    c.car_stop()
-    c.car_turn_left(500, 500)
-    time.sleep(turn_time)
-    c.car_stop()
-    time.sleep(0.5)
     c.car_stop()
 
 
@@ -268,23 +211,6 @@ def classify_treasure(team_of="red"):
     }
     mine_classifier = MinesClassifier(paddle_model="./model/MobileNet_big.nb")  # 加载模型
     color_of_treasure = ""  # 用于得到宝藏的颜色
-    cam = ""
-    print("in cam")
-    # for i in range(5):
-    #     try:  # 多次重复调用有几率出错
-    #         cap = cv2.VideoCapture(1)
-    #         cap.set(4, 240)
-    #         cap.set(3, 320)
-    #         cam = "open"
-    #         break
-    #     except:
-    #         print("打不开摄像头")
-    #         cam = "cannot open"
-    #         pass
-    if cam == "cannot open":  # 五次都打不开直接return假宝藏
-        print("Cannot open camera")
-        class_of = "fake"
-        return class_of
     list_of_treasure = [0, 0, 0, 0, 0]  # 0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角 4:无类别
     print("in here")
     while True:
@@ -351,9 +277,6 @@ if __name__ == '__main__':
     # mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
     mine_points = [(7, 10), (3, 10), (7, 6), (3, 6), (8, 5), (4, 5), (8, 1), (4, 1)]
     planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-    # print(mine_points)
-    # print(planer.paths)  # 初始化环节完成
-    # instantiate all functions.
     team = "红色"
     c = move.Car()
     i = move.Infrared()
@@ -363,7 +286,6 @@ if __name__ == '__main__':
     cap.set(4, 240)
     cap.set(3, 320)
     # init all the variable
-    path_location = 0 # 只有第一次是在开头处理路径 剩下的全部是识别宝藏后处理
     hit_flag = "no_hit"
     # K is the proportion.the other are the parameter of the PID
     K = 0.5
@@ -374,20 +296,18 @@ if __name__ == '__main__':
     SumMax = 400  # max of the black points
     SumMin = 100  # min of the black points
     treasure_corner = 0
-    one_path_done = 0  # in case for the stop on the midele of the path
+    one_path_done = 0  # in case for the stop in the middle of the path
     speed = 400  # the car speed
     break_time_long = 80  # 110  long line break time
     break_time_short = 50  # short line break time
-    # c.car_turn_right_6050(5000)
-    # exit()
-    # go forward to get in the maze
-    c.car_forward(400, 400)
+    # below is the start of the program
+    c.car_forward(400, 400)    # go forward to get in the maze
     time.sleep(1)
     c.car_stop()
-    # below is the main loop
+    #开头先处理一个path
     now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
     move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
-    path_location += 1
+    # below is the main loop
     while True:
         for j in range(len(move_list[0])):
             if j == len(move_list[0]) - 1:
@@ -399,17 +319,14 @@ if __name__ == '__main__':
                 time.sleep(0.3)
                 c.car_stop()
                 # print("forward done")
-                # time.sleep(0.5)
             elif move_list[0][j] == "左转":
                 treasure_corner = 1
                 c.car_turn_left_6050(5000)
                 # print("left done")
-                # left_90()
             elif move_list[0][j] == "右转":
                 treasure_corner = 1
                 c.car_turn_right_6050(5000)
                 # print("right done")
-                # right_90()
         # finish one path
         if move_list[0][j] == "长线":  #
             c.car_stop()
@@ -426,8 +343,6 @@ if __name__ == '__main__':
             if treasure == "fake":  # 掉头就跑
                 hit_flag = "hit" # 长线一律当撞过 掉头
                 c.car_turn_right_6050(12000)
-                # left_90_with_stop()
-                # left_90_with_stop(0.43)
                 PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400,non_break_time=10)  # 回到开头交叉路口
                 c.car_forward(400, 400)
                 time.sleep(0.3)
@@ -441,8 +356,6 @@ if __name__ == '__main__':
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
                 c.car_turn_right_6050(12000)
-                # left_90_with_stop()
-                # left_90_with_stop(0.5)
                 PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400,
                                 non_break_time=30)  # 回到开头交叉路口
                 c.car_forward(400, 400)
@@ -462,17 +375,15 @@ if __name__ == '__main__':
                 hit_flag = "no_hit"  # 没撞宝藏 等待下次更新
             elif treasure == "true":
                 hit_flag = "hit"  # 撞了宝藏
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=350,
+                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=400,
                                 break_mod=1, break_time=break_time_short)
                 # detect the treasure
                 c.car_stop()
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
-                left_90_with_stop()
-                left_90_with_stop(0.5)
+                c.car_turn_right_6050(12000)
                 PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=2, Line=120, SumMax=450, SumMin=100, base_speed=350
                                 , back_mod=0)  # back to the cross road
-
                 c.car_forward(400, 400)
                 time.sleep(0.3)
                 c.car_stop() # 等待下一次指令
@@ -483,17 +394,7 @@ if __name__ == '__main__':
             break
         now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
         move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
-        # time.sleep(1)
 
-
-print("test done")
-
-
-
-# from util.lidar import Lidar
-# # 初始化激光雷达，用法是scan_data = my_lidar.get_data()。其中scan_data的值是一个列表，列表里面有360个元素分别对应0到359度范围的障碍物的距离
-# my_lidar = Lidar()
-# while True:
-#     # 获取激光雷达数据
-#     print(my_lidar.get_data())
-
+    print("test done")
+    Cam.Release()
+    cap.release()

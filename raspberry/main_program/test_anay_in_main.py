@@ -55,8 +55,6 @@ def slove_path(path, hit_flag="hit"):
     return move_list
 
 
-
-
 def classify_treasure(team_of="red"):
     """
     识别宝藏
