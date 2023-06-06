@@ -1,18 +1,10 @@
-import move
-import time
 
-c = move.Car()
-c.car_stop()
-print("init done")
-# c.car_forward(400,400)
-# time.sleep(2)
-# c.car_forward_6050()
-# time.sleep(5)
-c.car_stop()
-c.car_turn_right_6050(12000)
-# c.car_turn_right_6050(10000)
-
-print("test done")
+test_list = [1, 2, 3, 4]
+for i in range(len(test_list)):
+    print(i)
+    if i  == 1:
+        test_list.pop(0)
+    print(test_list)
 
 """
 if（第一位等于 0x05 && 第二位等于）

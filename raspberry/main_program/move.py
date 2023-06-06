@@ -122,6 +122,13 @@ class Car:
         self.data[2] = 0x00
         self.car_com1.write(self.data)
 
+    def car_cheak_data(self,data_byte):
+        """
+        the car cheak data
+        :param data_byte: the data byte
+        """
+        received_data = self.car_com1.read()
+        print(received_data)
 class Infrared:
     def __init__(self):
         """

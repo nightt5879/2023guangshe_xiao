@@ -1,3 +1,4 @@
+import move
 from util.get_path import pathPlaner
 from util.mine_classify import MinesClassifier
 # below is the other import
@@ -148,11 +149,15 @@ def hit_the_treasure(hit_treasure_time):
     time.sleep(0.5)
 
 if __name__ == '__main__':
-    mine_points = [(7, 10), (3, 10), (7, 6), (3, 6), (8, 5), (4, 5), (8, 1), (4, 1)]
-    planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-    for i in range(len(planer.paths)):
-        now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
-        move_list = slove_path(now_path)  # 提取出需要的指令
+
+    # c = move.Car()
+    # c.car_turn_left_6050(5000)
+    # c.car_turn_left_6050(5000)
+    # mine_points = [(7, 10), (3, 10), (7, 6), (3, 6), (8, 5), (4, 5), (8, 1), (4, 1)]
+    # planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
+    # for i in range(len(planer.paths)):
+    #     now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
+    #     move_list = slove_path(now_path)  # 提取出需要的指令
         # print(move_list)
 
 

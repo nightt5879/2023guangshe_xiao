@@ -127,7 +127,7 @@ def slove_path(path, hit_flag="hit"):
 
 
 def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
-                    user_max_time=1,non_break_time = 40):
+                    user_max_time=2,non_break_time = 40):
     """
     PID巡线
     :param K: 总体的缩放比例
@@ -179,7 +179,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
             # print("min")
             # break
             min_time += 1
-        if max_time >= user_max_time:  # enough max or min time
+        if max_time >= user_max_time or min_time >= user_max_time * 3:  # enough max or min time
             break
         if break_mod == 1 and break_flag >= break_time:
             print("break time max")
@@ -215,6 +215,7 @@ def classify_treasure(team_of="red"):
     color_of_treasure = ""  # 用于得到宝藏的颜色
     list_of_treasure = [0, 0, 0, 0, 0]  # 0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角 4:无类别
     print("in here")
+    threshold = 0.4
     while True:
         success, img = cap.read()
         if success:
@@ -222,16 +223,16 @@ def classify_treasure(team_of="red"):
             cv2.imshow("img", img)
             result, pro = mine_classifier.recognize_img(img)
             # print(pro)
-            if mine_dict[result] == "蓝色三角" and pro[0] > 0.42:
+            if mine_dict[result] == "蓝色三角" and pro[0] > threshold:
                 print("蓝色三角")
                 list_of_treasure[0] += 1
-            elif mine_dict[result] == "蓝色圆形" and pro[1] > 0.42:
+            elif mine_dict[result] == "蓝色圆形" and pro[1] > threshold:
                 print("蓝色圆形")
                 list_of_treasure[1] += 1
-            elif mine_dict[result] == "红色圆形" and pro[2] > 0.42:
+            elif mine_dict[result] == "红色圆形" and pro[2] > threshold:
                 print("红色圆形")
                 list_of_treasure[2] += 1
-            elif mine_dict[result] == "红色三角" and pro[3] > 0.42:
+            elif mine_dict[result] == "红色三角" and pro[3] > threshold:
                 print("红色三角")
                 list_of_treasure[3] += 1
             else:
@@ -278,7 +279,7 @@ def hit_the_treasure(hit_treasure_time):
 if __name__ == '__main__':
     # team = select_team()  # 本次比赛的队伍颜色
     # mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
-    mine_points = [(7, 10), (3, 10), (7, 6), (3, 6), (8, 5), (4, 5), (8, 1), (4, 1)]
+    mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]  # 黑色墙壁也是1个格子
     planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
     team = "红色"
     c = move.Car()
@@ -303,6 +304,7 @@ if __name__ == '__main__':
     speed = 500  # the car speed
     break_time_long = 80  # 110  long line break time
     break_time_short = 50  # short line break time
+    double_order = 1
     # below is the start of the program
     c.car_forward(400, 400)    # go forward to get in the maze
     time.sleep(0.8)
@@ -321,14 +323,27 @@ if __name__ == '__main__':
                 c.car_forward(speed, speed)
                 time.sleep(0.28)
                 c.car_stop()
+                double_order = 1
                 # print("forward done")
-            elif move_list[0][j] == "左转":
+            elif move_list[0][j] == "长线" or move_list[0][j] == "短线":
+                # 如果读到这两个说明是最后的部分了，不要在进行双指令读取了 会超出列表的index然后出问题的
+                pass
+            elif (move_list[0][j] == "右转" and move_list[0][j + 1] == "右转") or (move_list[0][j] == "左转" and move_list[0][j + 1] == "左转"):
+                """
+                如果两个连续的转弯表示了掉头，这个时候进行直接转180度 
+                需要注意的是下一个指令读取还会读取到转弯，所以需要一个标志位（连续转弯后必接直走）
+                把标志位置0  前进会把标志位置1 就完成了双指令读取
+                """
+                c.car_turn_right_6050(12000)
+                double_order = 0
+            elif move_list[0][j] == "左转" and double_order:
                 treasure_corner = 1
                 c.car_turn_left_6050(5000)
                 # print("left done")
-            elif move_list[0][j] == "右转":
+            elif move_list[0][j] == "右转" and double_order:
                 treasure_corner = 1
                 c.car_turn_right_6050(5000)
+
                 # print("right done")
         if len(planer.paths) == 0:  # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
             c.car_forward(400, 400)
@@ -350,7 +365,7 @@ if __name__ == '__main__':
             print(treasure,color)
             if treasure == "fake":  # 掉头就跑
                 hit_flag = "hit" # 长线一律当撞过 掉头
-                c.car_turn_right_6050(12000)
+                c.car_turn_right_6050(11000)  # 稍微转少一点
                 PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400,non_break_time=30)  # 回到开头交叉路口
                 c.car_forward(400, 400)
                 time.sleep(0.35)
