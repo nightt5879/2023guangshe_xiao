@@ -174,7 +174,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
                    Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         if sum >= SumMax and break_flag > non_break_time:  # 不要再刚转弯开始巡线就break
             max_time += 1
-        elif max_time >= user_max_time:  # enough max time
+        if max_time >= user_max_time:  # enough max time
             break
         if break_mod == 1 and break_flag >= break_time:
             print("break time max")
