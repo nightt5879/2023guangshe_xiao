@@ -11,6 +11,8 @@ import move
 from YYJ import GPIO_RPi
 from YYJ import Vision
 from control import gpio
+import os
+import sys
 from move import path
 
 
@@ -128,7 +130,7 @@ def slove_path(path, hit_flag="hit"):
 
 
 def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
-                    user_max_time=2,non_break_time = 30):
+                    user_max_time=1,non_break_time = 30):
     """
     PID巡线
     :param K: 总体的缩放比例
@@ -160,7 +162,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         Cam.ReadImg(0, 320, 0, 150)
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         # Cam.ShowImg(Cam.Img)
-        Cam.ShowImg(Dst, 'Dst')
+        # Cam.ShowImg(Dst, 'Dst')
         Now = int((Centre[Line] +
                    Centre[Line - 5] + Centre[Line + 5] +
                    Centre[Line - 4] + Centre[Line + 4] +
@@ -217,11 +219,11 @@ def classify_treasure(team_of="红色"):
     color_of_treasure = ""  # 用于得到宝藏的颜色
     list_of_treasure = [0, 0, 0, 0, 0]  # 0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角 4:无类别
     print("in here")
-    threshold = 0.4
-    for i in range(5):  # 清除缓冲区
-        success, img = cap.read()
-        cv2.imshow("img", img)
-        cv2.waitKey(1)
+    threshold = 0.35  # 阈值
+    # for i in range(5):  # 清除缓冲区
+    #     success, img = cap.read()
+    #     cv2.imshow("img", img)
+    #     cv2.waitKey(1)
     while True:
         success, img = cap.read()
         if success:
@@ -231,18 +233,28 @@ def classify_treasure(team_of="红色"):
             # print(pro)
             if mine_dict[result] == "蓝色三角" and pro[0] > threshold:
                 print("蓝色三角")
+                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue_triangle.jpg")  # 显示图片
+                show_lcd(img_start)  # 允许起飞
                 list_of_treasure[0] += 1
             elif mine_dict[result] == "蓝色圆形" and pro[1] > threshold:
                 print("蓝色圆形")
+                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue_round.jpg")  # 显示图片
+                show_lcd(img_start)  # 允许起飞
                 list_of_treasure[1] += 1
             elif mine_dict[result] == "红色圆形" and pro[2] > threshold:
                 print("红色圆形")
+                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red_round.jpg")  # 显示图片
+                show_lcd(img_start)  # 允许起飞
                 list_of_treasure[2] += 1
             elif mine_dict[result] == "红色三角" and pro[3] > threshold:
                 print("红色三角")
+                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red_triangle.jpg")  # 显示图片
+                show_lcd(img_start)  # 允许起飞
                 list_of_treasure[3] += 1
             else:
                 list_of_treasure[4] += 1
+                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/no_treasure.jpg")  # 显示图片
+                show_lcd(img_start)  # 允许起飞
             # sum of the list_of_treasure
             if list_of_treasure[0] > 10 or list_of_treasure[1] > 10 or \
                     list_of_treasure[2] > 10 or list_of_treasure[3] > 10 or list_of_treasure[4] > 10:
@@ -287,7 +299,13 @@ if __name__ == '__main__':
     while start_over == 0:
         team = select_team()  # 本次比赛的队伍颜色
         print(team)
-        mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
+        while True:
+            try:
+                mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
+                break
+            except:
+                print("出错，重新调用")
+                time.sleep(1)
         # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
         planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
         img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/ready_to_go.jpg")# 显示图片
@@ -320,7 +338,7 @@ if __name__ == '__main__':
     Ki = 0
     Kd = 8
     Line = 120  # which line choose to follow
-    SumMax = 350  # max of the black points
+    SumMax = 340  # max of the black points
     SumMin = 50  # min of the black points
     treasure_corner = 0
     one_path_done = 0  # in case for the stop in the middle of the path
@@ -362,11 +380,11 @@ if __name__ == '__main__':
                 double_order = 0
             elif move_list[0][j] == "左转" and double_order:
                 treasure_corner = 1
-                c.car_turn_left_6050(4700)
+                c.car_turn_left_6050(4500)
                 # print("left done")
             elif move_list[0][j] == "右转" and double_order:
                 treasure_corner = 1
-                c.car_turn_right_6050(4600)
+                c.car_turn_right_6050(4500)
 
                 # print("right done")
         if len(planer.paths) == 0:  # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
@@ -402,7 +420,7 @@ if __name__ == '__main__':
                 c.car_stop()
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
-                c.car_turn_right_6050(11000) # 稍微转少一点
+                c.car_turn_right_6050(10700) # 稍微转少一点
                 PIDLineTracking(K, 5, Ki, 5, Line, 400, 0, 400,   # it means no break with the min
                                 non_break_time=60,)  # 回到开头交叉路口
                 c.car_forward(400, 400)
@@ -428,16 +446,23 @@ if __name__ == '__main__':
                 c.car_stop()
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
-                c.car_turn_right_6050(11000)
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=2, Line=120, SumMax=450, SumMin=0, base_speed=400 # it means no break with the min
-                                , back_mod=0)  # back to the cross road
+                c.car_turn_right_6050(10500)  # 由于有几率装完偏移  并且老偏移那一边 转少一点
+                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=0, base_speed=370 # it means no break with the min
+                                , back_mod=0,user_max_time=3)  # back to the cross road
                 c.car_forward(400, 400)
                 time.sleep(0.5)
                 c.car_stop() # 等待下一次指令
+                time.sleep(0.5)
                 print("short hit done")
         now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
         move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
-
-    print("test done")
     Cam.Release()
     cap.release()
+    # input_key = button_input()
+    # if input_key == "short_press":
+    #     print("Restarting program...")
+    #     os.execv(sys.executable, ['python', "/home/pi/Desktop/guangshe2023/main_program/test_in_main.py"])
+    # elif input_key == "long_press":
+    #     print("Ending program...")
+    print("test done")
+
