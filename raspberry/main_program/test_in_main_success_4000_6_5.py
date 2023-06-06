@@ -320,6 +320,18 @@ if __name__ == '__main__':
                 time.sleep(0.35)
                 c.car_stop()
                 print("forward done")
+            elif move_list[0][j] == "长线" or move_list[0][j] == "短线":
+                # 如果读到这两个说明是最后的部分了，不要在进行双指令读取了 会超出列表的index然后出问题的
+                pass
+            elif (move_list[0][j] == "右转" and move_list[0][j + 1] == "右转") or (
+                    move_list[0][j] == "左转" and move_list[0][j + 1] == "左转"):
+                """
+                如果两个连续的转弯表示了掉头，这个时候进行直接转180度 
+                需要注意的是下一个指令读取还会读取到转弯，所以需要一个标志位（连续转弯后必接直走）
+                把标志位置0  前进会把标志位置1 就完成了双指令读取
+                """
+                c.car_turn_right_6050(12000)
+                double_order = 0
             elif move_list[0][j] == "左转":
                 treasure_corner = 1
                 c.car_turn_left_6050(5000)
