@@ -2,6 +2,7 @@ from util.get_map import get_loc
 from util.get_map import show_lcd
 from util.get_path import pathPlaner
 from util.mine_classify import MinesClassifier
+from util.get_map import button_input
 # below is the other import
 import cv2
 import time
@@ -197,7 +198,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     c.car_stop()
 
 
-def classify_treasure(team_of="red"):
+def classify_treasure(team_of="红色"):
     """
     识别宝藏
     :param team_of:  队伍颜色
@@ -217,6 +218,10 @@ def classify_treasure(team_of="red"):
     list_of_treasure = [0, 0, 0, 0, 0]  # 0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角 4:无类别
     print("in here")
     threshold = 0.4
+    for i in range(5):  # 清除缓冲区
+        success, img = cap.read()
+        cv2.imshow("img", img)
+        cv2.waitKey(1)
     while True:
         success, img = cap.read()
         if success:
@@ -249,13 +254,13 @@ def classify_treasure(team_of="red"):
     if max_index <= 3:  # 防止识别到的是no_treasure的情况
         color_of_treasure = mine_dict[max_index][:2]  # 取出前两个字得到颜色
     # 分辨宝藏是真的还是假的,0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角
-    if team_of == "red" and list_of_treasure[2] > 10:
+    if team_of == "红色" and list_of_treasure[2] > 10:
         class_of = "fake"
-    elif team_of == "red" and list_of_treasure[3] > 10:
+    elif team_of == "红色" and list_of_treasure[3] > 10:
         class_of = "true"
-    elif team_of == "blue" and list_of_treasure[0] > 10:
+    elif team_of == "蓝色" and list_of_treasure[0] > 10:
         class_of = "fake"
-    elif team_of == "blue" and list_of_treasure[1] > 10:
+    elif team_of == "蓝色" and list_of_treasure[1] > 10:
         class_of = "true"
     else:
         print("no treasure")
@@ -278,11 +283,28 @@ def hit_the_treasure(hit_treasure_time):
     time.sleep(0.5)
 
 if __name__ == '__main__':
-    # team = select_team()  # 本次比赛的队伍颜色
-    # mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
-    mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]  # 黑色墙壁也是1个格子
-    planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-    team = "红色"
+    start_over = 0
+    while start_over == 0:
+        team = select_team()  # 本次比赛的队伍颜色
+        print(team)
+        mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
+        # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
+        planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
+        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/ready_to_go.jpg")# 显示图片
+        show_lcd(img_start)
+        # 单击确定起飞
+        input_key = button_input()
+        if input_key == "short_press":
+            start_over = 1  # it means the game is start
+        elif input_key == "long_press":
+            pass  # do nothing restart the start
+    # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
+    # planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
+    img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/go.jpg")  # 显示图片
+    show_lcd(img_start)  # 允许起飞
+    time.sleep(1)  # 以防突然走了 延时一点点稳妥
+    # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
+    # team = "红色"
     c = move.Car()
     i = move.Infrared()
     S = gpio.Screen()
@@ -296,15 +318,16 @@ if __name__ == '__main__':
     K = 0.5
     Kp = 3
     Ki = 0
-    Kd = 6
+    Kd = 8
     Line = 120  # which line choose to follow
-    SumMax = 320  # max of the black points
+    SumMax = 350  # max of the black points
     SumMin = 50  # min of the black points
     treasure_corner = 0
     one_path_done = 0  # in case for the stop in the middle of the path
     speed = 580  # the car speed
     break_time_long = 80  # 110  long line break time
     break_time_short = 50  # short line break time
+    double_order = 1
     double_order = 1
     # below is the start of the program
     c.car_forward(400, 400)    # go forward to get in the maze
@@ -343,12 +366,12 @@ if __name__ == '__main__':
                 # print("left done")
             elif move_list[0][j] == "右转" and double_order:
                 treasure_corner = 1
-                c.car_turn_right_6050(4700)
+                c.car_turn_right_6050(4600)
 
                 # print("right done")
         if len(planer.paths) == 0:  # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
             c.car_forward(400, 400)
-            time.sleep(2)  # 让小车继续直走一段距离然后就走出迷宫了
+            time.sleep(3)  # 让小车继续直走一段距离然后就走出迷宫了
             c.car_stop()
             break
         # finish one path
@@ -359,7 +382,7 @@ if __name__ == '__main__':
             PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax + 5000, SumMin, 400, break_mod=1, break_time=break_time_long,
                             user_max_time=5)
             # detect the treasure
-            treasure,color = classify_treasure()
+            treasure,color = classify_treasure(team)
             if color == team and len(planer.paths) != 0:  # 颜色相同并且
                 print("优化路径")
                 planer.update_paths()
@@ -390,7 +413,7 @@ if __name__ == '__main__':
             c.car_stop()
             time.sleep(1)
             # 观察宝藏
-            treasure,color = classify_treasure()
+            treasure,color = classify_treasure(team)
             if color == team:  # 颜色相同，优化路径
                 print("优化路径")
                 planer.update_paths()
@@ -409,7 +432,7 @@ if __name__ == '__main__':
                 PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=2, Line=120, SumMax=450, SumMin=0, base_speed=400 # it means no break with the min
                                 , back_mod=0)  # back to the cross road
                 c.car_forward(400, 400)
-                time.sleep(0.45)
+                time.sleep(0.5)
                 c.car_stop() # 等待下一次指令
                 print("short hit done")
         now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
