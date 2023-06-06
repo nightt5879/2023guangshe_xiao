@@ -127,7 +127,7 @@ def slove_path(path, hit_flag="hit"):
 
 
 def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
-                    user_max_time=2,non_break_time = 40):
+                    user_max_time=2,non_break_time = 30):
     """
     PID巡线
     :param K: 总体的缩放比例
@@ -159,7 +159,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         Cam.ReadImg(0, 320, 0, 150)
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         # Cam.ShowImg(Cam.Img)
-        # Cam.ShowImg(Dst, 'Dst')
+        Cam.ShowImg(Dst, 'Dst')
         Now = int((Centre[Line] +
                    Centre[Line - 5] + Centre[Line + 5] +
                    Centre[Line - 4] + Centre[Line + 4] +
@@ -175,11 +175,12 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
             # print("max")
             # break
             max_time += 1
-        elif sum <= SumMin and break_flag > non_break_time: # 小于一定值也跳出来
+        elif 10 <= sum <= SumMin and break_flag > non_break_time: # 小于一定值也跳出来
             # print("min")
             # break
             min_time += 1
         if max_time >= user_max_time or min_time >= user_max_time * 3:  # enough max or min time
+            print("max:", max_time, "min:", min_time,"sum:",sum)
             break
         if break_mod == 1 and break_flag >= break_time:
             print("break time max")
@@ -192,7 +193,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         pwm_2 = max(0, min(1000, pwm_2))
         c.car_forward(pwm_1, pwm_2)
         break_flag += 1
-        # Cam.Delay(1)
+        Cam.Delay(1)
     c.car_stop()
 
 
@@ -293,15 +294,15 @@ if __name__ == '__main__':
     hit_flag = "no_hit"
     # K is the proportion.the other are the parameter of the PID
     K = 0.5
-    Kp = 5
+    Kp = 3
     Ki = 0
     Kd = 6
     Line = 120  # which line choose to follow
-    SumMax = 350  # max of the black points
-    SumMin = 30  # min of the black points
+    SumMax = 320  # max of the black points
+    SumMin = 50  # min of the black points
     treasure_corner = 0
     one_path_done = 0  # in case for the stop in the middle of the path
-    speed = 600  # the car speed
+    speed = 580  # the car speed
     break_time_long = 80  # 110  long line break time
     break_time_short = 50  # short line break time
     double_order = 1
@@ -321,7 +322,7 @@ if __name__ == '__main__':
                 treasure_corner = 0
                 PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, speed)
                 c.car_forward(speed, speed)
-                time.sleep(0.28)
+                time.sleep(0.2)
                 c.car_stop()
                 double_order = 1
                 # print("forward done")
@@ -338,11 +339,11 @@ if __name__ == '__main__':
                 double_order = 0
             elif move_list[0][j] == "左转" and double_order:
                 treasure_corner = 1
-                c.car_turn_left_6050(4500)
+                c.car_turn_left_6050(4700)
                 # print("left done")
             elif move_list[0][j] == "右转" and double_order:
                 treasure_corner = 1
-                c.car_turn_right_6050(4500)
+                c.car_turn_right_6050(4700)
 
                 # print("right done")
         if len(planer.paths) == 0:  # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
@@ -366,7 +367,7 @@ if __name__ == '__main__':
             if treasure == "fake":  # 掉头就跑
                 hit_flag = "hit" # 长线一律当撞过 掉头
                 c.car_turn_right_6050(12000)
-                PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, 400,non_break_time=30)  # 回到开头交叉路口
+                PIDLineTracking(K, 5, Ki, 5, Line, SumMax, 0, 400,non_break_time=30,user_max_time=3)  # 回到开头交叉路口
                 c.car_forward(400, 400)
                 time.sleep(0.45)
                 c.car_stop()
@@ -379,7 +380,7 @@ if __name__ == '__main__':
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
                 c.car_turn_right_6050(11000) # 稍微转少一点
-                PIDLineTracking(K, 5, Ki, 5, Line, SumMax, SumMin, 400,
+                PIDLineTracking(K, 5, Ki, 5, Line, 400, 0, 400,   # it means no break with the min
                                 non_break_time=60,)  # 回到开头交叉路口
                 c.car_forward(400, 400)
                 time.sleep(0.45)
@@ -405,11 +406,12 @@ if __name__ == '__main__':
                 time.sleep(0.5)
                 hit_the_treasure(0.7)
                 c.car_turn_right_6050(11000)
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=2, Line=120, SumMax=450, SumMin=100, base_speed=350
+                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=2, Line=120, SumMax=450, SumMin=0, base_speed=400 # it means no break with the min
                                 , back_mod=0)  # back to the cross road
                 c.car_forward(400, 400)
                 time.sleep(0.45)
                 c.car_stop() # 等待下一次指令
+                print("short hit done")
         now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
         move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
 

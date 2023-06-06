@@ -19,7 +19,7 @@ def process_image(image_data, shape=224):
     image_data = image_data.reshape([1, 3, shape, shape]).astype('float32')
     return image_data
 # 模型位置
-paddle_model = "./model/MobileNet_small.nb"
+paddle_model = "./model/MobileNet_big.nb"
 config = paddlelite.lite.MobileConfig()
 config.set_model_from_file(paddle_model)
 predictor = paddlelite.lite.create_paddle_predictor(config)
