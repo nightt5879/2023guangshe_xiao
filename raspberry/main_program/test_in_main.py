@@ -301,7 +301,7 @@ if __name__ == '__main__':
     SumMin = 30  # min of the black points
     treasure_corner = 0
     one_path_done = 0  # in case for the stop in the middle of the path
-    speed = 500  # the car speed
+    speed = 600  # the car speed
     break_time_long = 80  # 110  long line break time
     break_time_short = 50  # short line break time
     double_order = 1
