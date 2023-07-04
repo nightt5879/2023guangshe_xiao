@@ -5,6 +5,20 @@ void PWM_Init(void)
 {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+TIM_TimeBaseStructure.TIM_Period = 0xFFFF;  // ???????????
+TIM_TimeBaseStructure.TIM_Prescaler = 0;  // ???????0
+TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;  // ?????????1
+TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ???????????
+TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+
+// ??TIM1???????(ETR)??
+TIM_ETRClockMode2Config(TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+
+// ??TIM1
+TIM_Cmd(TIM1, ENABLE);
+
 	
 //	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 //	GPIO_PinRemapConfig(GPIO_PartialRemap1_TIM2, ENABLE);
@@ -35,7 +49,7 @@ void PWM_Init(void)
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 500;		//CCR
+	TIM_OCInitStructure.TIM_Pulse = 150;		//CCR
 	
 	//The 4 Servoes Init
 	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
