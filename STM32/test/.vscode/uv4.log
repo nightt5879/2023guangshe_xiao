@@ -1,29 +1,8 @@
-Load "e:\\robot\\project\\2023guangshe_xiao\\STM32\\test\\Objects\\Project.axf" 
-Set JLink Project File to "e:\robot\project\2023guangshe_xiao\STM32\test\JLinkSettings.ini"* JLink Info: Device "STM32F103C8" selected.
-
-JLink info:
-------------
-DLL: V7.88i, compiled Jun 21 2023 11:52:57
-Firmware: J-Link OB-STM32F072-CortexM compiled Jan  7 2019 14:09:37
-Hardware: V1.00
-Feature(s) : GDB, RDI, FlashBP, FlashDL, JFlash, RDDI 
-
-* JLink Info: InitTarget() start
-* JLink Info: SWD selected. Executing JTAG -> SWD switching sequence.
-* JLink Info: Error: Failed to initialized DAP.
-* JLink Info: Can not attach to CPU. Trying connect under reset.
-* JLink Info: SWD selected. Executing JTAG -> SWD switching sequence.
-* JLink Info: Error: Failed to initialized DAP.
-* JLink Info: Connecting to CPU via connect under reset failed.
-* JLink Info: InitTarget() end - Took 305ms
-* JLink Info: Connect failed. Resetting via Reset pin and trying again.
-* JLink Info: InitTarget() start
-* JLink Info: SWD selected. Executing JTAG -> SWD switching sequence.
-* JLink Info: Error: Failed to initialized DAP.
-* JLink Info: Can not attach to CPU. Trying connect under reset.
-* JLink Info: SWD selected. Executing JTAG -> SWD switching sequence.
-* JLink Info: Error: Failed to initialized DAP.
-* JLink Info: Connecting to CPU via connect under reset failed.
-* JLink Info: InitTarget() end - Took 307ms
-Error: Flash Download failed  -  Target DLL has been cancelled
-Flash Load finished at 15:53:15
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'E:\keil_v5\ARM\ARMCC\Bin'
+Build target 'Target 1'
+compiling GPIO.c...
+compiling main.c...
+linking...
+Program Size: Code=4676 RO-data=1788 RW-data=132 ZI-data=1028  
+".\Objects\Project.axf" - 0 Error(s), 0 Warning(s).
+Build Time Elapsed:  00:00:02

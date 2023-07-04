@@ -8,7 +8,8 @@
 #include "math.h"
 
 //#include "Key.h"
-
+#define DEBOUNCE_DELAY 20  // 去抖动延迟时间，单位为毫秒
+#define COUNTER_THRESHOLD 10000  // 计数器阈值
 uint8_t KeyNum;
 uint16_t G1 = 0 ,G2 = 0;
 uint8_t ID;
@@ -26,206 +27,97 @@ double integral = 0.0;  // 误差的累积值
 double error = 0.0;  // 误差
 int16_t pwm_left,pwm_right;  // 左右电机的PWM值
 void car_forward(void);
-int main(void)
+uint16_t a;
+uint8_t level;
+uint8_t change_flag = 0;
+uint8_t b = 0;
+uint16_t c = 0;
+
+uint32_t GetTick(void)
 {
-	Serial_Init();
-	PWM_Init();
-	GPIOInit();
-	OLED_Init();
-	MPU6050_Init();
-	OLED_ShowString(1, 1, "ID:");
-	ID = MPU6050_GetID();
-	OLED_ShowHexNum(1, 4, ID, 2);
-
-
-	PWM_SetCompara(1,500);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
-	GPIO_SetBits(GPIOB, GPIO_Pin_13);
-	while (1)
-	{
-// 		// below are the serial port
-// 		if (Serial_GetRxFlag() == 1)  //get the data from serial port
-// 		{
-// 			G1 = Serial_RxPacket[2] << 8 | Serial_RxPacket[3];
-// 			G2 = Serial_RxPacket[4] << 8 | Serial_RxPacket[5];
-// //			OLED_ShowString(2, 1, "carmove:");
-// 			if(Serial_RxPacket[0] == 0x00 && Serial_RxPacket[1] == 0x00) //the car stop
-// 			{
-// 				GPIO_Set(3);
-// 				GPIO_Set(6);
-// 				PWM_SetCompara(1,G1);
-// 				PWM_SetCompara(2,G2);
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x01 && Serial_RxPacket[1] == 0x00) //the car forward
-// 			{
-// 				GPIO_Set(1);
-// 				GPIO_Set(4);
-// 				PWM_SetCompara(1,G1);
-// 				PWM_SetCompara(2,G2);
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x02 && Serial_RxPacket[1] == 0x00) //the car back
-// 			{
-// 				GPIO_Set(2);
-// 				GPIO_Set(5);
-// 				PWM_SetCompara(1,G1);
-// 				PWM_SetCompara(2,G2);
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x03 && Serial_RxPacket[1] == 0x00) //the car turn left
-// 			{
-// 				GPIO_Set(1);
-// 				GPIO_Set(5);
-// 				PWM_SetCompara(1,G1);
-// 			    PWM_SetCompara(2,G2);
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x04 && Serial_RxPacket[1] == 0x00) //the car turn right
-// 			{
-// 				GPIO_Set(2);
-// 				GPIO_Set(4);
-// 				PWM_SetCompara(1,G1);
-// 				PWM_SetCompara(2,G2);
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x05 && Serial_RxPacket[1] == 0x11)
-// 			{
-// 				OLED_ShowString(2, 4, "in");
-// 				for	(int i = 1;i < 6;i++)  // get the 6050 data for 5 times
-// 				{
-// 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-// 				}
-// 				start_GZ = GZ;
-// 				GPIO_Set(1); 
-// 				GPIO_Set(5);
-// 				PWM_SetCompara(1,500);
-// 				PWM_SetCompara(2,500);
-// 				while(1)  // get the 6050 data
-// 				{
-// 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-// 					del = GZ - start_GZ;
-// 					OLED_ShowSignedNum(2, 1,start_GZ, 5);
-// 					OLED_ShowSignedNum(3, 1, GZ, 5);
-// 					OLED_ShowSignedNum(4, 1, acc_GZ, 5);
-// 					if (fabs(del) > 400)  //Filter out noise.
-// 					{
-// 						acc_GZ += (int)(del/10);
-// 					}
-// 					if (fabs(acc_GZ) > G1)
-// 					{
-// 						// stop the car
-// 						GPIO_Set(3);
-// 						GPIO_Set(6);
-// 						acc_GZ = 0; // reset the acc_GZ
-// 						break;
-// 					}
-// 				}
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x05 && Serial_RxPacket[1] == 0x21)
-// 			{
-// 				OLED_ShowString(3, 1, "carmove222");
-// 				for	(int i = 1;i < 6;i++)  // get the 6050 data for 5 times
-// 				{
-// 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-// 				}
-// 				start_GZ = GZ;
-// 				GPIO_Set(2);
-// 				GPIO_Set(4);;
-// 				PWM_SetCompara(1,500);
-// 				PWM_SetCompara(2,500);
-// 				while(1)  // get the 6050 data
-// 				{
-// 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-// 					del = GZ - start_GZ;
-// 					OLED_ShowSignedNum(2, 1,start_GZ, 5);
-// 					OLED_ShowSignedNum(3, 1, GZ, 5);
-// 					OLED_ShowSignedNum(4, 1, acc_GZ, 5);
-// 					if (fabs(del) > 400)  //Filter out noise.
-// 					{
-// 						acc_GZ += (int)(del/10);
-// 					}
-// 					if (fabs(acc_GZ) > G1)
-// 					{
-// 						// stop the car
-// 						GPIO_Set(3);
-// 						GPIO_Set(6);
-// 						acc_GZ = 0; // reset the acc_GZ
-// 						break;
-// 					}
-// 				}
-// 			}
-// 			else if (Serial_RxPacket[0] == 0x06)
-// 			{
-// 				car_forward();
-// 			}
-// 		}
-	}
+    return SysTick->LOAD - SysTick->VAL;
 }
 
-
-
-// this the GPT code
-void car_forward()  // 让小车按照MPU6050和PID控制器前进
+int main(void)
 {
-    for (int i = 1; i < 6; i++)  // 读取6050的数据5次
-    {
-        MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
-    }
-    start_GZ = GZ;
-    GPIO_Set(1);
-    GPIO_Set(4);
-	PWM_SetCompara(1,0);
-	PWM_SetCompara(2,0);  //let the car stop
-    while(1)  // 不断读取6050的数据
-    {
-		if (Serial_GetRxFlag() == 1)  // RX get the data
-		{
-			if(Serial_RxPacket[0] == 0x00 && Serial_RxPacket[1] == 0x00) //the car stop
-			{
-				GPIO_Set(3);
-				GPIO_Set(6);
-				// reset all the value
-				integral = 0;
-				prev_error = 0;
-				error = 0;
-				break;
-			}
-		}
-        MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);	
-		del = GZ - start_GZ;				
-		if (fabs(del) > 100)  //Filter out noise.
-		{
-			error = (GZ - start_GZ)/10;  // 计算误差
-		}
-       else
-	   {
-			error = 0;
-	   }
+		if (SysTick_Config(SystemCoreClock / 1000))  // 配置 SysTick 定时器每 1ms 中断一次
+{
+    while (1);  // 如果失败，进入死循环
+}
 
-        // 计算PID的每个部分
-        double P = error;  // 比例部分
-        integral += error;  // 积分部分，注意我们需要累积所有的误差
-        double D = error - prev_error;  // 微分部分，这是这次和上次误差的差
+	PWM_Init();
+	GPIOInit();
 
-        // 计算控制输入
-        double control = K*(Kp*P + Ki*integral + Kd*D);
+	PWM_SetCompara(2,150);
+//	GPIO_ResetBits(GPIOB, GPIO_Pin_5);
+	GPIO_SetBits(GPIOA, GPIO_Pin_3);
+	GPIO_ResetBits(GPIOA,GPIO_Pin_2);
+Delay_s(5);
+	GPIO_SetBits(GPIOA, GPIO_Pin_2);
+	GPIO_ResetBits(GPIOA,GPIO_Pin_3);
+Delay_s(5);
+//	GPIO_SetBits(GPIOB, GPIO_Pin_5);
+//	Delay_s(5);
+//		GPIO_ResetBits(GPIOB, GPIO_Pin_3);
+//	 GPIO_SetBits(GPIOB, GPIO_Pin_2);
 
-        // TODO: 使用控制输入调整小车的速度
-		// the pwm need the int type
-		pwm_left = 400 - (int)(control);
-		pwm_right = 400 + (int)(control);
-		// OLED_ShowSignedNum(2, 6,(int)(control), 5);
-		// OLED_ShowSignedNum(3, 6,pwm_left, 5);
-		// OLED_ShowSignedNum(4, 6,pwm_right, 5);
-		// 使用fmax和fmin将pwm_left和pwm_right限制在0到1000
-		pwm_left = (int)fmax(0, fmin(1000, pwm_left));
-		pwm_right = (int)fmax(0, fmin(1000, pwm_right));
-		PWM_SetCompara(1,pwm_left);
-		PWM_SetCompara(2,pwm_right);
-        // 记录这次的误差，以供下次计算微分部分时使用
-        prev_error = error;
+	uint8_t lastLevel = 0;  // 上一次读取的电平
+	uint32_t lastChangeTime = 0;  // 上一次电平改变的时间
+    uint32_t counter = 0;  // 计数器
+	while (1)
+	{
+			level = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11);  // 读取当前电平
+			if (level == 0 ) b = 0;
+			else if(level == 1) b = 1;
+//			if (level != lastLevel)  // 如果电平改变了
+//			{
+//					if (GetTick() - lastChangeTime >= DEBOUNCE_DELAY)  // 如果距离上一次电平改变已经过去了足够的时间
+//					{
+//							lastLevel = level;  // 更新电平
+//							lastChangeTime = GetTick();  // 更新时间
 
-        // 显示一些信息
-        // OLED_ShowSignedNum(2, 1,start_GZ, 5);
-        // OLED_ShowSignedNum(3, 1, GZ, 5);
-		OLED_ShowSignedNum(2, 1, pwm_left, 5);
-        OLED_ShowSignedNum(3, 1, pwm_right, 5);
-        OLED_ShowSignedNum(4, 1, (int)(control), 5);
-    }
+//							// 在这里处理电平改变事件
+//							if (level == 0)
+//							{
+//									// 如果 DIR 信号为 0，设置电机为正转
+//									a = 1;
+//							}
+//							else
+//							{
+//									// 如果 DIR 信号为 1，设置电机为反转
+//									a = 0;
+//							}
+//					}
+//			}
+//			else
+//			{
+//					lastChangeTime = GetTick();  // 如果电平没有改变，也更新时间
+//			}
+			  counter+= 1;
+				 c = TIM_GetCounter(TIM1);
+
+        // 如果计数器达到阈值，切换 GPIOB4 和 GPIOB5 的状态
+        if (counter >= COUNTER_THRESHOLD)
+        {
+					counter = 0;  // 重置计数器
+					a ++;
+				}
+				if (a >= 300)
+				{
+            a = 0;
+					if (change_flag == 0)
+					{
+				GPIO_SetBits(GPIOA, GPIO_Pin_3);
+				GPIO_ResetBits(GPIOA,GPIO_Pin_2);
+						change_flag = 1;
+					}
+					else
+					{
+				GPIO_SetBits(GPIOA, GPIO_Pin_2);
+				GPIO_ResetBits(GPIOA,GPIO_Pin_3);	
+					change_flag = 0;
+					}
+        }
+	}
+
 }
