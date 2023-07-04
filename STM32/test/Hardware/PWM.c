@@ -15,9 +15,46 @@ TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
 // ??TIM1???????(ETR)??
 TIM_ETRClockMode2Config(TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+	    // TIM1??????
+    TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+
+    // NVIC ???????
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //?????
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;        //?????
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;           //??IRQ??
+    NVIC_Init(&NVIC_InitStructure);
 
 // ??TIM1
 TIM_Cmd(TIM1, ENABLE);
+
+// ??? TIM3
+//TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+//NVIC_InitTypeDef NVIC_InitStructure;
+
+// ?? TIM3 ??
+RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+
+// ?? TIM3 ????
+TIM_TimeBaseStructure.TIM_Period = 999;  // ??????
+TIM_TimeBaseStructure.TIM_Prescaler = 7199;  // ????,????????72000000/(7199+1) = 10kHz
+TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;  // ??????
+TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ??????
+TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+
+// ?? NVIC
+NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;  // TIM3 ??
+NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  // ?????
+NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;  // ????
+NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  // ????
+NVIC_Init(&NVIC_InitStructure);
+
+// ?? TIM3 ????
+TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+
+// ?? TIM3
+TIM_Cmd(TIM3, ENABLE);
 
 	
 //	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
@@ -49,7 +86,7 @@ TIM_Cmd(TIM1, ENABLE);
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 150;		//CCR
+	TIM_OCInitStructure.TIM_Pulse = 200;		//CCR
 	
 	//The 4 Servoes Init
 	TIM_OC1Init(TIM2, &TIM_OCInitStructure);

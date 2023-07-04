@@ -28,16 +28,18 @@ Project File Date:  07/01/2023
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'E:\keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling main.c...
-User\main.c(123): warning:  #1-D: last line of file ends without a newline
-  }
-User\main.c(64): warning:  #177-D: variable "lastLevel"  was declared but never referenced
+User\main.c(73): warning:  #177-D: variable "lastLevel"  was declared but never referenced
   	uint8_t lastLevel = 0;  // 上一次读取的电平
-User\main.c(65): warning:  #177-D: variable "lastChangeTime"  was declared but never referenced
+User\main.c(74): warning:  #177-D: variable "lastChangeTime"  was declared but never referenced
   	uint32_t lastChangeTime = 0;  // 上一次电平改变的时间
-User\main.c: 3 warnings, 0 errors
+User\main.c(75): warning:  #177-D: variable "counter"  was declared but never referenced
+      uint32_t counter = 0;  // 计数�?
+User\main.c(76): warning:  #177-D: variable "pwmValue"  was declared but never referenced
+  	uint8_t pwmValue = PWM_START_VALUE;
+User\main.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=2576 RO-data=268 RW-data=140 ZI-data=1028  
-".\Objects\Project.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=3128 RO-data=268 RW-data=160 ZI-data=1024  
+".\Objects\Project.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 

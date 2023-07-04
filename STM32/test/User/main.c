@@ -32,7 +32,16 @@ uint8_t level;
 uint8_t change_flag = 0;
 uint8_t b = 0;
 uint16_t c = 0;
-
+uint16_t d = 0;
+int32_t acc = 0;  //转动累计值
+uint16_t target = 1650;
+#define PWM_START_VALUE 200
+#define PWM_END_VALUE 60
+#define DECELERATION_DISTANCE 800
+#define TARGET_VALUE 2000  // 替换为你的实际目标值
+#define SPIN 1
+#define GUAN 0x281
+double speed;
 uint32_t GetTick(void)
 {
     return SysTick->LOAD - SysTick->VAL;
@@ -48,14 +57,14 @@ int main(void)
 	PWM_Init();
 	GPIOInit();
 
-	PWM_SetCompara(2,150);
+	PWM_SetCompara(2,200);
 //	GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-	GPIO_SetBits(GPIOA, GPIO_Pin_3);
-	GPIO_ResetBits(GPIOA,GPIO_Pin_2);
-Delay_s(5);
-	GPIO_SetBits(GPIOA, GPIO_Pin_2);
-	GPIO_ResetBits(GPIOA,GPIO_Pin_3);
-Delay_s(5);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_2);
+	GPIO_SetBits(GPIOA,GPIO_Pin_3);
+//Delay_s(5);
+//	GPIO_SetBits(GPIOA, GPIO_Pin_2);
+//	GPIO_ResetBits(GPIOA,GPIO_Pin_3);
+//Delay_s(5);
 //	GPIO_SetBits(GPIOB, GPIO_Pin_5);
 //	Delay_s(5);
 //		GPIO_ResetBits(GPIOB, GPIO_Pin_3);
@@ -64,11 +73,12 @@ Delay_s(5);
 	uint8_t lastLevel = 0;  // 上一次读取的电平
 	uint32_t lastChangeTime = 0;  // 上一次电平改变的时间
     uint32_t counter = 0;  // 计数器
+	uint8_t pwmValue = PWM_START_VALUE;
 	while (1)
 	{
 			level = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11);  // 读取当前电平
-			if (level == 0 ) b = 0;
-			else if(level == 1) b = 1;
+//			if (level == 0 ) b = 0;
+//			else if(level == 1) b = 1;
 //			if (level != lastLevel)  // 如果电平改变了
 //			{
 //					if (GetTick() - lastChangeTime >= DEBOUNCE_DELAY)  // 如果距离上一次电平改变已经过去了足够的时间
@@ -93,31 +103,86 @@ Delay_s(5);
 //			{
 //					lastChangeTime = GetTick();  // 如果电平没有改变，也更新时间
 //			}
-			  counter+= 1;
-				 c = TIM_GetCounter(TIM1);
+//			  counter+= 1;
+//				 c = TIM_GetCounter(TIM1);
+//			c++;
 
         // 如果计数器达到阈值，切换 GPIOB4 和 GPIOB5 的状态
-        if (counter >= COUNTER_THRESHOLD)
-        {
-					counter = 0;  // 重置计数器
-					a ++;
-				}
-				if (a >= 300)
-				{
-            a = 0;
-					if (change_flag == 0)
-					{
-				GPIO_SetBits(GPIOA, GPIO_Pin_3);
-				GPIO_ResetBits(GPIOA,GPIO_Pin_2);
-						change_flag = 1;
-					}
-					else
-					{
-				GPIO_SetBits(GPIOA, GPIO_Pin_2);
-				GPIO_ResetBits(GPIOA,GPIO_Pin_3);	
-					change_flag = 0;
-					}
-        }
+        // if (counter >= COUNTER_THRESHOLD)
+        // {
+		// 			counter = 0;  // 重置计数器
+		// 			a ++;
+		// 		}
+		// 		if (a >= 300)
+		// 		{
+        //     a = 0;
+		// 			if (change_flag == 0)
+		// 			{
+		// 		GPIO_SetBits(GPIOA, GPIO_Pin_3);
+		// 		GPIO_ResetBits(GPIOA,GPIO_Pin_2);
+		// 				change_flag = 1;
+		// 			}
+		// 			else
+		// 			{
+		// 		GPIO_SetBits(GPIOA, GPIO_Pin_2);
+		// 		GPIO_ResetBits(GPIOA,GPIO_Pin_3);	
+		// 			change_flag = 0;
+		// 			}
+        // }
+		// 如果编码器的值大于一定 就停下
+			c = TIM_GetCounter(TIM1);  // 读取计数器值
+
+//			// 在达到目标值前的 DECELERATION_DISTANCE 距离内开始减速
+//			if (c > TARGET_VALUE - DECELERATION_DISTANCE)
+//			{
+//					// 在这个区间内线性减小 PWM 值
+//					uint32_t range = TARGET_VALUE - (TARGET_VALUE - DECELERATION_DISTANCE);
+//					uint32_t positionInRange = c - (TARGET_VALUE - DECELERATION_DISTANCE);
+//					uint32_t pwmRange = PWM_START_VALUE - PWM_END_VALUE;
+//		
+//					// 根据当前位置在减速区间内的比例，调整 PWM 值
+//					pwmValue = PWM_START_VALUE - ((positionInRange * pwmRange) / range);
+//		
+//					// 限制 PWM 值的最小值为 PWM_END_VALUE
+//					if (pwmValue < PWM_END_VALUE)
+//					{
+//							pwmValue = PWM_END_VALUE;
+//					}
+//		
+//					PWM_SetCompara(2, pwmValue);
+//			}
+
+			// 如果达到目标值，停止电机
+//			if (c > (TARGET_VALUE * SPIN) -((SPIN-1)*GUAN) )
+//			{
+//					d = c;
+//					GPIO_SetBits(GPIOA, GPIO_Pin_3);
+//					GPIO_SetBits(GPIOA,GPIO_Pin_2);
+//					TIM_ClearITPendingBit(TIM1, TIM_IT_Update); //清除 TIM1 更新中断标志
+//					TIM_SetCounter(TIM1, 0);
+//			}
 	}
 
+}
+
+//void TIM1_UP_IRQHandler(void) {
+//				  GPIO_SetBits(GPIOA, GPIO_Pin_3);
+//        GPIO_SetBits(GPIOA,GPIO_Pin_2);
+//        TIM_ClearITPendingBit(TIM1, TIM_IT_Update); //清除 TIM1 更新中断标志
+////    if(TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET) //确保是 TIM1 更新中断
+////    {
+
+////        // 在这里停止电机，使用GPIO操作
+//////    }
+//}
+// TIM3 中断服务函数
+void TIM3_IRQHandler(void)
+{
+    if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)  // 如果发生了更新中断
+    {
+        // 在这里读取你的外部中断值，计算速度，并清零
+				speed = (float)TIM_GetCounter(TIM1) /1024 * 3/ 7 * 10;
+				TIM_SetCounter(TIM1, 0);
+        TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  // 清除更新中断标志位
+    }
 }
