@@ -121,21 +121,21 @@ class FullCircleServo(Servo):
         return self.speed_dict[speed_level]
 
 
-def thread1():
-    while True:
-        if servo1.target != servo1.angle:
-            servo1.set_angle(servo1.target)
-        time.sleep(0.5)
-
-
-def thread2():
-    while True:
-        if servo2.target != servo2.angle:
-            servo2.set_angle(servo2.target)
-        time.sleep(0.5)
-
-
 if __name__ == '__main__':
+    """
+    the process of the create the thread function
+    """
+    def thread1():
+        while True:
+            if servo1.target != servo1.angle:
+                servo1.set_angle(servo1.target)
+            time.sleep(0.5)
+
+    def thread2():
+        while True:
+            if servo2.target != servo2.angle:
+                servo2.set_angle(servo2.target)
+            time.sleep(0.5)
 
     """
     the process of the initialization
