@@ -39,10 +39,8 @@ class MinesClassifier:
         self.input_tensor0.from_numpy(image_data)
         self.predictor.run()
         output_tensor = self.predictor.get_output(0)
-        output_tensor = output_tensor.numpy()
-        e_x = np.exp(output_tensor.squeeze() - np.max(output_tensor.squeeze()))
-        pro = e_x / e_x.sum()
-        return np.argmax(pro),pro
+        output_tensor = output_tensor.numpy().squeeze()
+        return np.argmax(output_tensor),output_tensor
 
 
 
