@@ -16,15 +16,15 @@ uint8_t ID;
 int16_t AX, AY, AZ, GX, GY, GZ;
 int32_t start_GZ,acc_GZ = 0,del; //del represents the difference value.
 // 定义PID控制器的参数
-double K = 5.0;  // 控制器增益
-double Kp = 1.0;  // 比例增益
-double Ki = 0.0;  // 积分增益
-double Kd = 20.0;  // 微分增益
+//double K = 5.0;  // 控制器增益
+//double Kp = 1.0;  // 比例增益
+//double Ki = 0.0;  // 积分增益
+//double Kd = 20.0;  // 微分增益
 
-// 定义PID控制器的状态
-double prev_error = 0.0;  // 上一次的误差
-double integral = 0.0;  // 误差的累积值
-double error = 0.0;  // 误差
+//// 定义PID控制器的状态
+//double prev_error = 0.0;  // 上一次的误差
+//double integral = 0.0;  // 误差的累积值
+//double error = 0.0;  // 误差
 int16_t pwm_left,pwm_right;  // 左右电机的PWM值
 void car_forward(void);
 uint16_t a;
@@ -41,7 +41,11 @@ uint16_t target = 1650;
 #define TARGET_VALUE 2000  // 替换为你的实际目标值
 #define SPIN 1
 #define GUAN 0x281
+#define MAX_PWM = 500
+#define MIN_PWM = 0
+#define BASE_PWM 100
 double speed;
+void  pid_controller();
 uint32_t GetTick(void)
 {
     return SysTick->LOAD - SysTick->VAL;
@@ -57,10 +61,10 @@ int main(void)
 	PWM_Init();
 	GPIOInit();
 
-	PWM_SetCompara(2,200);
+	PWM_SetCompara(2,BASE_PWM);
 //	GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_2);
-	GPIO_SetBits(GPIOA,GPIO_Pin_3);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_3);
+	GPIO_SetBits(GPIOA,GPIO_Pin_2);
 //Delay_s(5);
 //	GPIO_SetBits(GPIOA, GPIO_Pin_2);
 //	GPIO_ResetBits(GPIOA,GPIO_Pin_3);
@@ -77,6 +81,8 @@ int main(void)
 	while (1)
 	{
 			level = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11);  // 读取当前电平
+			c = TIM_GetCounter(TIM1);  // 读取计数器值
+			pid_controller();
 //			if (level == 0 ) b = 0;
 //			else if(level == 1) b = 1;
 //			if (level != lastLevel)  // 如果电平改变了
@@ -130,7 +136,7 @@ int main(void)
 		// 			}
         // }
 		// 如果编码器的值大于一定 就停下
-			c = TIM_GetCounter(TIM1);  // 读取计数器值
+
 
 //			// 在达到目标值前的 DECELERATION_DISTANCE 距离内开始减速
 //			if (c > TARGET_VALUE - DECELERATION_DISTANCE)
@@ -185,4 +191,51 @@ void TIM3_IRQHandler(void)
 				TIM_SetCounter(TIM1, 0);
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  // 清除更新中断标志位
     }
+}
+
+// PID coefficients
+float Kp = 20, Ki = 0, Kd = 2;
+
+// PID variables
+float error, previous_error, integral, derivative;
+
+// Desired and current speed
+float target_speed = 4;
+
+// Integral limit values
+float integral_min = -10, integral_max = 10;
+
+// PWM output
+float pwm_output;
+
+float PWM_MAX = 200, PWM_MIN = -200;
+uint16_t set_pwm;
+void pid_controller() {
+    // Calculate error
+    error = target_speed - speed;
+
+    // Calculate integral term with saturation
+    integral += error;
+    if (integral > integral_max) {
+        integral = integral_max;
+    } else if (integral < integral_min) {
+        integral = integral_min;
+    }
+
+    // Calculate derivative term
+    derivative = error - previous_error;
+
+    // Calculate control output
+    pwm_output = Kp * error + Ki * integral + Kd * derivative;
+    // Ensure PWM output is within allowable range
+    if (pwm_output > PWM_MAX) {
+        pwm_output = PWM_MAX;
+    } else if (pwm_output < PWM_MIN) {
+        pwm_output = PWM_MIN;
+    }
+	set_pwm = (int)pwm_output + BASE_PWM;  // 把PWM_OUTPUT变成整数
+    // Update the PWM signal
+	PWM_SetCompara(2, set_pwm);
+    // Store current error for next iteration
+    previous_error = error;
 }
