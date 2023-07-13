@@ -1,5 +1,6 @@
 #include "GPIO.h"
 #include "stm32f10x.h"                  // Device header
+#include "motor.h"
 
 /**
   * @brief  Initializes TIM4 pwm output
@@ -52,6 +53,8 @@ void pwm_init(void)
   */
 void pwm_set_duty_cycle(uint8_t CHx, uint16_t Compare)  // change the duty cycle 1 to 4 CHx
 {
+  if (Compare > MAX_OUTPUT) Compare = MAX_OUTPUT;  // limit the duty cycle
+  else if (Compare <= MIN_OUTPUT) Compare = MIN_OUTPUT;
     switch (CHx){
         case 1:TIM_SetCompare1(TIM4, Compare);break;
         case 2:TIM_SetCompare2(TIM4, Compare);break;

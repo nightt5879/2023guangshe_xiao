@@ -29,3 +29,4 @@
 .\objects\gpio.o: .\Library\stm32f10x_usart.h
 .\objects\gpio.o: .\Library\stm32f10x_wwdg.h
 .\objects\gpio.o: .\Library\misc.h
+.\objects\gpio.o: motor.h

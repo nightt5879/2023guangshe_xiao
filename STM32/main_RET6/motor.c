@@ -5,11 +5,32 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_tim.h"
 #include "misc.h"
+#include <math.h>
+
 
 uint16_t fl_counter = 0;
 uint16_t fr_counter = 0;
 uint16_t bl_counter = 0;
 uint16_t br_counter = 0;
+// all speeds are the vertical component velocity of the wheel, measured in cm/s.
+float fl_speed = 0; 
+float fr_speed = 0;
+float bl_speed = 0;
+float br_speed = 0;
+// the target speed you want to achieve
+float fl_target_speed = 0;
+float fr_target_speed = 0;
+float bl_target_speed = 0;
+float br_target_speed = 0;
+// the motor direction
+uint8_t fl_direction = 0;
+uint8_t fr_direction = 0;
+uint8_t bl_direction = 0;
+uint8_t br_direction = 0;
+uint8_t test_a = 0;
+uint16_t test_b = 0;
+
+float kp = 1.4, ki = 0.1, kd = 0.0;  // These values should be tuned for your specific system
 
 /**
   * @brief  initialize the motor include the pwm and the direction gpio
@@ -35,6 +56,36 @@ void control_motor(uint8_t motor_select, uint8_t direction, uint16_t duty_cycle)
     motor_dir_select(motor_select, direction);
 }
 
+/**
+  * @brief  give the target speed and dir for the motor
+  * @param  directions: [FL, FR, BL, BR] 1 for forward, 0 for backward
+  * @param  speeds: [FL, FR, BL, BR] float speed of motor in cm/s
+  * @param  control_flags: [FL, FR, BL, BR] 1 for control, 0 for not control
+  * @retval None
+  */
+void control_motor_speed(uint8_t directions[], float speeds[], uint8_t control_flags[])
+{
+    if (control_flags[0])
+    {
+        fl_direction = directions[0];
+        fl_target_speed = speeds[0];
+    }
+    if (control_flags[1])
+    {
+        fr_direction = directions[1];
+        fr_target_speed = speeds[1];
+    }
+    if (control_flags[2])
+    {
+        bl_direction = directions[2];
+        bl_target_speed = speeds[2];
+    }
+    if (control_flags[3])
+    {
+        br_direction = directions[3];
+        br_target_speed = speeds[3];
+    }
+}
 /**
   * @brief  initialize the ETR for BR motor
   * @param  None
@@ -216,27 +267,109 @@ uint8_t Read_BR_Direction(void)
   * @param  None
   * @retval None
   */
-void TIM5_Configuration(void)
+void TIM6_Configuration(void)
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = 9999;  // 10ms = (9999 + 1) / 1MHz
-    TIM_TimeBaseStructure.TIM_Prescaler = (SystemCoreClock / 1000000) - 1;  // 1MHz
+    TIM_TimeBaseStructure.TIM_Period = 999;  // 10ms = (999 + 1) / 1MHz
+    TIM_TimeBaseStructure.TIM_Prescaler = 72 - 1;  // 1MHz
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+    TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
 
-    NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM6_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
-    TIM_Cmd(TIM5, ENABLE);
+    TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+    TIM_Cmd(TIM6, ENABLE);
+}
+
+/**
+  * @brief  initialize the pid control structure
+  * @param  None
+  * @retval None
+  */
+typedef struct 
+{
+    float setpoint;         // Desired value
+    float kp, ki, kd;       // PID coefficients
+    float prev0_error;       // last time error
+    float prev1_error;       // last last time error
+    float output;           // the add output
+} PID_Controller;
+PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
+
+/**
+  * @brief  initialize the pid control
+  * @param  None
+  * @retval None
+  */
+void pid_init(PID_Controller *pid, float kp, float ki, float kd, float setpoint)
+{
+    pid->setpoint = setpoint;
+    pid->kp = kp;
+    pid->ki = ki;
+    pid->kd = kd;
+    pid->prev0_error = 0.0;
+    pid->prev1_error = 0.0;
+}
+
+/**
+  * @brief  initialize the 4 pid control
+  * the kp ki kd in the header file
+  * @param  None
+  * @retval None
+  */
+void init_pid(void)
+{
+    pid_init(&pid_fl, kp, ki, kd, fl_target_speed);
+    pid_init(&pid_fr, kp, ki, kd, fr_target_speed);
+    pid_init(&pid_bl, kp, ki, kd, bl_target_speed);
+    pid_init(&pid_br, kp, ki, kd, br_target_speed);
+}
+
+/**
+  * @brief  pid compute
+  * the increment output += to the .output structure, you can use it to control the motor
+  * max and min output in the head of the file
+  * @param  PID_Controller *pid: the structure of the pid controller
+  * @param  float measurement: the measurement value
+  * @retval None
+  */
+void pid_compute(PID_Controller *pid, float measurement)
+{
+    test_b += 1;
+    // Calculate error
+    float error = pid->setpoint - measurement;
+    
+    // Proportional term
+    float P = pid->kp * (error - pid->prev0_error);  // P = Kp * (e[n] - e[n-1]) incremental PID
+    
+    // Integral term
+    float I = pid->ki * error;  // I = Ki * e[n]
+
+    // Derivative term
+    float D = pid->kd * (error - 2 * pid->prev0_error + pid->prev1_error);  // D = Kd * (e[n] - 2e[n-1] + e[n-2])
+
+    // Update previous error
+    pid->prev1_error = pid->prev0_error;
+    pid->prev0_error = error;
+
+    // Calculate control variable
+    float calculated_value = P + I + D;
+    //add to the output
+    pid->output += calculated_value;
+    //control the min and max of the output
+    if (pid->output > MAX_OUTPUT)
+        pid->output = MAX_OUTPUT;
+    else if (pid->output < MIN_OUTPUT)
+        pid->output = MIN_OUTPUT;
 }
 
 /**
@@ -244,11 +377,11 @@ void TIM5_Configuration(void)
   * @param  None
   * @retval None
   */
-void TIM5_IRQHandler(void)
+void TIM6_IRQHandler(void)
 {
-    if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
+    if(TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
     {
-        TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+        TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
 
         // PID control code goes here.
         br_counter = TIM_GetCounter(TIM1);
@@ -260,6 +393,39 @@ void TIM5_IRQHandler(void)
         TIM_SetCounter(TIM8, 0);
         TIM_SetCounter(TIM3, 0);
         TIM_SetCounter(TIM2, 0);
+        //The gear ratio is 3:7, and the encoder has 1024 lines. into the ISR is 10ms
+        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  cm/s
+        br_speed = ((float)br_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
+        bl_speed = ((float)bl_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
+        fl_speed = ((float)fl_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
+        fr_speed = ((float)fr_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
+        //pid control
+        // Apply PID control
+        if (fl_target_speed > 0.0)
+        {
+          pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_fl, fl_speed);
+          control_motor(MOTOR_FL, fl_direction, (int)pid_fl.output);
+        }
+        if (fr_target_speed > 0.0)
+        {
+          pid_fr.setpoint = fr_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_fr, fr_speed);
+          control_motor(MOTOR_FR, fr_direction, (int)pid_fr.output);
+        }
+        if (bl_target_speed > 0.0)
+        {
+          pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_bl, bl_speed);
+          control_motor(MOTOR_BL, bl_direction, (int)pid_bl.output);
+        }
+        if (br_target_speed > 0.0)
+        {
+          test_a += 1;
+          pid_br.setpoint = br_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_br, br_speed);
+          control_motor(MOTOR_BR, br_direction, (int)pid_br.output);
+        }
     }
 }
 

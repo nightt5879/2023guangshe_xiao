@@ -1,7 +1,7 @@
 --cpu Cortex-M3
-".\objects\startup_stm32f10x_md.o"
 ".\objects\core_cm3.o"
 ".\objects\system_stm32f10x.o"
+".\objects\startup_stm32f10x_hd.o"
 ".\objects\misc.o"
 ".\objects\stm32f10x_adc.o"
 ".\objects\stm32f10x_bkp.o"
