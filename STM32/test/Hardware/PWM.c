@@ -44,7 +44,7 @@ TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ??????
 TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 
 // ?? NVIC
-NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;  // TIM3 ??
+NVIC_InitStructure.NVIC_IRQChannel = TIM6_IRQn;  // TIM3 ??
 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  // ?????
 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;  // ????
 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  // ????

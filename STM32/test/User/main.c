@@ -78,11 +78,12 @@ int main(void)
 	uint32_t lastChangeTime = 0;  // 上一次电平改变的时间
     uint32_t counter = 0;  // 计数器
 	uint8_t pwmValue = PWM_START_VALUE;
+	 MPU6050_Init();
 	while (1)
 	{
-			level = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11);  // 读取当前电平
-			c = TIM_GetCounter(TIM1);  // 读取计数器值
-			pid_controller();
+//		level = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_11);  // 读取当前电平
+//		c = TIM_GetCounter(TIM1);  // 读取计数器值
+//		pid_controller();
 //			if (level == 0 ) b = 0;
 //			else if(level == 1) b = 1;
 //			if (level != lastLevel)  // 如果电平改变了
