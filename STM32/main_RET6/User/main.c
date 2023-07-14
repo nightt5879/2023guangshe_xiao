@@ -133,7 +133,6 @@ int main(void)
 //			// test_flag ++;
 //		}
 		if (distance > TARGET_DISTANCE) break;
-		if (test_flag >=1) break;
 //		if (break_flag > 100) break;
 	}
 	//stop the motor
