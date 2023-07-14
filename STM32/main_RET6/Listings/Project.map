@@ -100,7 +100,11 @@ Section Cross References
     main.o(i.main) refers to fflt_clz.o(x$fpl$ffltu) for __aeabi_ui2f
     main.o(i.main) refers to motor.o(i.control_motor_speed) for control_motor_speed
     main.o(i.main) refers to frleqf.o(x$fpl$frleqf) for __aeabi_cfrcmple
-    main.o(i.main) refers to main.o(i.stop_car) for stop_car
+    main.o(i.main) refers to fleqf.o(x$fpl$fleqf) for __aeabi_cfcmple
+    main.o(i.main) refers to faddsub_clz.o(x$fpl$fsub) for __aeabi_fsub
+    main.o(i.main) refers to fdiv.o(x$fpl$fdiv) for __aeabi_fdiv
+    main.o(i.main) refers to fmul.o(x$fpl$fmul) for __aeabi_fmul
+    main.o(i.main) refers to motor.o(i.control_motor) for control_motor
     main.o(i.main) refers to main.o(.data) for sys_clock
     main.o(i.main) refers to motor.o(.data) for distance
     main.o(i.stop_car) refers to motor.o(i.control_motor_speed) for control_motor_speed
@@ -767,6 +771,7 @@ Removing Unused input sections from the image.
     Removing stm32f10x_wwdg.o(i.WWDG_SetCounter), (16 bytes).
     Removing stm32f10x_wwdg.o(i.WWDG_SetPrescaler), (24 bytes).
     Removing stm32f10x_wwdg.o(i.WWDG_SetWindowValue), (40 bytes).
+    Removing main.o(i.stop_car), (76 bytes).
     Removing delay.o(i.Delay_s), (24 bytes).
     Removing motor.o(i.Read_BL_Direction), (16 bytes).
     Removing motor.o(i.Read_BR_Direction), (20 bytes).
@@ -776,7 +781,11 @@ Removing Unused input sections from the image.
     Removing uart.o(i.USART_SendFrame), (62 bytes).
     Removing uart.o(i.send_data), (60 bytes).
 
+<<<<<<< HEAD
 456 unused section(s) (total 17756 bytes) removed from the image.
+=======
+466 unused section(s) (total 19750 bytes) removed from the image.
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
 
 ==============================================================================
 
@@ -786,23 +795,42 @@ Image Symbol Table
 
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
+<<<<<<< HEAD
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
+=======
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
+<<<<<<< HEAD
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
+=======
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
+<<<<<<< HEAD
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
     ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
+=======
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
+    ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
+    ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
+    ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
@@ -813,7 +841,9 @@ Image Symbol Table
     ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
+<<<<<<< HEAD
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
@@ -822,6 +852,16 @@ Image Symbol Table
     ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+=======
+    ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
+    ../clib/memcpset.s                       0x00000000   Number         0  rt_memcpy_w.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
@@ -830,7 +870,12 @@ Image Symbol Table
     ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
+<<<<<<< HEAD
     ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
+=======
+    ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
     ../clib/signal.s                         0x00000000   Number         0  defsig.o ABSOLUTE
     ../clib/stdlib.c                         0x00000000   Number         0  exit.o ABSOLUTE
@@ -961,6 +1006,7 @@ Image Symbol Table
     i.TIM3_ETR_Config                        0x08000838   Section        0  motor.o(i.TIM3_ETR_Config)
     i.TIM6_Configuration                     0x080008a0   Section        0  motor.o(i.TIM6_Configuration)
     i.TIM6_IRQHandler                        0x08000900   Section        0  motor.o(i.TIM6_IRQHandler)
+<<<<<<< HEAD
     i.TIM8_ETR_Config                        0x0800094c   Section        0  motor.o(i.TIM8_ETR_Config)
     i.TIM_ClearITPendingBit                  0x080009b0   Section        0  stm32f10x_tim.o(i.TIM_ClearITPendingBit)
     i.TIM_Cmd                                0x080009b6   Section        0  stm32f10x_tim.o(i.TIM_Cmd)
@@ -1001,6 +1047,73 @@ Image Symbol Table
     x$fpl$fnaninf                            0x08001428   Section      140  fnaninf.o(x$fpl$fnaninf)
     x$fpl$frleqf                             0x080014b4   Section       98  frleqf.o(x$fpl$frleqf)
     x$fpl$usenofp                            0x08001516   Section        0  usenofp.o(x$fpl$usenofp)
+=======
+    i.TIM7_IRQHandler                        0x08000ca0   Section        0  6050control.o(i.TIM7_IRQHandler)
+    i.TIM8_ETR_Config                        0x08000cbc   Section        0  motor.o(i.TIM8_ETR_Config)
+    i.TIM_ClearITPendingBit                  0x08000d20   Section        0  stm32f10x_tim.o(i.TIM_ClearITPendingBit)
+    i.TIM_Cmd                                0x08000d26   Section        0  stm32f10x_tim.o(i.TIM_Cmd)
+    i.TIM_ETRClockMode2Config                0x08000d3e   Section        0  stm32f10x_tim.o(i.TIM_ETRClockMode2Config)
+    i.TIM_ETRConfig                          0x08000d5e   Section        0  stm32f10x_tim.o(i.TIM_ETRConfig)
+    i.TIM_GetCounter                         0x08000d7a   Section        0  stm32f10x_tim.o(i.TIM_GetCounter)
+    i.TIM_GetITStatus                        0x08000d80   Section        0  stm32f10x_tim.o(i.TIM_GetITStatus)
+    i.TIM_ITConfig                           0x08000da2   Section        0  stm32f10x_tim.o(i.TIM_ITConfig)
+    i.TIM_InternalClockConfig                0x08000db4   Section        0  stm32f10x_tim.o(i.TIM_InternalClockConfig)
+    i.TIM_OC1Init                            0x08000dc0   Section        0  stm32f10x_tim.o(i.TIM_OC1Init)
+    i.TIM_OC2Init                            0x08000e58   Section        0  stm32f10x_tim.o(i.TIM_OC2Init)
+    i.TIM_OC3Init                            0x08000efc   Section        0  stm32f10x_tim.o(i.TIM_OC3Init)
+    i.TIM_OC4Init                            0x08000f9c   Section        0  stm32f10x_tim.o(i.TIM_OC4Init)
+    i.TIM_OCStructInit                       0x08001018   Section        0  stm32f10x_tim.o(i.TIM_OCStructInit)
+    i.TIM_SetCompare1                        0x0800102c   Section        0  stm32f10x_tim.o(i.TIM_SetCompare1)
+    i.TIM_SetCompare2                        0x08001030   Section        0  stm32f10x_tim.o(i.TIM_SetCompare2)
+    i.TIM_SetCompare3                        0x08001034   Section        0  stm32f10x_tim.o(i.TIM_SetCompare3)
+    i.TIM_SetCompare4                        0x08001038   Section        0  stm32f10x_tim.o(i.TIM_SetCompare4)
+    i.TIM_SetCounter                         0x0800103e   Section        0  stm32f10x_tim.o(i.TIM_SetCounter)
+    i.TIM_TimeBaseInit                       0x08001044   Section        0  stm32f10x_tim.o(i.TIM_TimeBaseInit)
+    i.UART4_Init                             0x080010e8   Section        0  uart.o(i.UART4_Init)
+    i.USART_Cmd                              0x08001168   Section        0  stm32f10x_usart.o(i.USART_Cmd)
+    i.USART_Init                             0x08001180   Section        0  stm32f10x_usart.o(i.USART_Init)
+    i.UsageFault_Handler                     0x08001258   Section        0  stm32f10x_it.o(i.UsageFault_Handler)
+    i.control_motor                          0x0800125c   Section        0  motor.o(i.control_motor)
+    i.control_motor_speed                    0x08001278   Section        0  motor.o(i.control_motor_speed)
+    i.dir_gpio_input_Config                  0x080012dc   Section        0  motor.o(i.dir_gpio_input_Config)
+    i.init_pid                               0x08001328   Section        0  motor.o(i.init_pid)
+    i.main                                   0x080013b8   Section        0  main.o(i.main)
+    i.motor_dir_gpio_init                    0x0800156c   Section        0  gpio.o(i.motor_dir_gpio_init)
+    i.motor_dir_select                       0x08001614   Section        0  gpio.o(i.motor_dir_select)
+    i.motor_init                             0x080016b0   Section        0  motor.o(i.motor_init)
+    i.pid_compute                            0x080016bc   Section        0  motor.o(i.pid_compute)
+    i.pid_init                               0x08001758   Section        0  motor.o(i.pid_init)
+    i.pwm_init                               0x0800176c   Section        0  gpio.o(i.pwm_init)
+    i.pwm_set_duty_cycle                     0x0800181c   Section        0  gpio.o(i.pwm_set_duty_cycle)
+    x$fpl$d2f                                0x08001878   Section       98  d2f.o(x$fpl$d2f)
+    x$fpl$dadd                               0x080018dc   Section      336  daddsub_clz.o(x$fpl$dadd)
+    _dadd1                                   0x080018ed   Thumb Code     0  daddsub_clz.o(x$fpl$dadd)
+    x$fpl$dcmpinf                            0x08001a2c   Section       24  dcmpi.o(x$fpl$dcmpinf)
+    x$fpl$dleqf                              0x08001a44   Section      120  dleqf.o(x$fpl$dleqf)
+    x$fpl$dmul                               0x08001abc   Section      340  dmul.o(x$fpl$dmul)
+    x$fpl$dnaninf                            0x08001c10   Section      156  dnaninf.o(x$fpl$dnaninf)
+    x$fpl$dretinf                            0x08001cac   Section       12  dretinf.o(x$fpl$dretinf)
+    x$fpl$drleqf                             0x08001cb8   Section      108  drleqf.o(x$fpl$drleqf)
+    x$fpl$dsub                               0x08001d24   Section      468  daddsub_clz.o(x$fpl$dsub)
+    _dsub1                                   0x08001d35   Thumb Code     0  daddsub_clz.o(x$fpl$dsub)
+    x$fpl$f2d                                0x08001ef8   Section       86  f2d.o(x$fpl$f2d)
+    x$fpl$fadd                               0x08001f50   Section      196  faddsub_clz.o(x$fpl$fadd)
+    _fadd1                                   0x08001f5f   Thumb Code     0  faddsub_clz.o(x$fpl$fadd)
+    x$fpl$fcmpinf                            0x08002014   Section       24  fcmpi.o(x$fpl$fcmpinf)
+    x$fpl$fdiv                               0x0800202c   Section      388  fdiv.o(x$fpl$fdiv)
+    _fdiv1                                   0x0800202d   Thumb Code     0  fdiv.o(x$fpl$fdiv)
+    x$fpl$ffix                               0x080021b0   Section       54  ffix.o(x$fpl$ffix)
+    x$fpl$ffltu                              0x080021e8   Section       38  fflt_clz.o(x$fpl$ffltu)
+    x$fpl$fleqf                              0x08002210   Section      104  fleqf.o(x$fpl$fleqf)
+    x$fpl$fmul                               0x08002278   Section      258  fmul.o(x$fpl$fmul)
+    x$fpl$fnaninf                            0x0800237a   Section      140  fnaninf.o(x$fpl$fnaninf)
+    x$fpl$fretinf                            0x08002406   Section       10  fretinf.o(x$fpl$fretinf)
+    x$fpl$frleqf                             0x08002410   Section       98  frleqf.o(x$fpl$frleqf)
+    x$fpl$frsb                               0x08002472   Section       20  faddsub_clz.o(x$fpl$frsb)
+    x$fpl$fsub                               0x08002488   Section      234  faddsub_clz.o(x$fpl$fsub)
+    _fsub1                                   0x08002497   Thumb Code     0  faddsub_clz.o(x$fpl$fsub)
+    x$fpl$usenofp                            0x08002572   Section        0  usenofp.o(x$fpl$usenofp)
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     .data                                    0x20000000   Section       20  stm32f10x_rcc.o(.data)
     APBAHBPrescTable                         0x20000000   Data          16  stm32f10x_rcc.o(.data)
     ADCPrescTable                            0x20000010   Data           4  stm32f10x_rcc.o(.data)
@@ -1197,6 +1310,7 @@ Image Symbol Table
     TIM2_ETR_Config                          0x080007c1   Thumb Code   110  motor.o(i.TIM2_ETR_Config)
     TIM3_ETR_Config                          0x08000839   Thumb Code    94  motor.o(i.TIM3_ETR_Config)
     TIM6_Configuration                       0x080008a1   Thumb Code    90  motor.o(i.TIM6_Configuration)
+<<<<<<< HEAD
     TIM6_IRQHandler                          0x08000901   Thumb Code    60  motor.o(i.TIM6_IRQHandler)
     TIM8_ETR_Config                          0x0800094d   Thumb Code    90  motor.o(i.TIM8_ETR_Config)
     TIM_ClearITPendingBit                    0x080009b1   Thumb Code     6  stm32f10x_tim.o(i.TIM_ClearITPendingBit)
@@ -1244,6 +1358,89 @@ Image Symbol Table
     __I$use$fp                               0x08001516   Number         0  usenofp.o(x$fpl$usenofp)
     Region$$Table$$Base                      0x08001518   Number         0  anon$$obj.o(Region$$Table)
     Region$$Table$$Limit                     0x08001538   Number         0  anon$$obj.o(Region$$Table)
+=======
+    TIM6_IRQHandler                          0x08000901   Thumb Code   784  motor.o(i.TIM6_IRQHandler)
+    TIM7_IRQHandler                          0x08000ca1   Thumb Code    22  6050control.o(i.TIM7_IRQHandler)
+    TIM8_ETR_Config                          0x08000cbd   Thumb Code    90  motor.o(i.TIM8_ETR_Config)
+    TIM_ClearITPendingBit                    0x08000d21   Thumb Code     6  stm32f10x_tim.o(i.TIM_ClearITPendingBit)
+    TIM_Cmd                                  0x08000d27   Thumb Code    24  stm32f10x_tim.o(i.TIM_Cmd)
+    TIM_ETRClockMode2Config                  0x08000d3f   Thumb Code    32  stm32f10x_tim.o(i.TIM_ETRClockMode2Config)
+    TIM_ETRConfig                            0x08000d5f   Thumb Code    28  stm32f10x_tim.o(i.TIM_ETRConfig)
+    TIM_GetCounter                           0x08000d7b   Thumb Code     6  stm32f10x_tim.o(i.TIM_GetCounter)
+    TIM_GetITStatus                          0x08000d81   Thumb Code    34  stm32f10x_tim.o(i.TIM_GetITStatus)
+    TIM_ITConfig                             0x08000da3   Thumb Code    18  stm32f10x_tim.o(i.TIM_ITConfig)
+    TIM_InternalClockConfig                  0x08000db5   Thumb Code    12  stm32f10x_tim.o(i.TIM_InternalClockConfig)
+    TIM_OC1Init                              0x08000dc1   Thumb Code   132  stm32f10x_tim.o(i.TIM_OC1Init)
+    TIM_OC2Init                              0x08000e59   Thumb Code   154  stm32f10x_tim.o(i.TIM_OC2Init)
+    TIM_OC3Init                              0x08000efd   Thumb Code   150  stm32f10x_tim.o(i.TIM_OC3Init)
+    TIM_OC4Init                              0x08000f9d   Thumb Code   114  stm32f10x_tim.o(i.TIM_OC4Init)
+    TIM_OCStructInit                         0x08001019   Thumb Code    20  stm32f10x_tim.o(i.TIM_OCStructInit)
+    TIM_SetCompare1                          0x0800102d   Thumb Code     4  stm32f10x_tim.o(i.TIM_SetCompare1)
+    TIM_SetCompare2                          0x08001031   Thumb Code     4  stm32f10x_tim.o(i.TIM_SetCompare2)
+    TIM_SetCompare3                          0x08001035   Thumb Code     4  stm32f10x_tim.o(i.TIM_SetCompare3)
+    TIM_SetCompare4                          0x08001039   Thumb Code     6  stm32f10x_tim.o(i.TIM_SetCompare4)
+    TIM_SetCounter                           0x0800103f   Thumb Code     4  stm32f10x_tim.o(i.TIM_SetCounter)
+    TIM_TimeBaseInit                         0x08001045   Thumb Code   122  stm32f10x_tim.o(i.TIM_TimeBaseInit)
+    UART4_Init                               0x080010e9   Thumb Code   120  uart.o(i.UART4_Init)
+    USART_Cmd                                0x08001169   Thumb Code    24  stm32f10x_usart.o(i.USART_Cmd)
+    USART_Init                               0x08001181   Thumb Code   210  stm32f10x_usart.o(i.USART_Init)
+    UsageFault_Handler                       0x08001259   Thumb Code     4  stm32f10x_it.o(i.UsageFault_Handler)
+    control_motor                            0x0800125d   Thumb Code    26  motor.o(i.control_motor)
+    control_motor_speed                      0x08001279   Thumb Code    68  motor.o(i.control_motor_speed)
+    dir_gpio_input_Config                    0x080012dd   Thumb Code    64  motor.o(i.dir_gpio_input_Config)
+    init_pid                                 0x08001329   Thumb Code   100  motor.o(i.init_pid)
+    main                                     0x080013b9   Thumb Code   390  main.o(i.main)
+    motor_dir_gpio_init                      0x0800156d   Thumb Code   146  gpio.o(i.motor_dir_gpio_init)
+    motor_dir_select                         0x08001615   Thumb Code   142  gpio.o(i.motor_dir_select)
+    motor_init                               0x080016b1   Thumb Code    12  motor.o(i.motor_init)
+    pid_compute                              0x080016bd   Thumb Code   150  motor.o(i.pid_compute)
+    pid_init                                 0x08001759   Thumb Code    20  motor.o(i.pid_init)
+    pwm_init                                 0x0800176d   Thumb Code   166  gpio.o(i.pwm_init)
+    pwm_set_duty_cycle                       0x0800181d   Thumb Code    88  gpio.o(i.pwm_set_duty_cycle)
+    __aeabi_d2f                              0x08001879   Thumb Code     0  d2f.o(x$fpl$d2f)
+    _d2f                                     0x08001879   Thumb Code    98  d2f.o(x$fpl$d2f)
+    __aeabi_dadd                             0x080018dd   Thumb Code     0  daddsub_clz.o(x$fpl$dadd)
+    _dadd                                    0x080018dd   Thumb Code   332  daddsub_clz.o(x$fpl$dadd)
+    __fpl_dcmp_Inf                           0x08001a2d   Thumb Code    24  dcmpi.o(x$fpl$dcmpinf)
+    __aeabi_cdcmple                          0x08001a45   Thumb Code     0  dleqf.o(x$fpl$dleqf)
+    _dcmple                                  0x08001a45   Thumb Code   120  dleqf.o(x$fpl$dleqf)
+    __fpl_dcmple_InfNaN                      0x08001aa7   Thumb Code     0  dleqf.o(x$fpl$dleqf)
+    __aeabi_dmul                             0x08001abd   Thumb Code     0  dmul.o(x$fpl$dmul)
+    _dmul                                    0x08001abd   Thumb Code   332  dmul.o(x$fpl$dmul)
+    __fpl_dnaninf                            0x08001c11   Thumb Code   156  dnaninf.o(x$fpl$dnaninf)
+    __fpl_dretinf                            0x08001cad   Thumb Code    12  dretinf.o(x$fpl$dretinf)
+    __aeabi_cdrcmple                         0x08001cb9   Thumb Code     0  drleqf.o(x$fpl$drleqf)
+    _drcmple                                 0x08001cb9   Thumb Code   108  drleqf.o(x$fpl$drleqf)
+    __aeabi_dsub                             0x08001d25   Thumb Code     0  daddsub_clz.o(x$fpl$dsub)
+    _dsub                                    0x08001d25   Thumb Code   464  daddsub_clz.o(x$fpl$dsub)
+    __aeabi_f2d                              0x08001ef9   Thumb Code     0  f2d.o(x$fpl$f2d)
+    _f2d                                     0x08001ef9   Thumb Code    86  f2d.o(x$fpl$f2d)
+    __aeabi_fadd                             0x08001f51   Thumb Code     0  faddsub_clz.o(x$fpl$fadd)
+    _fadd                                    0x08001f51   Thumb Code   196  faddsub_clz.o(x$fpl$fadd)
+    __fpl_fcmp_Inf                           0x08002015   Thumb Code    24  fcmpi.o(x$fpl$fcmpinf)
+    __aeabi_fdiv                             0x0800202d   Thumb Code     0  fdiv.o(x$fpl$fdiv)
+    _fdiv                                    0x0800202d   Thumb Code   384  fdiv.o(x$fpl$fdiv)
+    __aeabi_f2iz                             0x080021b1   Thumb Code     0  ffix.o(x$fpl$ffix)
+    _ffix                                    0x080021b1   Thumb Code    54  ffix.o(x$fpl$ffix)
+    __aeabi_ui2f                             0x080021e9   Thumb Code     0  fflt_clz.o(x$fpl$ffltu)
+    _ffltu                                   0x080021e9   Thumb Code    38  fflt_clz.o(x$fpl$ffltu)
+    __aeabi_cfcmple                          0x08002211   Thumb Code     0  fleqf.o(x$fpl$fleqf)
+    _fcmple                                  0x08002211   Thumb Code   104  fleqf.o(x$fpl$fleqf)
+    __fpl_fcmple_InfNaN                      0x08002263   Thumb Code     0  fleqf.o(x$fpl$fleqf)
+    __aeabi_fmul                             0x08002279   Thumb Code     0  fmul.o(x$fpl$fmul)
+    _fmul                                    0x08002279   Thumb Code   258  fmul.o(x$fpl$fmul)
+    __fpl_fnaninf                            0x0800237b   Thumb Code   140  fnaninf.o(x$fpl$fnaninf)
+    __fpl_fretinf                            0x08002407   Thumb Code    10  fretinf.o(x$fpl$fretinf)
+    __aeabi_cfrcmple                         0x08002411   Thumb Code     0  frleqf.o(x$fpl$frleqf)
+    _frcmple                                 0x08002411   Thumb Code    98  frleqf.o(x$fpl$frleqf)
+    __aeabi_frsub                            0x08002473   Thumb Code     0  faddsub_clz.o(x$fpl$frsb)
+    _frsb                                    0x08002473   Thumb Code    20  faddsub_clz.o(x$fpl$frsb)
+    __aeabi_fsub                             0x08002489   Thumb Code     0  faddsub_clz.o(x$fpl$fsub)
+    _fsub                                    0x08002489   Thumb Code   234  faddsub_clz.o(x$fpl$fsub)
+    __I$use$fp                               0x08002572   Number         0  usenofp.o(x$fpl$usenofp)
+    Region$$Table$$Base                      0x08002574   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08002594   Number         0  anon$$obj.o(Region$$Table)
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     fl_dir                                   0x20000014   Data           1  main.o(.data)
     fr_dir                                   0x20000015   Data           1  main.o(.data)
     bl_dir                                   0x20000016   Data           1  main.o(.data)
@@ -1294,9 +1491,15 @@ Memory Map of the image
 
   Image Entry point : 0x08000131
 
+<<<<<<< HEAD
   Load Region LR_IROM1 (Base: 0x08000000, Size: 0x000015d0, Max: 0x00040000, ABSOLUTE)
 
     Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00001538, Max: 0x00040000, ABSOLUTE)
+=======
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000262c, Max: 0x00040000, ABSOLUTE)
+
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00002594, Max: 0x00040000, ABSOLUTE)
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -1387,6 +1590,7 @@ Memory Map of the image
     0x080007c0   0x080007c0   0x00000078   Code   RO         3358    i.TIM2_ETR_Config   motor.o
     0x08000838   0x08000838   0x00000068   Code   RO         3359    i.TIM3_ETR_Config   motor.o
     0x080008a0   0x080008a0   0x00000060   Code   RO         3360    i.TIM6_Configuration  motor.o
+<<<<<<< HEAD
     0x08000900   0x08000900   0x0000004c   Code   RO         3361    i.TIM6_IRQHandler   motor.o
     0x0800094c   0x0800094c   0x00000064   Code   RO         3362    i.TIM8_ETR_Config   motor.o
     0x080009b0   0x080009b0   0x00000006   Code   RO         2416    i.TIM_ClearITPendingBit  stm32f10x_tim.o
@@ -1443,6 +1647,87 @@ Memory Map of the image
     0x20000000   0x08001538   0x00000014   Data   RW         1805    .data               stm32f10x_rcc.o
     0x20000014   0x0800154c   0x00000044   Data   RW         3198    .data               main.o
     0x20000058   0x08001590   0x00000040   Data   RW         3371    .data               motor.o
+=======
+    0x08000900   0x08000900   0x000003a0   Code   RO         3361    i.TIM6_IRQHandler   motor.o
+    0x08000ca0   0x08000ca0   0x0000001c   Code   RO         3546    i.TIM7_IRQHandler   6050control.o
+    0x08000cbc   0x08000cbc   0x00000064   Code   RO         3362    i.TIM8_ETR_Config   motor.o
+    0x08000d20   0x08000d20   0x00000006   Code   RO         2416    i.TIM_ClearITPendingBit  stm32f10x_tim.o
+    0x08000d26   0x08000d26   0x00000018   Code   RO         2421    i.TIM_Cmd           stm32f10x_tim.o
+    0x08000d3e   0x08000d3e   0x00000020   Code   RO         2428    i.TIM_ETRClockMode2Config  stm32f10x_tim.o
+    0x08000d5e   0x08000d5e   0x0000001c   Code   RO         2429    i.TIM_ETRConfig     stm32f10x_tim.o
+    0x08000d7a   0x08000d7a   0x00000006   Code   RO         2440    i.TIM_GetCounter    stm32f10x_tim.o
+    0x08000d80   0x08000d80   0x00000022   Code   RO         2442    i.TIM_GetITStatus   stm32f10x_tim.o
+    0x08000da2   0x08000da2   0x00000012   Code   RO         2446    i.TIM_ITConfig      stm32f10x_tim.o
+    0x08000db4   0x08000db4   0x0000000c   Code   RO         2448    i.TIM_InternalClockConfig  stm32f10x_tim.o
+    0x08000dc0   0x08000dc0   0x00000098   Code   RO         2450    i.TIM_OC1Init       stm32f10x_tim.o
+    0x08000e58   0x08000e58   0x000000a4   Code   RO         2455    i.TIM_OC2Init       stm32f10x_tim.o
+    0x08000efc   0x08000efc   0x000000a0   Code   RO         2460    i.TIM_OC3Init       stm32f10x_tim.o
+    0x08000f9c   0x08000f9c   0x0000007c   Code   RO         2465    i.TIM_OC4Init       stm32f10x_tim.o
+    0x08001018   0x08001018   0x00000014   Code   RO         2468    i.TIM_OCStructInit  stm32f10x_tim.o
+    0x0800102c   0x0800102c   0x00000004   Code   RO         2482    i.TIM_SetCompare1   stm32f10x_tim.o
+    0x08001030   0x08001030   0x00000004   Code   RO         2483    i.TIM_SetCompare2   stm32f10x_tim.o
+    0x08001034   0x08001034   0x00000004   Code   RO         2484    i.TIM_SetCompare3   stm32f10x_tim.o
+    0x08001038   0x08001038   0x00000006   Code   RO         2485    i.TIM_SetCompare4   stm32f10x_tim.o
+    0x0800103e   0x0800103e   0x00000004   Code   RO         2486    i.TIM_SetCounter    stm32f10x_tim.o
+    0x08001042   0x08001042   0x00000002   PAD
+    0x08001044   0x08001044   0x000000a4   Code   RO         2492    i.TIM_TimeBaseInit  stm32f10x_tim.o
+    0x080010e8   0x080010e8   0x00000080   Code   RO         3473    i.UART4_Init        uart.o
+    0x08001168   0x08001168   0x00000018   Code   RO         2960    i.USART_Cmd         stm32f10x_usart.o
+    0x08001180   0x08001180   0x000000d8   Code   RO         2967    i.USART_Init        stm32f10x_usart.o
+    0x08001258   0x08001258   0x00000004   Code   RO         3235    i.UsageFault_Handler  stm32f10x_it.o
+    0x0800125c   0x0800125c   0x0000001a   Code   RO         3363    i.control_motor     motor.o
+    0x08001276   0x08001276   0x00000002   PAD
+    0x08001278   0x08001278   0x00000064   Code   RO         3364    i.control_motor_speed  motor.o
+    0x080012dc   0x080012dc   0x0000004c   Code   RO         3365    i.dir_gpio_input_Config  motor.o
+    0x08001328   0x08001328   0x00000090   Code   RO         3366    i.init_pid          motor.o
+    0x080013b8   0x080013b8   0x000001b4   Code   RO         3196    i.main              main.o
+    0x0800156c   0x0800156c   0x000000a8   Code   RO         3290    i.motor_dir_gpio_init  gpio.o
+    0x08001614   0x08001614   0x0000009c   Code   RO         3291    i.motor_dir_select  gpio.o
+    0x080016b0   0x080016b0   0x0000000c   Code   RO         3367    i.motor_init        motor.o
+    0x080016bc   0x080016bc   0x0000009c   Code   RO         3368    i.pid_compute       motor.o
+    0x08001758   0x08001758   0x00000014   Code   RO         3369    i.pid_init          motor.o
+    0x0800176c   0x0800176c   0x000000b0   Code   RO         3292    i.pwm_init          gpio.o
+    0x0800181c   0x0800181c   0x0000005c   Code   RO         3293    i.pwm_set_duty_cycle  gpio.o
+    0x08001878   0x08001878   0x00000062   Code   RO         3607    x$fpl$d2f           fz_ws.l(d2f.o)
+    0x080018da   0x080018da   0x00000002   PAD
+    0x080018dc   0x080018dc   0x00000150   Code   RO         3609    x$fpl$dadd          fz_ws.l(daddsub_clz.o)
+    0x08001a2c   0x08001a2c   0x00000018   Code   RO         3686    x$fpl$dcmpinf       fz_ws.l(dcmpi.o)
+    0x08001a44   0x08001a44   0x00000078   Code   RO         3658    x$fpl$dleqf         fz_ws.l(dleqf.o)
+    0x08001abc   0x08001abc   0x00000154   Code   RO         3625    x$fpl$dmul          fz_ws.l(dmul.o)
+    0x08001c10   0x08001c10   0x0000009c   Code   RO         3660    x$fpl$dnaninf       fz_ws.l(dnaninf.o)
+    0x08001cac   0x08001cac   0x0000000c   Code   RO         3662    x$fpl$dretinf       fz_ws.l(dretinf.o)
+    0x08001cb8   0x08001cb8   0x0000006c   Code   RO         3627    x$fpl$drleqf        fz_ws.l(drleqf.o)
+    0x08001d24   0x08001d24   0x000001d4   Code   RO         3611    x$fpl$dsub          fz_ws.l(daddsub_clz.o)
+    0x08001ef8   0x08001ef8   0x00000056   Code   RO         3629    x$fpl$f2d           fz_ws.l(f2d.o)
+    0x08001f4e   0x08001f4e   0x00000002   PAD
+    0x08001f50   0x08001f50   0x000000c4   Code   RO         3631    x$fpl$fadd          fz_ws.l(faddsub_clz.o)
+    0x08002014   0x08002014   0x00000018   Code   RO         3664    x$fpl$fcmpinf       fz_ws.l(fcmpi.o)
+    0x0800202c   0x0800202c   0x00000184   Code   RO         3638    x$fpl$fdiv          fz_ws.l(fdiv.o)
+    0x080021b0   0x080021b0   0x00000036   Code   RO         3641    x$fpl$ffix          fz_ws.l(ffix.o)
+    0x080021e6   0x080021e6   0x00000002   PAD
+    0x080021e8   0x080021e8   0x00000026   Code   RO         3645    x$fpl$ffltu         fz_ws.l(fflt_clz.o)
+    0x0800220e   0x0800220e   0x00000002   PAD
+    0x08002210   0x08002210   0x00000068   Code   RO         3651    x$fpl$fleqf         fz_ws.l(fleqf.o)
+    0x08002278   0x08002278   0x00000102   Code   RO         3653    x$fpl$fmul          fz_ws.l(fmul.o)
+    0x0800237a   0x0800237a   0x0000008c   Code   RO         3666    x$fpl$fnaninf       fz_ws.l(fnaninf.o)
+    0x08002406   0x08002406   0x0000000a   Code   RO         3668    x$fpl$fretinf       fz_ws.l(fretinf.o)
+    0x08002410   0x08002410   0x00000062   Code   RO         3655    x$fpl$frleqf        fz_ws.l(frleqf.o)
+    0x08002472   0x08002472   0x00000014   Code   RO         3632    x$fpl$frsb          fz_ws.l(faddsub_clz.o)
+    0x08002486   0x08002486   0x00000002   PAD
+    0x08002488   0x08002488   0x000000ea   Code   RO         3633    x$fpl$fsub          fz_ws.l(faddsub_clz.o)
+    0x08002572   0x08002572   0x00000000   Code   RO         3670    x$fpl$usenofp       fz_ws.l(usenofp.o)
+    0x08002572   0x08002572   0x00000002   PAD
+    0x08002574   0x08002574   0x00000020   Data   RO         3827    Region$$Table       anon$$obj.o
+
+
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08002594, Size: 0x00000768, Max: 0x0000c000, ABSOLUTE)
+
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
+
+    0x20000000   0x08002594   0x00000014   Data   RW         1805    .data               stm32f10x_rcc.o
+    0x20000014   0x080025a8   0x00000044   Data   RW         3198    .data               main.o
+    0x20000058   0x080025ec   0x00000040   Data   RW         3371    .data               motor.o
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
     0x20000098        -       0x00000070   Zero   RW         3370    .bss                motor.o
     0x20000108        -       0x00000060   Zero   RW         3560    .bss                c_w.l(libspace.o)
     0x20000168        -       0x00000200   Zero   RW          131    HEAP                startup_stm32f10x_hd.o
@@ -1459,7 +1744,11 @@ Image component sizes
          0          0          0          0          0       4540   core_cm3.o
         70          0          0          0          0        890   delay.o
        592         50          0          0          0       2317   gpio.o
+<<<<<<< HEAD
        208         38          0         68          0       2261   main.o
+=======
+       436         46          0         68          0       1966   main.o
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
        112         12          0          0          0     205640   misc.o
        974        148          0         64        112       7853   motor.o
         56         22        304          0       1536        788   startup_stm32f10x_hd.o
@@ -1473,7 +1762,11 @@ Image component sizes
        128          8          0          0          0        553   uart.o
 
     ----------------------------------------------------------------------
+<<<<<<< HEAD
       4410        442        336        152       1648     339399   Object Totals
+=======
+      5682        590        336        152       1648     341450   Object Totals
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
          0          0         32          0          0          0   (incl. Generated)
         14          0          0          0          0          0   (incl. Padding)
 
@@ -1529,6 +1822,7 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
+<<<<<<< HEAD
       5096        466        336        152       1744     337023   Grand Totals
       5096        466        336        152       1744     337023   ELF Image Totals
       5096        466        336        152          0          0   ROM Totals
@@ -1538,6 +1832,17 @@ Image component sizes
     Total RO  Size (Code + RO Data)                 5432 (   5.30kB)
     Total RW  Size (RW Data + ZI Data)              1896 (   1.85kB)
     Total ROM Size (Code + RO Data + RW Data)       5584 (   5.45kB)
+=======
+      9284        750        336        152       1744     339554   Grand Totals
+      9284        750        336        152       1744     339554   ELF Image Totals
+      9284        750        336        152          0          0   ROM Totals
+
+==============================================================================
+
+    Total RO  Size (Code + RO Data)                 9620 (   9.39kB)
+    Total RW  Size (RW Data + ZI Data)              1896 (   1.85kB)
+    Total ROM Size (Code + RO Data + RW Data)       9772 (   9.54kB)
+>>>>>>> parent of 7b0162b (稳定版本 72MHz正常晶振)
 
 ==============================================================================
 
