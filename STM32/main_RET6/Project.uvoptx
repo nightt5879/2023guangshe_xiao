@@ -218,7 +218,7 @@
         <Ww>
           <count>12</count>
           <WinNumber>2</WinNumber>
-          <ItemText>test_a</ItemText>
+          <ItemText>test_a,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
@@ -243,7 +243,7 @@
         <Ww>
           <count>17</count>
           <WinNumber>2</WinNumber>
-          <ItemText>test_b</ItemText>
+          <ItemText>test_b,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
@@ -259,6 +259,16 @@
           <count>20</count>
           <WinNumber>2</WinNumber>
           <ItemText>kd</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>distance,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>22</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>sys_clock</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

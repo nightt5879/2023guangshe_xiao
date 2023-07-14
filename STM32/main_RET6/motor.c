@@ -29,8 +29,9 @@ uint8_t fl_direction = 0;
 uint8_t fr_direction = 0;
 uint8_t bl_direction = 0;
 uint8_t br_direction = 0;
-uint8_t test_a = 0;
+uint16_t test_a = 0;
 uint16_t test_b = 0;
+float distance = 0; // the move of the car
 
 float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 
@@ -276,7 +277,7 @@ void TIM6_Configuration(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = 999;  // 10ms = (999 + 1) / 1MHz
+    TIM_TimeBaseStructure.TIM_Period = 9999;  //
     TIM_TimeBaseStructure.TIM_Prescaler = 72 - 1;  // 1MHz
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -346,7 +347,7 @@ void init_pid(void)
   */
 void pid_compute(PID_Controller *pid, float measurement)
 {
-    test_b += 1;
+    // test_b += 1;
     // Calculate error
     float error = pid->setpoint - measurement;
     
@@ -383,9 +384,14 @@ void TIM6_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
     {
-		    test_a += 1;
+		test_a += 1;
+        if (test_a >= 100)
+        {
+          test_a = 0;
+          test_b ++;
+        }
         send_flag = 1;
-        TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
+
 
         // PID control code goes here.
         br_counter = TIM_GetCounter(TIM1);
@@ -399,10 +405,10 @@ void TIM6_IRQHandler(void)
         TIM_SetCounter(TIM2, 0);
         //The gear ratio is 3:7, and the encoder has 1024 lines. into the ISR is 10ms
         //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  cm/s
-        br_speed = ((float)br_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
-        bl_speed = ((float)bl_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
-        fl_speed = ((float)fl_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
-        fr_speed = ((float)fr_counter / 7) * 3 * 100 * COS45 * RADIUS / 1024;
+        br_speed = ((float)br_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        bl_speed = ((float)bl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        fl_speed = ((float)fl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        fr_speed = ((float)fr_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
         //pid control
         // Apply PID control
         if (fl_target_speed > 0.0)
@@ -429,6 +435,10 @@ void TIM6_IRQHandler(void)
           pid_compute(&pid_br, br_speed);
           control_motor(MOTOR_BR, br_direction, (int)pid_br.output);
         }
+        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.001;
+        // distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
+        // 7 * 3 / 1024 * 2 * PI * RADIUS * COS45 ;
+		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
 

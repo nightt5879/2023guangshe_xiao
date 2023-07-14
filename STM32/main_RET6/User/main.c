@@ -11,7 +11,7 @@ uint8_t bl_dir = 0;
 uint8_t br_dir = 0;
 
 uint8_t directions[] = {1,1,1,1};
-float speeds[] = {8,8,8,8};
+float speeds[] = {10,10,10,10};
 uint8_t control_flags[] = {1,1,1,1};
 uint16_t break_flag = 0;
 
@@ -20,9 +20,12 @@ extern float fl_speed;
 extern float fr_speed;
 extern float bl_speed;
 extern float br_speed;
+//the distance move of the car
+extern float distance;
 //send the data to the computer
 float data[4] = {0.1, 0.2, 0.3, 0.4}; // 9 channels
 uint8_t send_flag = 0;
+float sys_clock;
 int main(void)
 {
 	Delay_ms(100);
@@ -35,8 +38,12 @@ int main(void)
 	dir_gpio_input_Config();
 	init_pid();
 	UART4_Init();
-//	control_motor(MOTOR_BL, MOTOR_FORWARD, TEST_PWM_DUTY);
-	control_motor_speed(directions, speeds, control_flags);
+	SystemInit();
+    RCC_ClocksTypeDef RCC_Clocks;
+    RCC_GetClocksFreq(&RCC_Clocks);
+    sys_clock = (float)RCC_Clocks.SYSCLK_Frequency;
+//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
+//	control_motor_speed(directions, speeds, control_flags);
 
 	while (1)
 	{	
@@ -56,34 +63,35 @@ int main(void)
 			data[3] = fr_speed;
 			send_data(data, 4);  // send the data to the computer
 		}
-		if (break_flag > 100 && break_flag < 200) // change the direction
-		{
-			directions[0] = 1;
-			directions[1] = 0;
-			directions[2] = 0;
-			directions[3] = 1;
-			control_motor_speed(directions, speeds, control_flags);
-		}
-		else if(break_flag > 200 && break_flag < 300)
-		{
-			directions[0] = 0;
-			directions[1] = 0;
-			directions[2] = 0;
-			directions[3] = 0;
-			control_motor_speed(directions, speeds, control_flags);
-		}
-		else if(break_flag > 300)
-		{
-			directions[0] = 0;
-			directions[1] = 1;
-			directions[2] = 1;
-			directions[3] = 0;
-			control_motor_speed(directions, speeds, control_flags);
-		}
-		if(break_flag > 385)
-		{
-			break;
-		}
+//		if (break_flag > 100 && break_flag < 200) // change the direction
+//		{
+//			directions[0] = 1;
+//			directions[1] = 0;
+//			directions[2] = 0;
+//			directions[3] = 1;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		else if(break_flag > 200 && break_flag < 300)
+//		{
+//			directions[0] = 0;
+//			directions[1] = 0;
+//			directions[2] = 0;
+//			directions[3] = 0;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		else if(break_flag > 300)
+//		{
+//			directions[0] = 0;
+//			directions[1] = 1;
+//			directions[2] = 1;
+//			directions[3] = 0;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		if(break_flag > 385)
+//		{
+//			break;
+//		}
+		// if (distance > 40) break;
 	}
 	//stop the motor
 	speeds[0] = 0;
