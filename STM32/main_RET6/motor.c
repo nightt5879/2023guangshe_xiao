@@ -32,6 +32,7 @@ uint8_t br_direction = 0;
 uint16_t test_a = 0;
 uint16_t test_b = 0;
 float distance = 0; // the move of the car
+extern uint16_t break_flag;
 
 float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 
@@ -437,7 +438,8 @@ void TIM6_IRQHandler(void)
         }
 //        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
         distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-        7 * 3 / 1024 * 2 * PI * RADIUS * COS45 ;
+        7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
+		break_flag ++;
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
