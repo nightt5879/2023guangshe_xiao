@@ -1,7 +1,7 @@
 .\objects\countsensor.o: User\CountSensor.c
 .\objects\countsensor.o: .\Start\stm32f10x.h
 .\objects\countsensor.o: .\Start\core_cm3.h
-.\objects\countsensor.o: E:\robot\51\keil\keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\countsensor.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\countsensor.o: .\Start\system_stm32f10x.h
 .\objects\countsensor.o: .\User\stm32f10x_conf.h
 .\objects\countsensor.o: .\Library\stm32f10x_adc.h

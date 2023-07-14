@@ -6,8 +6,10 @@
 #include "stm32f10x_tim.h"
 #include "misc.h"
 #include <math.h>
+#include "UART.h"
 
-
+extern uint8_t send_flag;
+//counter of the encoder
 uint16_t fl_counter = 0;
 uint16_t fr_counter = 0;
 uint16_t bl_counter = 0;
@@ -30,7 +32,7 @@ uint8_t br_direction = 0;
 uint8_t test_a = 0;
 uint16_t test_b = 0;
 
-float kp = 1.4, ki = 0.1, kd = 0.0;  // These values should be tuned for your specific system
+float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 
 /**
   * @brief  initialize the motor include the pwm and the direction gpio
@@ -381,6 +383,8 @@ void TIM6_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
     {
+		    test_a += 1;
+        send_flag = 1;
         TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
 
         // PID control code goes here.
@@ -421,7 +425,6 @@ void TIM6_IRQHandler(void)
         }
         if (br_target_speed > 0.0)
         {
-          test_a += 1;
           pid_br.setpoint = br_target_speed;  // Update the setpoint if it has changed
           pid_compute(&pid_br, br_speed);
           control_motor(MOTOR_BR, br_direction, (int)pid_br.output);

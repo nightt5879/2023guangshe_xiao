@@ -30,3 +30,4 @@
 .\objects\main.o: .\Library\misc.h
 .\objects\main.o: ..\main_RET6\delay.h
 .\objects\main.o: ..\main_RET6\motor.h
+.\objects\main.o: ..\main_RET6\UART.h

@@ -1,7 +1,7 @@
 .\objects\gpio.o: User\GPIO.c
 .\objects\gpio.o: .\Start\stm32f10x.h
 .\objects\gpio.o: .\Start\core_cm3.h
-.\objects\gpio.o: E:\robot\51\keil\keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\gpio.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\gpio.o: .\Start\system_stm32f10x.h
 .\objects\gpio.o: .\User\stm32f10x_conf.h
 .\objects\gpio.o: .\Library\stm32f10x_adc.h
