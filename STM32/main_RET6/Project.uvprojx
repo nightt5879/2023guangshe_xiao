@@ -699,26 +699,6 @@
               <FileType>1</FileType>
               <FilePath>.\UART.c</FilePath>
             </File>
-            <File>
-              <FileName>MPU6050.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\MPU6050.c</FilePath>
-            </File>
-            <File>
-              <FileName>MPU6050.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\MPU6050.h</FilePath>
-            </File>
-            <File>
-              <FileName>MPU6050_Reg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\MPU6050_Reg.h</FilePath>
-            </File>
-            <File>
-              <FileName>6050control.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\6050control.c</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>

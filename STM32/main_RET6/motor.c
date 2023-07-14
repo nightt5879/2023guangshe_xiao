@@ -32,7 +32,6 @@ uint8_t br_direction = 0;
 uint16_t test_a = 0;
 uint16_t test_b = 0;
 float distance = 0; // the move of the car
-extern uint16_t break_flag;
 
 float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 
@@ -392,6 +391,7 @@ void TIM6_IRQHandler(void)
           test_b ++;
         }
         send_flag = 1;
+<<<<<<< HEAD
 //        // PID control code goes here.
 //        br_counter = TIM_GetCounter(TIM1);
 //        bl_counter = TIM_GetCounter(TIM8);
@@ -438,6 +438,55 @@ void TIM6_IRQHandler(void)
 //        distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
 //        7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
 //		// break_flag ++;
+=======
+
+
+        // PID control code goes here.
+        br_counter = TIM_GetCounter(TIM1);
+        bl_counter = TIM_GetCounter(TIM8);
+        fl_counter = TIM_GetCounter(TIM3);
+        fr_counter = TIM_GetCounter(TIM2);
+        // reset the counter
+        TIM_SetCounter(TIM1, 0);
+        TIM_SetCounter(TIM8, 0);
+        TIM_SetCounter(TIM3, 0);
+        TIM_SetCounter(TIM2, 0);
+        //The gear ratio is 3:7, and the encoder has 1024 lines. into the ISR is 10ms
+        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  cm/s
+        br_speed = ((float)br_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        bl_speed = ((float)bl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        fl_speed = ((float)fl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        fr_speed = ((float)fr_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        //pid control
+        // Apply PID control
+        if (fl_target_speed > 0.0)
+        {
+          pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_fl, fl_speed);
+          control_motor(MOTOR_FL, fl_direction, (int)pid_fl.output);
+        }
+        if (fr_target_speed > 0.0)
+        {
+          pid_fr.setpoint = fr_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_fr, fr_speed);
+          control_motor(MOTOR_FR, fr_direction, (int)pid_fr.output);
+        }
+        if (bl_target_speed > 0.0)
+        {
+          pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_bl, bl_speed);
+          control_motor(MOTOR_BL, bl_direction, (int)pid_bl.output);
+        }
+        if (br_target_speed > 0.0)
+        {
+          pid_br.setpoint = br_target_speed;  // Update the setpoint if it has changed
+          pid_compute(&pid_br, br_speed);
+          control_motor(MOTOR_BR, br_direction, (int)pid_br.output);
+        }
+//        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
+        distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
+        7 * 3 / 1024 * 2 * PI * RADIUS * COS45 ;
+>>>>>>> parent of 400d962 (Update keil-assistant.log)
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }

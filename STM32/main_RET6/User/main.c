@@ -4,19 +4,19 @@
 #include "UART.h"
 
 #define TEST_PWM_DUTY 100
+<<<<<<< HEAD
 #define TARGET_DISTANCE 60
 #define TEST_SPEED 20
+=======
+>>>>>>> parent of 400d962 (Update keil-assistant.log)
 
-void stop_car(void);
-#define DECELERATION_DISTANCE 20  // Decelerate when 10 units away from the target
-#define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
 uint8_t fl_dir = 0;
 uint8_t fr_dir = 0;
 uint8_t bl_dir = 0;
 uint8_t br_dir = 0;
 
 uint8_t directions[] = {1,1,1,1};
-float speeds[] = {TEST_SPEED, TEST_SPEED, TEST_SPEED, TEST_SPEED};
+float speeds[] = {20,20,20,20};
 uint8_t control_flags[] = {1,1,1,1};
 uint16_t break_flag = 0;
 
@@ -28,11 +28,17 @@ extern float br_speed;
 //the distance move of the car
 extern float distance;
 //send the data to the computer
+<<<<<<< HEAD
 float data[5] = {0.1, 0.2, 0.3, 0.4,0.4}; // 9 channels
 uint8_t send_flag = 0;
 uint16_t test_flag = 0;
 RCC_ClocksTypeDef rcc_clocks;
 uint32_t systemClockFrequency = 0;
+=======
+float data[4] = {0.1, 0.2, 0.3, 0.4}; // 9 channels
+uint8_t send_flag = 0;
+float sys_clock;
+>>>>>>> parent of 400d962 (Update keil-assistant.log)
 int main(void)
 {
 //	Delay_ms(100);
@@ -49,7 +55,12 @@ int main(void)
     
     systemClockFrequency = rcc_clocks.SYSCLK_Frequency;
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
+<<<<<<< HEAD
 	control_motor_speed(directions, speeds, control_flags);
+=======
+//	control_motor_speed(directions, speeds, control_flags);
+
+>>>>>>> parent of 400d962 (Update keil-assistant.log)
 	while (1)
 	{	
 		//test the for counter
@@ -58,6 +69,7 @@ int main(void)
 //        bl_dir = Read_BL_Direction();
 //        br_dir = Read_BR_Direction();
 
+<<<<<<< HEAD
 //		if (send_flag == 1) 
 //		{
 //			break_flag ++;
@@ -87,20 +99,48 @@ int main(void)
 //		// test_flag ++;
 //	}
 		if (distance > TARGET_DISTANCE) break;
+=======
+		if (send_flag == 1) 
+		{
+			break_flag ++;
+			send_flag = 0;
+			data[0] = br_speed;
+			data[1] = bl_speed;
+			data[2] = fl_speed;
+			data[3] = fr_speed;
+			send_data(data, 4);  // send the data to the computer
+		}
+//		if (break_flag > 100 && break_flag < 200) // change the direction
+//		{
+//			directions[0] = 1;
+//			directions[1] = 0;
+//			directions[2] = 0;
+//			directions[3] = 1;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		else if(break_flag > 200 && break_flag < 300)
+//		{
+//			directions[0] = 0;
+//			directions[1] = 0;
+//			directions[2] = 0;
+//			directions[3] = 0;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		else if(break_flag > 300)
+//		{
+//			directions[0] = 0;
+//			directions[1] = 1;
+//			directions[2] = 1;
+//			directions[3] = 0;
+//			control_motor_speed(directions, speeds, control_flags);
+//		}
+//		if(break_flag > 385)
+//		{
+//			break;
+//		}
+		if (distance > 40) break;
+>>>>>>> parent of 400d962 (Update keil-assistant.log)
 	}
 	//stop the motor
 	stop_car();
-}
-
-void stop_car(void)
-{
-	speeds[0] = 0;
-	speeds[1] = 0;
-	speeds[2] = 0;
-	speeds[3] = 0;
-	control_motor_speed(directions, speeds, control_flags);
-	control_motor(MOTOR_BL, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_BR, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_FL, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_FR, MOTOR_FORWARD, 0);
 }
