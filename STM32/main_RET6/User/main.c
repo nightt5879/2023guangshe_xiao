@@ -11,7 +11,7 @@ uint8_t bl_dir = 0;
 uint8_t br_dir = 0;
 
 uint8_t directions[] = {1,1,1,1};
-float speeds[] = {10,10,10,10};
+float speeds[] = {20,20,20,20};
 uint8_t control_flags[] = {1,1,1,1};
 uint16_t break_flag = 0;
 
@@ -91,7 +91,7 @@ int main(void)
 //		{
 //			break;
 //		}
-		// if (distance > 40) break;
+		if (distance > 40) break;
 	}
 	//stop the motor
 	speeds[0] = 0;

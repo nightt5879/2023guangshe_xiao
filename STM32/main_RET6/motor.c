@@ -435,9 +435,9 @@ void TIM6_IRQHandler(void)
           pid_compute(&pid_br, br_speed);
           control_motor(MOTOR_BR, br_direction, (int)pid_br.output);
         }
-        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.001;
-        // distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-        // 7 * 3 / 1024 * 2 * PI * RADIUS * COS45 ;
+//        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
+        distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
+        7 * 3 / 1024 * 2 * PI * RADIUS * COS45 ;
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
