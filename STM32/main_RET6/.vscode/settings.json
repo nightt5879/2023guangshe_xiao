@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "stm32f10x.h": "c",
-        "gpio.h": "c",
-        "stm32f10x_tim.h": "c",
-        "misc.h": "c"
-    }
-}
