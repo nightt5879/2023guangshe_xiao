@@ -49,7 +49,7 @@ int main(void)
     
     systemClockFrequency = rcc_clocks.SYSCLK_Frequency;
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
-//	control_motor_speed(directions, speeds, control_flags);
+	control_motor_speed(directions, speeds, control_flags);
 	while (1)
 	{	
 		//test the for counter
