@@ -101,68 +101,43 @@ int main(void)
 //		{
 //			break;
 //		}
-	if (distance > TARGET_DISTANCE - DECELERATION_DISTANCE && distance < TARGET_DISTANCE - REVERSE_DISTANCE) {
-		// Calculate a deceleration factor between 0 and 1.
-		deceleration_factor = (TARGET_DISTANCE - distance) / DECELERATION_DISTANCE; //Percentage deceleration
-//		if (deceleration_factor < 0.2) deceleration_factor = 0.4;
+//	if (distance > TARGET_DISTANCE - DECELERATION_DISTANCE && distance < TARGET_DISTANCE - REVERSE_DISTANCE) {
+//		// Calculate a deceleration factor between 0 and 1.
+//		deceleration_factor = (TARGET_DISTANCE - distance) / DECELERATION_DISTANCE; //Percentage deceleration
+////		if (deceleration_factor < 0.2) deceleration_factor = 0.4;
 
-		// Apply the deceleration factor to the speeds.
-		// When deceleration_factor is 1, the speed will be the same as it was.
-		// When deceleration_factor is 0, the speed will be 0.
-		speeds[0] *= deceleration_factor;
-		speeds[1] *= deceleration_factor;
-		speeds[2] *= deceleration_factor;
-		speeds[3] *= deceleration_factor;
-		
-		// Apply the new speeds.
-		control_motor_speed(directions, speeds, control_flags);
-		// test_flag ++;
-	}
+//		// Apply the deceleration factor to the speeds.
+//		// When deceleration_factor is 1, the speed will be the same as it was.
+//		// When deceleration_factor is 0, the speed will be 0.
+//		speeds[0] *= deceleration_factor;
+//		speeds[1] *= deceleration_factor;
+//		speeds[2] *= deceleration_factor;
+//		speeds[3] *= deceleration_factor;
+//		
+//		// Apply the new speeds.
+//		control_motor_speed(directions, speeds, control_flags);
+//		// test_flag ++;
+//	}
 		// Reverse Motor Brake
-		if (TARGET_DISTANCE - REVERSE_DISTANCE <=distance && distance <= TARGET_DISTANCE) {
-			// Apply the new speeds.
-			directions[0] = 0;
-			directions[1] = 0;
-			directions[2] = 0;
-			directions[3] = 0;
-			speeds[0] = TEST_SPEED;
-			speeds[1] = TEST_SPEED;
-			speeds[2] = TEST_SPEED;
-			speeds[3] = TEST_SPEED;
-			control_motor_speed(directions, speeds, control_flags);
-			// test_flag ++;
-		}
-		if (distance > TARGET_DISTANCE) 
-		{
-			//change the direction
-			test_flag ++;
-			distance = 0;
-			//reset the speed
-			directions[0] = 1;
-			directions[1] = 0;
-			directions[2] = 0;
-			directions[3] = 1;
-			speeds[0] = TEST_SPEED;
-			speeds[1] = TEST_SPEED;
-			speeds[2] = TEST_SPEED;
-			speeds[3] = TEST_SPEED;
-			control_motor_speed(directions, speeds, control_flags);
-//			test_flag = 0;
-//			stop_car();
-		}
+//		if (TARGET_DISTANCE - REVERSE_DISTANCE <=distance && distance <= TARGET_DISTANCE) {
+//			// Apply the new speeds.
+//			directions[0] = 0;
+//			directions[1] = 0;
+//			directions[2] = 0;
+//			directions[3] = 0;
+//			speeds[0] = TEST_SPEED;
+//			speeds[1] = TEST_SPEED;
+//			speeds[2] = TEST_SPEED;
+//			speeds[3] = TEST_SPEED;
+//			control_motor_speed(directions, speeds, control_flags);
+//			// test_flag ++;
+//		}
+		if (distance > TARGET_DISTANCE) break;
 		if (test_flag >=1) break;
 //		if (break_flag > 100) break;
 	}
 	//stop the motor
-	speeds[0] = 0;
-	speeds[1] = 0;
-	speeds[2] = 0;
-	speeds[3] = 0;
-	control_motor_speed(directions, speeds, control_flags);
-	control_motor(MOTOR_BL, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_BR, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_FL, MOTOR_FORWARD, 0);
-	control_motor(MOTOR_FR, MOTOR_FORWARD, 0);
+	stop_car();
 }
 
 void stop_car(void)
