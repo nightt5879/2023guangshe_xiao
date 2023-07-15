@@ -47,10 +47,10 @@ float distance = 0; // the move of the car
 extern uint16_t break_flag;
 //angle pid return delta_v
 extern float delta_v;
-//The speed has been revised.
-float resvised_speed_positve = 0;
-float resvised_speed_negative = 0;
+int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
 
+
+PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 
 /**
@@ -314,21 +314,6 @@ void TIM6_Configuration(void)
     TIM_Cmd(TIM6, ENABLE);
 }
 
-/**
-  * @brief  initialize the pid control structure
-  * @param  None
-  * @retval None
-  */
-typedef struct 
-{
-    float setpoint;         // Desired value
-    float kp, ki, kd;       // PID coefficients
-    float prev0_error;       // last time error
-    float prev1_error;       // last last time error
-    float output;           // the add output
-} PID_Controller;
-PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
-
 
 
 /**
@@ -444,20 +429,29 @@ void TIM6_IRQHandler(void)
         fl_speed = fl_speed_dir *((float)fl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
         fr_speed = fr_speed_dir *((float)fr_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
         //get the resived speed
-        // //here the fl, fr, bl, br are the same.so we use just one of them
-        // resvised_speed_positve = delta_v;
-        // resvised_speed_negative = - delta_v;
         // Apply PID control
-        pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
+        if(delta_v_enable) 
+        {
+            pid_fl.setpoint = fl_target_speed - delta_v;  // Update the setpoint if it has changed
+            pid_fr.setpoint = fr_target_speed + delta_v;
+            pid_bl.setpoint = bl_target_speed - delta_v;  // Update the setpoint if it has changed
+            pid_br.setpoint = br_target_speed + delta_v;
+        } else
+        {
+            pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
+            pid_fr.setpoint = fr_target_speed;
+            pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
+            pid_br.setpoint = br_target_speed;
+        }
         pid_compute(&pid_fl, fl_speed);
         control_motor(MOTOR_FL,(int)pid_fl.output);
-        pid_fr.setpoint = fr_target_speed;  // Update the setpoint if it has changed
+
         pid_compute(&pid_fr, fr_speed);
         control_motor(MOTOR_FR,(int)pid_fr.output);
-        pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
+
         pid_compute(&pid_bl, bl_speed);
         control_motor(MOTOR_BL, (int)pid_bl.output);
-        pid_br.setpoint = br_target_speed;  // Update the setpoint if it has changed
+
         pid_compute(&pid_br, br_speed);
         control_motor(MOTOR_BR, (int)pid_br.output);
 //        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
@@ -478,8 +472,18 @@ void TIM6_IRQHandler(void)
             7 * 3 / 1024 * 4.6;//* 2 * PI * RADIUS * COS45 ;  //
         else
             distance += 0;
-		break_flag ++;
+		// break_flag ++;
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
+}
+
+/**
+  * @brief  enanble or disable the delta_v
+  * @param  None
+  * @retval None
+  */
+void toggle_delta_v(int enable)
+{
+    delta_v_enable = enable;
 }
 

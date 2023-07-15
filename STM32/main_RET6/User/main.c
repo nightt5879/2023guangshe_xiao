@@ -4,14 +4,16 @@
 #include "UART.h"
 #include "6050control.h"
 #include "MPU6050.h"
+#include <stdlib.h>
 
 #define TEST_PWM_DUTY 100
 #define TARGET_DISTANCE 50
-#define TEST_SPEED -10
+#define TEST_SPEED 13
 #define DECELERATION_DISTANCE 20  // Decelerate when 10 units away from the target
 #define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
 void stop_car(void);
 void init(void);
+void send_to_win(void);
 
 float speeds[] = {TEST_SPEED, TEST_SPEED, TEST_SPEED, TEST_SPEED};
 uint8_t control_flags[] = {1,1,1,1};
@@ -32,7 +34,7 @@ extern float speed_x;
 extern float speed_y;
 extern float delta_v;
 //send the data to the computer
-float data[11]; // 9 channels
+float data[15]; // 9 channels
 uint8_t send_flag = 0;
 float sys_clock;
 uint16_t test_flag = 0;
@@ -42,29 +44,64 @@ int main(void)
 	init();
 //	control_motor_speed(speeds, control_flags);
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
-//	control_motor_speed(speeds, control_flags);
+	toggle_delta_v(0);
+	control_motor_speed(speeds, control_flags);
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
 		//send the data to the computer
-		if (send_flag == 1)
-		{
-			send_flag = 0;
-			data[0] = fl_speed;;
-			data[1] = fr_speed;
-			data[2] = bl_speed;
-			data[3] = br_speed;
-			data[4] = distance;
-			data[5] = angle_z;
-			data[6] = speed_x;
-			data[7] = speed_y;
-			data[8] = distance_x;
-			data[9] = distance_y;
-			data[10] = delta_v;
-			send_data(data, 11);
+		send_to_win();
+		if (abs(distance) > TARGET_DISTANCE )
+		{ 
+			distance = 0;
+			break_flag ++;
+			toggle_delta_v(0);
+			stop_car();
 		}
-//			if (distance > TARGET_DISTANCE ) stop_car();
-//		if (break_flag > 100) break;
+		else
+		{
+			if (break_flag == 1)
+			{
+				toggle_delta_v(0);
+				speeds[0] = -TEST_SPEED;
+				speeds[1] = TEST_SPEED;
+				speeds[2] = TEST_SPEED;
+				speeds[3] = -TEST_SPEED;
+				control_motor_speed(speeds, control_flags);
+			}
+			else if (break_flag == 2)
+			{
+				toggle_delta_v(0);
+				speeds[0] = -TEST_SPEED;
+				speeds[1] = -TEST_SPEED;
+				speeds[2] = -TEST_SPEED;
+				speeds[3] = -TEST_SPEED;
+				control_motor_speed(speeds, control_flags);
+			}
+			else if (break_flag == 3)
+			{
+				toggle_delta_v(0);
+				speeds[0] = TEST_SPEED;
+				speeds[1] = -TEST_SPEED;
+				speeds[2] = -TEST_SPEED;
+				speeds[3] = TEST_SPEED;
+				control_motor_speed(speeds, control_flags);
+			}
+			else if (break_flag == 4)
+			{
+				toggle_delta_v(0);
+				speeds[0] = TEST_SPEED;
+				speeds[1] = TEST_SPEED;
+				speeds[2] = TEST_SPEED;
+				speeds[3] = TEST_SPEED;
+				control_motor_speed(speeds, control_flags);
+			}
+		}
+		if (break_flag >= 5)
+		{
+			toggle_delta_v(0);
+			stop_car();
+		}
 	}
 	//stop the motor
 	stop_car();
@@ -77,10 +114,10 @@ void stop_car(void)
 	speeds[2] = 0;
 	speeds[3] = 0;
 	control_motor_speed(speeds, control_flags);
-	control_motor(MOTOR_BL, 0);
-	control_motor(MOTOR_BR, 0);
-	control_motor(MOTOR_FL, 0);
-	control_motor(MOTOR_FR, 0);
+//	control_motor(MOTOR_BL, 0);
+//	control_motor(MOTOR_BR, 0);
+//	control_motor(MOTOR_FL, 0);
+//	control_motor(MOTOR_FR, 0);
 }
 
 void init(void)
@@ -109,4 +146,28 @@ void init(void)
 	// RCC_ClocksTypeDef RCC_Clocks;
 	// RCC_GetClocksFreq(&RCC_Clocks);
 	// sys_clock = (float)RCC_Clocks.SYSCLK_Frequency;
+}
+
+void send_to_win(void)
+{
+	if (send_flag == 1)
+	{
+		send_flag = 0;
+		data[0] = fl_speed;;
+		data[1] = fr_speed;
+		data[2] = bl_speed;
+		data[3] = br_speed;
+		data[4] = distance;
+		data[5] = angle_z;
+		data[6] = speed_x;
+		data[7] = speed_y;
+		data[8] = distance_x;
+		data[9] = distance_y;
+		data[10] = delta_v;
+		data[11] = pid_fl.setpoint;
+		data[12] = pid_fr.setpoint;
+		data[13] = pid_bl.setpoint;
+		data[14] = pid_br.setpoint;
+		send_data(data, 15);
+	}
 }

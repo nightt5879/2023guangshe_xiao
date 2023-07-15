@@ -6,7 +6,9 @@
 
 
 //pid
-float kp_angle = 0.1, ki_angle = 0.0, kd_angle = 0.0;
+float kp_angle = 0.2, ki_angle = 0.0, kd_angle = 0;
+#define MAX_ACC 0.3
+#define ANGLE_MIN 4
 //delta V
 float delta_v = 0;
 
@@ -194,13 +196,19 @@ void pid_compute_angle(PID_Position *pid, float measurement)
     // test_b += 1;
     // Calculate error
     float error = pid->setpoint - measurement;
+	// two small ignore
+	if (abs(error) < ANGLE_MIN) error = 0.0;
     
     // Proportional term
     float P = pid->kp * error; //P = Kp * e[n]
     
     // Integral term
 	pid->acc_error += error;
-    float I = pid->ki * pid->acc_error; //I = Ki * sum(e[n])
+	float I = pid->ki * pid->acc_error; //I = Ki * sum(e[n])
+	//limit the I
+	if (I > MAX_ACC) I = MAX_ACC;
+	else if (I < -MAX_ACC) I = -MAX_ACC;
+
 
     // Derivative term
     float D = pid->kd * (error - pid->prev_error); //D = Kd * (e[n] - e[n-1])

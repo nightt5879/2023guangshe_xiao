@@ -33,3 +33,4 @@
 .\objects\main.o: ..\main_RET6\UART.h
 .\objects\main.o: ..\main_RET6\6050control.h
 .\objects\main.o: ..\main_RET6\MPU6050.h
+.\objects\main.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

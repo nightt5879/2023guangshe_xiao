@@ -17,6 +17,7 @@ uint8_t Read_BL_Direction(void);
 uint8_t Read_BR_Direction(void);
 void TIM6_Configuration(void);
 void TIM6_IRQHandler(void);
+void toggle_delta_v(int enable);
 
 
 #define MOTOR_FL 1
@@ -31,5 +32,19 @@ void TIM6_IRQHandler(void);
 #define COS45 0.707f //cos45 for the speed calculate
 #define MAX_OUTPUT 500 //max pwm
 #define MIN_OUTPUT 0  // min pwm
+/**
+  * @brief  initialize the pid control structure
+  * @param  None
+  * @retval None
+  */
+typedef struct 
+{
+    float setpoint;         // Desired value
+    float kp, ki, kd;       // PID coefficients
+    float prev0_error;       // last time error
+    float prev1_error;       // last last time error
+    float output;           // the add output
+} PID_Controller;
+extern PID_Controller pid_fl, pid_fr, pid_bl, pid_br;
 	
 #endif
