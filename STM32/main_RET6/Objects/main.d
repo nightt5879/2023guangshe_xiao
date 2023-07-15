@@ -31,3 +31,5 @@
 .\objects\main.o: ..\main_RET6\delay.h
 .\objects\main.o: ..\main_RET6\motor.h
 .\objects\main.o: ..\main_RET6\UART.h
+.\objects\main.o: ..\main_RET6\6050control.h
+.\objects\main.o: ..\main_RET6\MPU6050.h

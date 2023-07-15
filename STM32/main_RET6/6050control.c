@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include "MPU6050.h"
 
+
+//pid
+float kp_angle = 0.1, ki_angle = 0.0, kd_angle = 0.0;
+//delta V
+float delta_v = 0;
+
 uint8_t ID;
 int16_t AX, AY, AZ, GX, GY, GZ;
 float ax, ay, az, gx, gy, gz;
@@ -11,7 +17,18 @@ int16_t AX_CORR, AY_CORR, AZ_CORR, GX_CORR, GY_CORR, GZ_CORR;
 int16_t ax_corr_done, ay_corr_done, az_corr_done, gx_corr_done, gy_corr_done, gz_corr_done;
 float ax_prev = 0, ay_prev = 0, az_prev = 0, gx_prev = 0, gy_prev = 0, gz_prev = 0;
 float now_z = 0;
+uint16_t interrupt_a = 0;
+uint8_t interrupt_b = 0;
 
+//below are the x y and z angle result from the 6050
+float angle_z = 0;
+float distance_x = 0;
+float distance_y = 0;
+//6050 test the speed
+float speed_x = 0;
+float speed_y = 0;
+uint8_t ax_zero = 0;
+uint8_t ay_zero = 0;
 /**
   * @brief  low pass filter
   * @retval None
@@ -54,13 +71,22 @@ void mpu_6050_corretion(void)
 	GZ_CORR /= 2;
 }
 
+/**
+  * @brief  init the 6050
+  * @retval None
+  */
 void init_6050(void)
 {
+	MPU6050_Init();
 	ID = MPU6050_GetID();
-	mpu_6050_corretion();
-	mpu_6050_corretion();
+	mpu_6050_corretion();  // correct the data of the 6050
 }
 
+/**
+  * @brief  get the data of the 6050 
+  * no return value, but the data is stored in the global variables, and use in the timer interrupt
+  * @retval None
+  */
 void get_6050_data(void)
 {
 	MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
@@ -117,6 +143,82 @@ void TIM7_Configuration(void)
 }
 
 /**
+  * @brief  initialize the pid of angle
+  * @param  None
+  * @retval None
+  */
+typedef struct 
+{
+    float setpoint;         // Desired value
+    float kp, ki, kd;       // PID coefficients
+    float error;       // now error
+    float prev_error;       // last time error
+	float acc_error; 		// accumulate error
+    float output;           // the add output
+} PID_Position;
+PID_Position pid_angle;  //the 4 motors pid controller
+
+/**
+  * @brief  pid init
+  * @param  PID_Controller *pid: the structure of the pid controller
+  * @param  float kp: the kp of the pid controller
+  * @param  float ki: the ki of the pid controller
+  * @param  float kd: the kd of the pid controller
+  * @param  float setpoint: the setpoint of the pid controller
+  * @retval None
+  */
+void pid_angle_init(PID_Position *pid, float kp, float ki, float kd, float setpoint)
+{
+    pid->setpoint = setpoint;
+    pid->kp = kp;
+    pid->ki = ki;
+    pid->kd = kd;
+    pid->prev_error = 0.0;
+    pid->acc_error = 0.0;
+}
+
+void init_pid_angle(void)
+{
+	pid_angle_init(&pid_angle, kp_angle, ki_angle, kd_angle, 0.0);
+}
+
+/**
+  * @brief  pid compute
+  * here is the poisition pid controller
+  * @param  PID_Position *pid: the structure of the pid controller
+  * @param  float measurement: the measurement value
+  * @retval None
+  */
+void pid_compute_angle(PID_Position *pid, float measurement)
+{
+    // test_b += 1;
+    // Calculate error
+    float error = pid->setpoint - measurement;
+    
+    // Proportional term
+    float P = pid->kp * error; //P = Kp * e[n]
+    
+    // Integral term
+	pid->acc_error += error;
+    float I = pid->ki * pid->acc_error; //I = Ki * sum(e[n])
+
+    // Derivative term
+    float D = pid->kd * (error - pid->prev_error); //D = Kd * (e[n] - e[n-1])
+
+    // Update previous error
+	pid->prev_error = error;
+
+    // Calculate control variable
+    float calculated_value = P + I + D;
+	// get the output
+    pid->output = calculated_value;
+    //control the min and max of the output
+    // if (pid->output > MAX_OUTPUT)
+    //     pid->output = MAX_OUTPUT;
+    // else if (pid->output < MIN_OUTPUT)
+    //     pid->output = MIN_OUTPUT;
+}
+/**
   * @brief  TIM7 interrupt handler
   * @retval None
   */
@@ -124,7 +226,39 @@ void TIM7_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM7, TIM_IT_Update) != RESET)
     {
-
+		interrupt_a++;
+		if(interrupt_a == 1000)
+		{
+			interrupt_a = 0;
+			interrupt_b++;
+		}
+		// get_6050_data();
+		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
+		angle_z += gz * 0.001;
+		//get the pid output
+		pid_compute_angle(&pid_angle, angle_z);
+		delta_v = pid_angle.output;
+		//ax is the acceleration, 
+		//so it needs to be multiplied by t squared to obtain the displacement 
+		//during this period of time (discrete approximation).
+		speed_x += ax * 9.8 * (0.001) * 100; //
+		speed_y += ay * 9.8 * (0.001) * 100;
+		// If multiple consecutive readings of acceleration values are detected as 0, the speed will be adjusted to
+		if (ax == 0) ax_zero ++;
+		if (ay == 0) ay_zero ++;
+		if (ay_zero > 10) 
+		{
+			ay_zero = 0;
+			speed_x = 0;
+		}
+		if (ax_zero > 10) 
+		{
+			ax_zero = 0;
+			speed_y = 0;
+		}
+		//values that are too small will not be accumulated.
+		if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
+		if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
         // Clear interrupt flag.
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }

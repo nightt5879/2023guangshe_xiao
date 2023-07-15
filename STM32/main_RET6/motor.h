@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 void motor_init(void);
-void control_motor(uint8_t motor_select, uint8_t direction, uint16_t duty_cycle) ;
-void control_motor_speed(uint8_t directions[], float speeds[], uint8_t control_flags[]);
+void control_motor(uint8_t motor_select,int16_t duty_cycle); 
+void control_motor_speed(float speeds[], uint8_t control_flags[]);
 void init_pid(void);
 void TIM1_ETR_Config(void);
 void TIM8_ETR_Config(void);
