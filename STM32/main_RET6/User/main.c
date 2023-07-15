@@ -41,10 +41,13 @@ uint8_t send_flag = 0;
 float sys_clock;
 uint16_t test_flag = 0;
 float deceleration_factor;
+//gray input
+uint8_t rightModuleValues[5];
+uint8_t leftModuleValues[5];
 int main(void)
 {
 	init();
-	control_motor_speed(speeds, control_flags);
+//	control_motor_speed(speeds, control_flags);
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
 	toggle_delta_v(0);
 //	control_move('x',TARGET_DISTANCE);
@@ -53,77 +56,8 @@ int main(void)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
 		//send the data to the computer
+		read_gray_scale_module(rightModuleValues, leftModuleValues);
 		send_to_win();
-		if (distance_flag > STBLE_TIME)
-		{
-			if (break_flag == 1)
-			{
-				distance_flag = 0;
-				distance = 0;
-				control_move('y',-TARGET_DISTANCE);
-				break_flag ++;
-			}
-			else if (break_flag == 2)
-			{	
-				distance_flag = 0;
-				distance = 0;
-				control_move('x',-TARGET_DISTANCE);
-				break_flag ++;
-			}
-			else if (break_flag == 3)
-			{
-				distance_flag = 0;
-				distance = 0;
-				control_move('y',TARGET_DISTANCE);
-				break_flag ++;
-			}
-		}
-		// if (abs(distance) > TARGET_DISTANCE )
-		// { 
-		// 	distance = 0;
-		// 	break_flag ++;
-		// 	toggle_delta_v(0);
-		// 	stop_car();
-		// }
-		// else
-		// {
-		// 	if (break_flag == 1)
-		// 	{
-		// 		toggle_delta_v(0);
-		// 		speeds[0] = -TEST_SPEED;
-		// 		speeds[1] = TEST_SPEED;
-		// 		speeds[2] = TEST_SPEED;
-		// 		speeds[3] = -TEST_SPEED;
-		// 		control_motor_speed(speeds, control_flags);
-		// 	}
-		// 	else if (break_flag == 2)
-		// 	{
-		// 		toggle_delta_v(0);
-		// 		speeds[0] = -TEST_SPEED;
-		// 		speeds[1] = -TEST_SPEED;
-		// 		speeds[2] = -TEST_SPEED;
-		// 		speeds[3] = -TEST_SPEED;
-		// 		control_motor_speed(speeds, control_flags);
-		// 	}
-		// 	else if (break_flag == 3)
-		// 	{
-		// 		toggle_delta_v(0);
-		// 		speeds[0] = TEST_SPEED;
-		// 		speeds[1] = -TEST_SPEED;
-		// 		speeds[2] = -TEST_SPEED;
-		// 		speeds[3] = TEST_SPEED;
-		// 		control_motor_speed(speeds, control_flags);
-		// 	}
-		// 	else if (break_flag == 4)
-		// 	{
-		// 		toggle_delta_v(0);
-		// 		speeds[0] = TEST_SPEED;
-		// 		speeds[1] = TEST_SPEED;
-		// 		speeds[2] = TEST_SPEED;
-		// 		speeds[3] = TEST_SPEED;
-		// 		control_motor_speed(speeds, control_flags);
-		// 	}
-		// }
 		if (break_flag > 3)
 		{
 			distance = 0;
@@ -162,6 +96,8 @@ void init(void)
 	init_6050();
 	//control of the motor, include 4PWM and 4DIR
 	motor_init();
+	//init the gray input
+	init_gray_scale_module_gpio();
 	//the four encoders
 	TIM1_ETR_Config();
 	TIM8_ETR_Config();
@@ -170,7 +106,7 @@ void init(void)
 	dir_gpio_input_Config();
 	//init the pid and the interrupt (10ms)
 	init_pid();
-	TIM6_Configuration();
+//	TIM6_Configuration();
 	//UART init
 	UART4_Init();
 	//init the angle pid and interrupt init (1ms)

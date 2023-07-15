@@ -158,3 +158,51 @@ void motor_dir_select(uint8_t motor_select, uint8_t diration)
 		//it mean no the right select for motor do nothing
     }
 }
+
+/**
+  * @brief  init the gray scale module gpio
+  * @param None
+  * @retval None
+  */
+void init_gray_scale_module_gpio(void) 
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
+
+    // Configure PC7, PC6, PC0, PC1, PC2, PC3 as input pins
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    // Configure PB15, PB14, PB13 as input pins
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    // Configure PA1 as input pin
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+
+/**
+  * @brief  read the gray scale module value
+  * @param rightModuleValues: the value of the right module
+  * @param leftModuleValues: the value of the left module
+  * @retval None
+  */
+void read_gray_scale_module(uint8_t* rightModuleValues, uint8_t* leftModuleValues) 
+{
+    // Read the value of the right module's GPIO pins
+    rightModuleValues[0] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7);
+    rightModuleValues[1] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_6);
+    rightModuleValues[2] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_15);
+    rightModuleValues[3] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14);
+    rightModuleValues[4] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_13);
+
+    // Read the value of the left module's GPIO pins
+    leftModuleValues[0] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_0);
+    leftModuleValues[1] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_1);
+    leftModuleValues[2] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2);
+    leftModuleValues[3] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3);
+    leftModuleValues[4] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1);
+}
+

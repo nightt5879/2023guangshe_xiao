@@ -58,7 +58,7 @@ uint8_t distance_flag = 0;
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 0.7, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
+float kp = 0.7  , ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 PID_Controller pid_move;  //the distance pid controller
 float move_kp = 0.225, move_ki = 0.0005, move_kd = 0.8;  // These values should be tuned for your specific system
 
