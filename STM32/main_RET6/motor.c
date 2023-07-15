@@ -6,6 +6,7 @@
 #include "stm32f10x_tim.h"
 #include "misc.h"
 #include <math.h>
+#include <stdlib.h>
 #include "UART.h"
 #include "6050control.h"
 
@@ -48,10 +49,19 @@ extern uint16_t break_flag;
 //angle pid return delta_v
 extern float delta_v;
 int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
+//move pid value
+char move_axis = 'n';
+float move_target_distance;
+//distance flag
+uint8_t distance_flag = 0;
 
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
-float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
+// float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
+float kp = 0.7, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
+PID_Controller pid_move;  //the distance pid controller
+float move_kp = 0.225, move_ki = 0.0005, move_kd = 0.8;  // These values should be tuned for your specific system
+
 
 /**
   * @brief  initialize the motor include the pwm and the direction gpio
@@ -343,6 +353,7 @@ void init_pid(void)
     pid_init(&pid_fr, kp, ki, kd, fr_target_speed);
     pid_init(&pid_bl, kp, ki, kd, bl_target_speed);
     pid_init(&pid_br, kp, ki, kd, br_target_speed);
+    pid_init(&pid_move, move_kp, move_ki, move_kd, 0.0);
 }
 
 /**
@@ -383,6 +394,11 @@ void pid_compute(PID_Controller *pid, float measurement)
         pid->output = -MAX_OUTPUT;
 }
 
+void control_move(char axis,float target_disatance)
+{
+  move_axis = axis;
+  move_target_distance = target_disatance;
+}
 /**
   * @brief  the interrupt handler for TIM5 using for PID control of the motor
   * @param  None
@@ -473,6 +489,34 @@ void TIM6_IRQHandler(void)
         else
             distance += 0;
 		// break_flag ++;
+    //below are the distance PID
+    pid_move.setpoint = move_target_distance;
+    pid_compute(&pid_move, distance);
+    if(abs(pid_move.setpoint - distance) < DSITANCE_THRESHOLD)
+    { 
+      // distance_flag += 1;
+      // distance = 0;
+      // move_target_distance = 0;
+      pid_move.output = 0; // Close enough to the target.
+    }
+    // axis X
+    if (move_axis == 'x')
+    {
+        fl_target_speed = pid_move.output;
+        fr_target_speed = pid_move.output;
+        bl_target_speed = pid_move.output;
+        br_target_speed = pid_move.output;
+    }
+    else if( move_axis == 'y')
+    {
+        move_kp = 0.32;
+        move_ki = 0.0;
+        move_kd = 0.0;  // y axis value of pid
+        fl_target_speed = pid_move.output;
+        fr_target_speed = -pid_move.output;
+        bl_target_speed = -pid_move.output;
+        br_target_speed = pid_move.output;
+    }
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }

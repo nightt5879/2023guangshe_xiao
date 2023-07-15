@@ -31,5 +31,6 @@
 .\objects\motor.o: .\Library\stm32f10x_wwdg.h
 .\objects\motor.o: .\Library\misc.h
 .\objects\motor.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\math.h
+.\objects\motor.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\motor.o: UART.h
 .\objects\motor.o: 6050control.h

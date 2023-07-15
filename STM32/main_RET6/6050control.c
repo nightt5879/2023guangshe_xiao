@@ -6,9 +6,9 @@
 
 
 //pid
-float kp_angle = 0.2, ki_angle = 0.0, kd_angle = 0;
+float kp_angle = 0.1, ki_angle = 0.01, kd_angle = 0;
 #define MAX_ACC 0.3
-#define ANGLE_MIN 4
+#define ANGLE_MIN 6
 //delta V
 float delta_v = 0;
 

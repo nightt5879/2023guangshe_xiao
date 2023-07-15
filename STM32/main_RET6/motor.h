@@ -18,6 +18,7 @@ uint8_t Read_BR_Direction(void);
 void TIM6_Configuration(void);
 void TIM6_IRQHandler(void);
 void toggle_delta_v(int enable);
+void control_move(char axis,float target_disatance);
 
 
 #define MOTOR_FL 1
@@ -32,6 +33,7 @@ void toggle_delta_v(int enable);
 #define COS45 0.707f //cos45 for the speed calculate
 #define MAX_OUTPUT 500 //max pwm
 #define MIN_OUTPUT 0  // min pwm
+#define DSITANCE_THRESHOLD  2.5//Distance Threshold
 /**
   * @brief  initialize the pid control structure
   * @param  None

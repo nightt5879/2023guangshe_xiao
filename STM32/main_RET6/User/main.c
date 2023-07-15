@@ -7,10 +7,11 @@
 #include <stdlib.h>
 
 #define TEST_PWM_DUTY 100
-#define TARGET_DISTANCE 50
-#define TEST_SPEED 13
+#define TARGET_DISTANCE 80
+#define TEST_SPEED 8
 #define DECELERATION_DISTANCE 20  // Decelerate when 10 units away from the target
 #define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
+#define STBLE_TIME 30
 void stop_car(void);
 void init(void);
 void send_to_win(void);
@@ -33,6 +34,7 @@ extern float distance_y;
 extern float speed_x;
 extern float speed_y;
 extern float delta_v;
+extern uint8_t distance_flag; // the time in the thread in 0.01s
 //send the data to the computer
 float data[15]; // 9 channels
 uint8_t send_flag = 0;
@@ -42,64 +44,96 @@ float deceleration_factor;
 int main(void)
 {
 	init();
-//	control_motor_speed(speeds, control_flags);
+	control_motor_speed(speeds, control_flags);
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
 	toggle_delta_v(0);
-	control_motor_speed(speeds, control_flags);
+//	control_move('x',TARGET_DISTANCE);
+	// control_motor_speed(speeds, control_flags);
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
 		//send the data to the computer
 		send_to_win();
-		if (abs(distance) > TARGET_DISTANCE )
-		{ 
-			distance = 0;
-			break_flag ++;
-			toggle_delta_v(0);
-			stop_car();
-		}
-		else
+		if (distance_flag > STBLE_TIME)
 		{
 			if (break_flag == 1)
 			{
-				toggle_delta_v(0);
-				speeds[0] = -TEST_SPEED;
-				speeds[1] = TEST_SPEED;
-				speeds[2] = TEST_SPEED;
-				speeds[3] = -TEST_SPEED;
-				control_motor_speed(speeds, control_flags);
+				distance_flag = 0;
+				distance = 0;
+				control_move('y',-TARGET_DISTANCE);
+				break_flag ++;
 			}
 			else if (break_flag == 2)
-			{
-				toggle_delta_v(0);
-				speeds[0] = -TEST_SPEED;
-				speeds[1] = -TEST_SPEED;
-				speeds[2] = -TEST_SPEED;
-				speeds[3] = -TEST_SPEED;
-				control_motor_speed(speeds, control_flags);
+			{	
+				distance_flag = 0;
+				distance = 0;
+				control_move('x',-TARGET_DISTANCE);
+				break_flag ++;
 			}
 			else if (break_flag == 3)
 			{
-				toggle_delta_v(0);
-				speeds[0] = TEST_SPEED;
-				speeds[1] = -TEST_SPEED;
-				speeds[2] = -TEST_SPEED;
-				speeds[3] = TEST_SPEED;
-				control_motor_speed(speeds, control_flags);
-			}
-			else if (break_flag == 4)
-			{
-				toggle_delta_v(0);
-				speeds[0] = TEST_SPEED;
-				speeds[1] = TEST_SPEED;
-				speeds[2] = TEST_SPEED;
-				speeds[3] = TEST_SPEED;
-				control_motor_speed(speeds, control_flags);
+				distance_flag = 0;
+				distance = 0;
+				control_move('y',TARGET_DISTANCE);
+				break_flag ++;
 			}
 		}
-		if (break_flag >= 5)
+		// if (abs(distance) > TARGET_DISTANCE )
+		// { 
+		// 	distance = 0;
+		// 	break_flag ++;
+		// 	toggle_delta_v(0);
+		// 	stop_car();
+		// }
+		// else
+		// {
+		// 	if (break_flag == 1)
+		// 	{
+		// 		toggle_delta_v(0);
+		// 		speeds[0] = -TEST_SPEED;
+		// 		speeds[1] = TEST_SPEED;
+		// 		speeds[2] = TEST_SPEED;
+		// 		speeds[3] = -TEST_SPEED;
+		// 		control_motor_speed(speeds, control_flags);
+		// 	}
+		// 	else if (break_flag == 2)
+		// 	{
+		// 		toggle_delta_v(0);
+		// 		speeds[0] = -TEST_SPEED;
+		// 		speeds[1] = -TEST_SPEED;
+		// 		speeds[2] = -TEST_SPEED;
+		// 		speeds[3] = -TEST_SPEED;
+		// 		control_motor_speed(speeds, control_flags);
+		// 	}
+		// 	else if (break_flag == 3)
+		// 	{
+		// 		toggle_delta_v(0);
+		// 		speeds[0] = TEST_SPEED;
+		// 		speeds[1] = -TEST_SPEED;
+		// 		speeds[2] = -TEST_SPEED;
+		// 		speeds[3] = TEST_SPEED;
+		// 		control_motor_speed(speeds, control_flags);
+		// 	}
+		// 	else if (break_flag == 4)
+		// 	{
+		// 		toggle_delta_v(0);
+		// 		speeds[0] = TEST_SPEED;
+		// 		speeds[1] = TEST_SPEED;
+		// 		speeds[2] = TEST_SPEED;
+		// 		speeds[3] = TEST_SPEED;
+		// 		control_motor_speed(speeds, control_flags);
+		// 	}
+		// }
+		if (break_flag > 3)
 		{
+			distance = 0;
+			control_move('x',0);
+			break;
 			toggle_delta_v(0);
+			stop_car();
+		}
+		if (distance > TARGET_DISTANCE)
+		{
 			stop_car();
 		}
 	}
@@ -114,10 +148,10 @@ void stop_car(void)
 	speeds[2] = 0;
 	speeds[3] = 0;
 	control_motor_speed(speeds, control_flags);
-//	control_motor(MOTOR_BL, 0);
-//	control_motor(MOTOR_BR, 0);
-//	control_motor(MOTOR_FL, 0);
-//	control_motor(MOTOR_FR, 0);
+	control_motor(MOTOR_BL, 0);
+	control_motor(MOTOR_BR, 0);
+	control_motor(MOTOR_FL, 0);
+	control_motor(MOTOR_FR, 0);
 }
 
 void init(void)

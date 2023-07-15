@@ -749,7 +749,7 @@ I (.\Library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Library\misc.h)(0x4D783BB4)
 F (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)()
-F (.\User\main.c)(0x64B26B02)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\User\main.c)(0x64B2A3A5)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (.\Start\stm32f10x.h)(0x4D783CB4)
 I (.\Start\core_cm3.h)(0x4D523B58)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
@@ -779,7 +779,7 @@ I (.\Library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Library\misc.h)(0x4D783BB4)
 I (..\main_RET6\delay.h)(0x64AEAAFD)
-I (..\main_RET6\motor.h)(0x64B25D73)
+I (..\main_RET6\motor.h)(0x64B293B4)
 I (..\main_RET6\UART.h)(0x64B25475)
 I (..\main_RET6\6050control.h)(0x64B23729)
 I (..\main_RET6\MPU6050.h)(0x64B1518B)
@@ -846,7 +846,7 @@ I (.\Library\stm32f10x_tim.h)(0x4D783BB4)
 I (.\Library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Library\misc.h)(0x4D783BB4)
-I (motor.h)(0x64B25D73)
+I (motor.h)(0x64B293B4)
 F (.\delay.c)(0x64AEAACA)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\delay.o --omf_browse .\objects\delay.crf --depend .\objects\delay.d)
 I (.\Start\stm32f10x.h)(0x4D783CB4)
 I (.\Start\core_cm3.h)(0x4D523B58)
@@ -877,8 +877,8 @@ I (.\Library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Library\misc.h)(0x4D783BB4)
 I (delay.h)(0x64AEAAFD)
-F (.\motor.c)(0x64B25FCB)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\motor.o --omf_browse .\objects\motor.crf --depend .\objects\motor.d)
-I (motor.h)(0x64B25D73)
+F (.\motor.c)(0x64B2A523)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\motor.o --omf_browse .\objects\motor.crf --depend .\objects\motor.d)
+I (motor.h)(0x64B293B4)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
 I (GPIO.h)(0x64AF7541)
 I (.\Start\stm32f10x.h)(0x4D783CB4)
@@ -909,6 +909,7 @@ I (.\Library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\Library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\Library\misc.h)(0x4D783BB4)
 I (E:\keil_v5\ARM\ARMCC\include\math.h)(0x5E8E3CC2)
+I (E:\keil_v5\ARM\ARMCC\include\stdlib.h)(0x5E8E3CC2)
 I (UART.h)(0x64B25475)
 I (6050control.h)(0x64B23729)
 F (.\UART.c)(0x64AFF6E6)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\uart.o --omf_browse .\objects\uart.crf --depend .\objects\uart.d)
@@ -974,7 +975,7 @@ I (.\Library\misc.h)(0x4D783BB4)
 I (MPU6050_Reg.h)(0x64B1518B)
 F (.\MPU6050.h)(0x64B1518B)()
 F (.\MPU6050_Reg.h)(0x64B1518B)()
-F (.\6050control.c)(0x64B2694D)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\6050control.o --omf_browse .\objects\6050control.crf --depend .\objects\6050control.d)
+F (.\6050control.c)(0x64B295B9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\6050control.o --omf_browse .\objects\6050control.crf --depend .\objects\6050control.d)
 I (.\Start\stm32f10x.h)(0x4D783CB4)
 I (.\Start\core_cm3.h)(0x4D523B58)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
@@ -1007,6 +1008,7 @@ I (6050control.h)(0x64B23729)
 I (E:\keil_v5\ARM\ARMCC\include\math.h)(0x5E8E3CC2)
 I (E:\keil_v5\ARM\ARMCC\include\stdlib.h)(0x5E8E3CC2)
 I (MPU6050.h)(0x64B1518B)
-F (.\move.c)(0x64B26DF9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\move.o --omf_browse .\objects\move.crf --depend .\objects\move.d)
+F (.\move.c)(0x64B28B33)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\User -I .\Library -I ..\main_RET6-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o .\objects\move.o --omf_browse .\objects\move.crf --depend .\objects\move.d)
 I (move.h)(0x64B26DF0)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
+I (motor.h)(0x64B293B4)
