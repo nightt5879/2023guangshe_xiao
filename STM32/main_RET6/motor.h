@@ -31,9 +31,12 @@ void control_move(char axis,float target_disatance);
 #define RADIUS 3.15f  //the radius of the wheel cm
 #define PI 3.14f  //the pi
 #define COS45 0.707f //cos45 for the speed calculate
-#define MAX_OUTPUT 500 //max pwm
+#define MAX_OUTPUT 650 //max pwm
 #define MIN_OUTPUT 0  // min pwm
 #define DSITANCE_THRESHOLD  2.5//Distance Threshold
+#define X_FACTOR 11.6f
+#define Y_FACTOR 20.5f
+#define Z_FACTOR 64.17f
 /**
   * @brief  initialize the pid control structure
   * @param  None

@@ -242,7 +242,7 @@ void TIM7_IRQHandler(void)
 		}
 		// get_6050_data();
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
-		angle_z += gz * 0.001;
+		angle_z -= gz * 0.001;
 		//get the pid output
 		pid_compute_angle(&pid_angle, angle_z);
 		delta_v = pid_angle.output;

@@ -21,6 +21,11 @@ float fl_speed = 0;
 float fr_speed = 0;
 float bl_speed = 0;
 float br_speed = 0;
+//Number of rotations made
+float fl_num = 0;
+float fr_num = 0;
+float bl_num = 0;
+float br_num = 0;
 //the speed postive and negetive
 int8_t fl_speed_dir = 0;
 int8_t fr_speed_dir = 0;
@@ -44,7 +49,9 @@ uint8_t br_dir = 0;
 // use for test
 uint16_t test_a = 0;
 uint16_t test_b = 0;
-float distance = 0; // the move of the car
+float distance_x_encoder = 0; // the move of the car
+float distance_y_encoder = 0; // the move of the car
+float angle_z_encoder = 0; // the angle of the car
 extern uint16_t break_flag;
 //angle pid return delta_v
 extern float delta_v;
@@ -58,7 +65,7 @@ uint8_t distance_flag = 0;
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 0.7  , ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
+float kp = 1.5, ki = 0.6, kd = 8;  // These values should be tuned for your specific system
 PID_Controller pid_move;  //the distance pid controller
 float move_kp = 0.225, move_ki = 0.0005, move_kd = 0.8;  // These values should be tuned for your specific system
 
@@ -439,14 +446,20 @@ void TIM6_IRQHandler(void)
         if (br_dir == 0) br_speed_dir = 1;
         else br_speed_dir = -1;
         //The gear ratio is 3:7, and the encoder has 1024 lines. into the ISR is 10ms
-        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  cm/s
-        br_speed = br_speed_dir * ((float)br_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        bl_speed = bl_speed_dir *((float)bl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        fl_speed = fl_speed_dir *((float)fl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        fr_speed = fr_speed_dir *((float)fr_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  r/s
+        //the cycle in 10ms postive mean forward, negative mean backward
+        fl_num = fl_speed_dir *((float)fl_counter / 7) * 3 / 1024;
+        fr_num = fr_speed_dir *((float)fr_counter / 7) * 3 / 1024;
+        bl_num = bl_speed_dir *((float)bl_counter / 7) * 3 / 1024;
+        br_num = br_speed_dir * ((float)br_counter / 7) * 3 / 1024;
+        // get the speed of the wheel R/s
+        fl_speed = fl_num * 100;
+        fr_speed = fr_num * 100;
+        bl_speed = bl_num * 100;
+        br_speed = br_num * 100;
         //get the resived speed
         // Apply PID control
-        if(delta_v_enable) 
+        if(delta_v_enable)   // angle control
         {
             pid_fl.setpoint = fl_target_speed - delta_v;  // Update the setpoint if it has changed
             pid_fr.setpoint = fr_target_speed + delta_v;
@@ -459,64 +472,30 @@ void TIM6_IRQHandler(void)
             pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
             pid_br.setpoint = br_target_speed;
         }
-        pid_compute(&pid_fl, fl_speed);
-        control_motor(MOTOR_FL,(int)pid_fl.output);
-
-        pid_compute(&pid_fr, fr_speed);
-        control_motor(MOTOR_FR,(int)pid_fr.output);
-
-        pid_compute(&pid_bl, bl_speed);
-        control_motor(MOTOR_BL, (int)pid_bl.output);
-
-        pid_compute(&pid_br, br_speed);
-        control_motor(MOTOR_BR, (int)pid_br.output);
-//        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
-        //define the forward and the move to the right is positive, and the backward and the move to the left is negative
-        //this car is only used for translation operations.
-        //the left side forward dir is 1, the right side forward dir is 0
-        if(fl_dir == 1 && bl_dir == 1 && fr_dir == 0 && br_dir == 0) // it mean forward
-            distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 0 && bl_dir == 0 && fr_dir == 1 && br_dir == 1) // it mean backward
-            distance -= ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 1 && bl_dir == 0 && fr_dir == 1 && br_dir == 0) // it mean move to the right
-            distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 4.6;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 0 && bl_dir == 1 && fr_dir == 0 && br_dir == 1) // it mean move to the left
-            distance -= ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 4.6;//* 2 * PI * RADIUS * COS45 ;  //
-        else
-            distance += 0;
+        // pid_compute(&pid_fl, fl_speed);
+        // control_motor(MOTOR_FL,(int)pid_fl.output);
+        // pid_compute(&pid_fr, fr_speed);
+        // control_motor(MOTOR_FR,(int)pid_fr.output);
+        // pid_compute(&pid_bl, bl_speed);
+        // control_motor(MOTOR_BL, (int)pid_bl.output);
+        // pid_compute(&pid_br, br_speed);
+        // control_motor(MOTOR_BR, (int)pid_br.output);
+        // get the x y disatnce and the Z angle
+        distance_x_encoder += ((fl_num - bl_num + br_num - fr_num) / 2) * X_FACTOR; // the X distance
+        distance_y_encoder += ((fl_num + bl_num + fr_num + br_num) / 4) * Y_FACTOR; // the Y distance
+        angle_z_encoder += ((fl_num + bl_num - fr_num - br_num) / 4) * Z_FACTOR; // the Z angle
 		// break_flag ++;
     //below are the distance PID
-    pid_move.setpoint = move_target_distance;
-    pid_compute(&pid_move, distance);
-    if(abs(pid_move.setpoint - distance) < DSITANCE_THRESHOLD)
-    { 
-      // distance_flag += 1;
-      // distance = 0;
-      // move_target_distance = 0;
-      pid_move.output = 0; // Close enough to the target.
-    }
+    // pid_move.setpoint = move_target_distance;
+    // pid_compute(&pid_move, distance);
+    // if(abs(pid_move.setpoint - distance) < DSITANCE_THRESHOLD)
+    // { 
+    //   // distance_flag += 1;
+    //   // distance = 0;
+    //   // move_target_distance = 0;
+    //   pid_move.output = 0; // Close enough to the target.
+    // }
     // axis X
-    if (move_axis == 'x')
-    {
-        fl_target_speed = pid_move.output;
-        fr_target_speed = pid_move.output;
-        bl_target_speed = pid_move.output;
-        br_target_speed = pid_move.output;
-    }
-    else if( move_axis == 'y')
-    {
-        move_kp = 0.32;
-        move_ki = 0.0;
-        move_kd = 0.0;  // y axis value of pid
-        fl_target_speed = pid_move.output;
-        fr_target_speed = -pid_move.output;
-        bl_target_speed = -pid_move.output;
-        br_target_speed = pid_move.output;
-    }
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }

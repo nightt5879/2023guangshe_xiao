@@ -22,12 +22,21 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 E:\robot\project\2023guangshe_xiao\STM32\main_RET6\Project.uvprojx
-Project File Date:  07/15/2023
+Project File Date:  07/16/2023
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'E:\keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-".\Objects\Project.axf" - 0 Error(s), 0 Warning(s).
+compiling move.c...
+compiling GPIO.c...
+compiling main.c...
+User\main.c(78): warning:  #111-D: statement is unreachable
+  	stop_car();
+User\main.c: 1 warning, 0 errors
+compiling motor.c...
+linking...
+Program Size: Code=13112 RO-data=336 RW-data=328 ZI-data=1872  
+".\Objects\Project.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -40,7 +49,7 @@ Package Vendor: Keil
   E:/keil_v5/Packs/Keil/STM32F1xx_DFP/2.4.1/Device/Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

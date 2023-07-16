@@ -5,7 +5,7 @@
 void UART4_Init(void);
 void send_data(float *data, uint8_t size);
 
-#define CH_COUNT 15  // the max channel count
+#define CH_COUNT 17  // the max channel count
 #define TAIL {0x00, 0x00, 0x80, 0x7f}  // Data frame end
 
 
