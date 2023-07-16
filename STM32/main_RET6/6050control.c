@@ -341,7 +341,7 @@ float kalman_update(KalmanState* state, float measurement) {
 void cheak_corner(void)
 {
     read_gray_scale_module(right_modle, left_modle);
-	corner_flag = 0;
+//	corner_flag = 0;
     if (left_modle[0] || left_modle[4] || right_modle[0]|| right_modle[4]) // it mean close to the conrner
     {
 		test_flag_tim7 ++;
