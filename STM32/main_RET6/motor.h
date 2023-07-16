@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 void motor_init(void);
-void control_motor(uint8_t motor_select, uint8_t direction, uint16_t duty_cycle) ;
-void control_motor_speed(uint8_t directions[], float speeds[], uint8_t control_flags[]);
+void control_motor(uint8_t motor_select,int16_t duty_cycle); 
+void control_motor_speed(float speeds[], uint8_t control_flags[]);
 void init_pid(void);
 void TIM1_ETR_Config(void);
 void TIM8_ETR_Config(void);
@@ -17,6 +17,8 @@ uint8_t Read_BL_Direction(void);
 uint8_t Read_BR_Direction(void);
 void TIM6_Configuration(void);
 void TIM6_IRQHandler(void);
+void toggle_delta_v(int enable);
+void control_move(char axis,float target_disatance);
 
 
 #define MOTOR_FL 1
@@ -31,5 +33,20 @@ void TIM6_IRQHandler(void);
 #define COS45 0.707f //cos45 for the speed calculate
 #define MAX_OUTPUT 500 //max pwm
 #define MIN_OUTPUT 0  // min pwm
+#define DSITANCE_THRESHOLD  2.5//Distance Threshold
+/**
+  * @brief  initialize the pid control structure
+  * @param  None
+  * @retval None
+  */
+typedef struct 
+{
+    float setpoint;         // Desired value
+    float kp, ki, kd;       // PID coefficients
+    float prev0_error;       // last time error
+    float prev1_error;       // last last time error
+    float output;           // the add output
+} PID_Controller;
+extern PID_Controller pid_fl, pid_fr, pid_bl, pid_br;
 	
 #endif

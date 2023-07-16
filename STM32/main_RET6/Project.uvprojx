@@ -719,6 +719,11 @@
               <FileType>1</FileType>
               <FilePath>.\6050control.c</FilePath>
             </File>
+            <File>
+              <FileName>move.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\move.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
