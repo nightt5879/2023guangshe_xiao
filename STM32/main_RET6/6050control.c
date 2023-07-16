@@ -6,9 +6,10 @@
 
 
 //pid
-float kp_angle = 0.1, ki_angle = 0.01, kd_angle = 0;
+float kp_angle = 0.10, ki_angle = 0.0, kd_angle = 8;
 #define MAX_ACC 0.3
-#define ANGLE_MIN 6
+#define ANGLE_MIN 1.5
+#define MAX_OUTPUT_ANGLE 5
 //delta V
 float delta_v = 0;
 
@@ -31,6 +32,10 @@ float speed_x = 0;
 float speed_y = 0;
 uint8_t ax_zero = 0;
 uint8_t ay_zero = 0;
+
+void kalman_init(KalmanState* state, float q, float r, float p, float initial_value);
+float kalman_update(KalmanState* state, float measurement);
+KalmanState state_ax, state_ay, state_gz;
 /**
   * @brief  low pass filter
   * @retval None
@@ -82,7 +87,13 @@ void init_6050(void)
 	MPU6050_Init();
 	ID = MPU6050_GetID();
 	mpu_6050_corretion();  // correct the data of the 6050
+	// Initialize the Kalman filter state for each sensor reading
+
+    kalman_init(&state_ax, 0.1, 0.1, 1, 0); // You may need to adjust the noise parameters and initial value
+    kalman_init(&state_ay, 0.1, 0.1, 1, 0); // based on your specific sensor characteristics
+    kalman_init(&state_gz, 0.1, 0.1, 1, 0); 
 }
+
 
 /**
   * @brief  get the data of the 6050 
@@ -101,12 +112,22 @@ void get_6050_data(void)
 	gz_corr_done = abs(GZ - GZ_CORR) < LOW_PASS_FILTR ? 0 : GZ - GZ_CORR;
 	//low pass filter
 	// Use the low pass filter function on the corrected data.
-	ax = low_pass_filter(ax_corr_done / 32768.0 * 2.0, ax_prev);
-	ay = low_pass_filter(ay_corr_done / 32768.0 * 2.0, ay_prev);
-	az = low_pass_filter(az_corr_done / 32768.0 * 2.0, az_prev);
-	gx = low_pass_filter(gx_corr_done / 32768.0 * 250.0, gx_prev);
-	gy = low_pass_filter(gy_corr_done / 32768.0 * 250.0, gy_prev);
-	gz = low_pass_filter(gz_corr_done / 32768.0 * 250.0, gz_prev);
+	// ax = low_pass_filter(ax_corr_done / 32768.0 * 2.0, ax_prev);
+	// ay = low_pass_filter(ay_corr_done / 32768.0 * 2.0, ay_prev);
+	// az = low_pass_filter(az_corr_done / 32768.0 * 2.0, az_prev);
+	// gx = low_pass_filter(gx_corr_done / 32768.0 * 1000.0, gx_prev);
+	// gy = low_pass_filter(gy_corr_done / 32768.0 * 1000.0, gy_prev);
+	// gz = low_pass_filter(gz_corr_done / 32768.0 * 1000.0, gz_prev);
+	ax = ax_corr_done / 32768.0 * 2.0;
+	ay = ay_corr_done / 32768.0 * 2.0;
+	az = az_corr_done / 32768.0 * 2.0;
+	gx = gx_corr_done / 32768.0 * 2000.0;
+	gy = gy_corr_done / 32768.0 * 2000.0;
+	gz =gz_corr_done / 32768.0 * 2000.0;
+	//
+	ax = kalman_update(&state_ax, ax);
+	ay = kalman_update(&state_ay, ay);
+	gz = kalman_update(&state_gz, gz);
 
 	// Update the previous values for the next loop.
 	ax_prev = ax;
@@ -219,6 +240,8 @@ void pid_compute_angle(PID_Position *pid, float measurement)
     // Calculate control variable
     float calculated_value = P + I + D;
 	// get the output
+	if (calculated_value > MAX_OUTPUT_ANGLE) calculated_value = MAX_OUTPUT_ANGLE;
+	else if (calculated_value < -MAX_OUTPUT_ANGLE) calculated_value = -MAX_OUTPUT_ANGLE;
     pid->output = calculated_value;
     //control the min and max of the output
     // if (pid->output > MAX_OUTPUT)
@@ -270,4 +293,26 @@ void TIM7_IRQHandler(void)
         // Clear interrupt flag.
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }
+}
+
+
+
+
+void kalman_init(KalmanState* state, float q, float r, float p, float initial_value) {
+    state->q = q;
+    state->r = r;
+    state->p = p;
+    state->x = initial_value;
+}
+
+float kalman_update(KalmanState* state, float measurement) {
+    // prediction update
+    state->p = state->p + state->q;
+
+    // measurement update
+    state->k = state->p / (state->p + state->r);
+    state->x = state->x + state->k * (measurement - state->x);
+    state->p = (1 - state->k) * state->p;
+
+    return state->x;
 }

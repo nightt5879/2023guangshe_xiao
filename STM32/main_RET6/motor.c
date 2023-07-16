@@ -65,7 +65,7 @@ uint8_t distance_flag = 0;
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 1.5, ki = 0.6, kd = 8;  // These values should be tuned for your specific system
+float kp = 3, ki = 4, kd = 8;  // These values should be tuned for your specific system
 PID_Controller pid_move;  //the distance pid controller
 float move_kp = 0.225, move_ki = 0.0005, move_kd = 0.8;  // These values should be tuned for your specific system
 
@@ -461,10 +461,10 @@ void TIM6_IRQHandler(void)
         // Apply PID control
         if(delta_v_enable)   // angle control
         {
-            pid_fl.setpoint = fl_target_speed - delta_v;  // Update the setpoint if it has changed
-            pid_fr.setpoint = fr_target_speed + delta_v;
-            pid_bl.setpoint = bl_target_speed - delta_v;  // Update the setpoint if it has changed
-            pid_br.setpoint = br_target_speed + delta_v;
+            pid_fl.setpoint = fl_target_speed + delta_v;  // Update the setpoint if it has changed
+            pid_fr.setpoint = fr_target_speed - delta_v;
+            pid_bl.setpoint = bl_target_speed + delta_v;  // Update the setpoint if it has changed
+            pid_br.setpoint = br_target_speed - delta_v;
         } else
         {
             pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
@@ -472,14 +472,14 @@ void TIM6_IRQHandler(void)
             pid_bl.setpoint = bl_target_speed;  // Update the setpoint if it has changed
             pid_br.setpoint = br_target_speed;
         }
-        // pid_compute(&pid_fl, fl_speed);
-        // control_motor(MOTOR_FL,(int)pid_fl.output);
-        // pid_compute(&pid_fr, fr_speed);
-        // control_motor(MOTOR_FR,(int)pid_fr.output);
-        // pid_compute(&pid_bl, bl_speed);
-        // control_motor(MOTOR_BL, (int)pid_bl.output);
-        // pid_compute(&pid_br, br_speed);
-        // control_motor(MOTOR_BR, (int)pid_br.output);
+        pid_compute(&pid_fl, fl_speed);
+        control_motor(MOTOR_FL,(int)pid_fl.output);
+        pid_compute(&pid_fr, fr_speed);
+        control_motor(MOTOR_FR,(int)pid_fr.output);
+        pid_compute(&pid_bl, bl_speed);
+        control_motor(MOTOR_BL, (int)pid_bl.output);
+        pid_compute(&pid_br, br_speed);
+        control_motor(MOTOR_BR, (int)pid_br.output);
         // get the x y disatnce and the Z angle
         distance_x_encoder += ((fl_num - bl_num + br_num - fr_num) / 2) * X_FACTOR; // the X distance
         distance_y_encoder += ((fl_num + bl_num + fr_num + br_num) / 4) * Y_FACTOR; // the Y distance

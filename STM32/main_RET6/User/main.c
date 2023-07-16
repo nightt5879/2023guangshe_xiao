@@ -39,7 +39,7 @@ extern float speed_y;
 extern float delta_v;
 extern uint8_t distance_flag; // the time in the thread in 0.01s
 //send the data to the computer
-float data[CH_COUNT]; // 9 channels
+float data[CH_COUNT]; 
 uint8_t send_flag = 0;
 float sys_clock;
 uint16_t test_flag = 0;
@@ -50,11 +50,10 @@ uint8_t leftModuleValues[5];
 int main(void)
 {
 	init();
-	// control_motor_speed(speeds, control_flags);
 //	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
-	toggle_delta_v(0);
+	toggle_delta_v(1);
 //	control_move('x',TARGET_DISTANCE);
-	// control_motor_speed(speeds, control_flags);
+	control_motor_speed(speeds, control_flags);
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
@@ -69,10 +68,10 @@ int main(void)
 		// 	toggle_delta_v(0);
 		// 	stop_car();
 		// }
-		// if (distance > TARGET_DISTANCE)
-		// {
-		// 	stop_car();
-		// }
+		if (distance_y_encoder > TARGET_DISTANCE)
+		{
+			stop_car();
+		}
 	}
 	//stop the motor
 	stop_car();
