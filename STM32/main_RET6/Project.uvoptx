@@ -165,6 +165,26 @@
           <WinNumber>1</WinNumber>
           <ItemText>leftModuleValues</ItemText>
         </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test_a,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>left_modle</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>right_modle</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test_flag_tim7,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -286,6 +306,11 @@
           <count>23</count>
           <WinNumber>2</WinNumber>
           <ItemText>break_flag</ItemText>
+        </Ww>
+        <Ww>
+          <count>24</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>sys_clock</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

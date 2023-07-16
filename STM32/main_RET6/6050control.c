@@ -43,13 +43,11 @@ extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
 extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
 extern uint8_t distance_flag;
 extern PID_Controller pid_move_x, pid_move_y;
-//gray input
-uint8_t left_modle[5];
-uint8_t right_modle[5];
+
 void kalman_init(KalmanState* state, float q, float r, float p, float initial_value);
 float kalman_update(KalmanState* state, float measurement);
-void cheak_corner(void);
-uint8_t corner_flag = 1;  //the flag of the conner
+
+
 uint16_t test_flag_tim7  =0;
 KalmanState state_ax, state_ay, state_gz;
 /**
@@ -306,10 +304,10 @@ void TIM7_IRQHandler(void)
 		//values that are too small will not be accumulated.
 		if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
 		if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
-		if (corner_flag)
-        {
-            cheak_corner();
-        }
+//		if (corner_flag)
+//        {
+//            cheak_corner();
+//        }
         // Clear interrupt flag.
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }
@@ -338,48 +336,49 @@ float kalman_update(KalmanState* state, float measurement) {
 }
 
 
-void cheak_corner(void)
-{
-    read_gray_scale_module(right_modle, left_modle);
-//	corner_flag = 0;
-    if (left_modle[0] || left_modle[4] || right_modle[0]|| right_modle[4]) // it mean close to the conrner
-    {
-		test_flag_tim7 ++;
-		if(move_target_distance_x == 0) // it mean the robot is in the Y aixs
-		{
-			distance_x_encoder = 0;
-			distance_y_encoder = 0;
-			distance_x = 0;
-			distance_y = 0;
-			distance_x_filter = 0;
-			distance_y_filter = 0;
-			move_target_distance_x = 0;
-			if (move_target_distance_y > 0)  // it mean forward
-			{
-			move_target_distance_y = CORNER_Y;
-			}
-			else if (move_target_distance_y < 0) // it mean backward
-			{
-			move_target_distance_y = -CORNER_Y;
-			}
-      }
-        else if (move_target_distance_y == 0) // it mean the robot is in the X aixs
-      {
-			distance_x_encoder = 0;
-			distance_y_encoder = 0;
-			distance_x = 0;
-			distance_y = 0;
-			distance_x_filter = 0;
-			distance_y_filter = 0;
-			move_target_distance_y = 0;
-			if (move_target_distance_x > 0)  // it mean forward
-			{
-				move_target_distance_x = CORNER_X;
-			}
-			else if (move_target_distance_x < 0) // it mean backward
-			{
-				move_target_distance_x = -CORNER_X;
-			}
-      }
-    }
-}
+// void cheak_corner(void)
+// {
+//     read_gray_scale_module(right_modle, left_modle);
+// //	corner_flag = 0;
+//     if (left_modle[0] || left_modle[4] || right_modle[0]|| right_modle[4]) // it mean close to the conrner
+//     {
+// 		test_flag_tim7 ++;
+// 		close_to_target();
+// 	// 	if(move_target_distance_x == 0) // it mean the robot is in the Y aixs
+// 	// 	{
+// 	// 		distance_x_encoder = 0;
+// 	// 		distance_y_encoder = 0;
+// 	// 		distance_x = 0;
+// 	// 		distance_y = 0;
+// 	// 		distance_x_filter = 0;
+// 	// 		distance_y_filter = 0;
+// 	// 		move_target_distance_x = 0;
+// 	// 		if (move_target_distance_y > 0)  // it mean forward
+// 	// 		{
+// 	// 		move_target_distance_y = CORNER_Y;
+// 	// 		}
+// 	// 		else if (move_target_distance_y < 0) // it mean backward
+// 	// 		{
+// 	// 		move_target_distance_y = -CORNER_Y;
+// 	// 		}
+//     //   }
+//     //     else if (move_target_distance_y == 0) // it mean the robot is in the X aixs
+//     //   {
+// 	// 		distance_x_encoder = 0;
+// 	// 		distance_y_encoder = 0;
+// 	// 		distance_x = 0;
+// 	// 		distance_y = 0;
+// 	// 		distance_x_filter = 0;
+// 	// 		distance_y_filter = 0;
+// 	// 		move_target_distance_y = 0;
+// 	// 		if (move_target_distance_x > 0)  // it mean forward
+// 	// 		{
+// 	// 			move_target_distance_x = CORNER_X;
+// 	// 		}
+// 	// 		else if (move_target_distance_x < 0) // it mean backward
+// 	// 		{
+// 	// 			move_target_distance_x = -CORNER_X;
+// 	// 		}
+//     //   }
+//     }
+// }

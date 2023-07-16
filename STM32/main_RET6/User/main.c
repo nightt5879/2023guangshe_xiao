@@ -8,14 +8,17 @@
 #include "GPIO.h"
 
 #define TEST_PWM_DUTY 100
-#define TARGET_DISTANCE 80
+#define TARGET_DISTANCE 40
 #define TEST_SPEED 6
 #define DECELERATION_DISTANCE 20  // Decelerate when 10 units away from the target
 #define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
 #define STBLE_TIME 30
+#define MOVE_X 40
+#define MOVE_Y 50
 void stop_car(void);
 void init(void);
 void send_to_win(void);
+void move_control_main(float target_x, float target_y);
 
 float speeds[] = {TEST_SPEED, TEST_SPEED, TEST_SPEED, TEST_SPEED};
 uint8_t control_flags[] = {1,1,1,1};
@@ -38,40 +41,48 @@ extern float speed_x;
 extern float speed_y;
 extern float delta_v;
 extern uint8_t distance_flag; // the time in the thread in 0.01s
+extern float distance_x_filter,distance_y_filter,move_target_distance_x,move_target_distance_y;
+extern uint8_t corner_flag;
 //send the data to the computer
 float data[CH_COUNT]; 
 uint8_t send_flag = 0;
 float sys_clock;
 uint16_t test_flag = 0;
 float deceleration_factor;
-//gray input
-uint8_t rightModuleValues[5];
-uint8_t leftModuleValues[5];
 int main(void)
 {
 	init();
-//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
+	Delay_ms(1000);
+	//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
 	toggle_delta_v(1);
-//	control_move('x',TARGET_DISTANCE);
-	control_motor_speed(speeds, control_flags);
+	control_move(-MOVE_X,0);
+	// control_move(0,MOVE_Y);
+	// move_control_main(0,-40);
+	// move_control_main(40,0);
+//	Delay_s(1);
+//	 move_control_main(80,80);
+//	control_motor_speed(speeds, control_flags);	
+	distance_flag = 0;
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
-		//send the data to the computer
-		// read_gray_scale_module(rightModuleValues, leftModuleValues);
 		send_to_win();
-		// if (break_flag > 3)
+//		if(distance_flag == 1)
+//		{
+//			break_flag++;
+//			//control the car
+//			if(break_flag == 1) control_move(0,MOVE_Y);
+//			// else if (break_flag == 1)
+//		}
+
+		if (break_flag > 1)
+		{
+			stop_the_car();
+		}
+		// if (distance_y_encoder > TARGET_DISTANCE)
 		// {
-		// 	distance = 0;
-		// 	control_move('x',0);
-		// 	break;
-		// 	toggle_delta_v(0);
 		// 	stop_car();
 		// }
-		if (distance_y_encoder > TARGET_DISTANCE)
-		{
-			stop_car();
-		}
 	}
 	//stop the motor
 	stop_car();
@@ -115,9 +126,9 @@ void init(void)
 	init_pid_angle();
 	TIM7_Configuration();
 	//get the system clock
-	// RCC_ClocksTypeDef RCC_Clocks;
-	// RCC_GetClocksFreq(&RCC_Clocks);
-	// sys_clock = (float)RCC_Clocks.SYSCLK_Frequency;
+	RCC_ClocksTypeDef RCC_Clocks;
+	RCC_GetClocksFreq(&RCC_Clocks);
+	sys_clock = (float)RCC_Clocks.SYSCLK_Frequency;
 }
 
 void send_to_win(void)
@@ -142,6 +153,23 @@ void send_to_win(void)
 		data[14] = pid_fr.setpoint;
 		data[15] = pid_bl.setpoint;
 		data[16] = pid_br.setpoint;
+		data[17] = distance_x_filter;
+		data[18] = distance_y_filter;
+		data[19] = move_target_distance_x;
+		data[20] = move_target_distance_y;
 		send_data(data, CH_COUNT);
+	}
+}
+
+void move_control_main(float target_x, float target_y)
+{
+	while(distance_flag == 0)  //wait for the distance flag
+	{	
+	}
+	if (distance_flag == 1)
+	{
+		distance_flag = 0;
+		corner_flag = 1;
+		control_move(target_x,target_y);
 	}
 }
