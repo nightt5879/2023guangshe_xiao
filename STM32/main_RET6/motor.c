@@ -58,7 +58,7 @@ extern float distance_x;
 extern float distance_y;
 extern uint16_t break_flag;
 
-float distance_x_filter, distance_y_filter, angle_z_filter; //the filtter data
+float distance_x_filter, distance_y_filter; //the filtter data
 //angle pid return delta_v
 extern float delta_v;
 int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
@@ -76,7 +76,7 @@ PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
 float kp = 3, ki = 4, kd = 8;  // These values should be tuned for your specific system
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
-float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 4;  // These values should be tuned for your specific system
+float move_kp_y = 0.065, move_ki_y = 0.0, move_kd_y = 0;  // These values should be tuned for your specific system
 float move_kp_x = 0.225, move_ki_x = 0.0, move_kd_x = 2;  // These values should be tuned for your specific system
 
 float complementary_filter(float input1, float input2, float alpha);
@@ -503,7 +503,6 @@ void TIM6_IRQHandler(void)
         // complementary filter
         distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
         distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
-        angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
         pid_move_x.setpoint = move_target_distance_x;
         pid_move_y.setpoint = move_target_distance_y;
         pid_compute(&pid_move_x, distance_x_filter);
@@ -574,18 +573,18 @@ void cheak_corner(void)
         stop_the_car_no_clear_speed();
         control_move(CORNER_X,0);
     }
-    // else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
-    // {
-    //     corner_flag = 0;
-    //     stop_the_car_no_clear_speed();
-    //     control_move(0,CORNER_Y);
-    // }
-    // else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
-    // {
-    //     corner_flag = 0;
-    //     stop_the_car_no_clear_speed();
-    //     control_move(0,-CORNER_Y);
-    // }
+    else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
+    {
+        corner_flag = 0;
+        stop_the_car_no_clear_speed();
+        control_move(0,CORNER_Y);
+    }
+    else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
+    {
+        corner_flag = 0;
+        stop_the_car_no_clear_speed();
+        control_move(0,-CORNER_Y);
+    }
 }
 
 void stop_the_car(void)

@@ -43,6 +43,7 @@ extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
 extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
 extern uint8_t distance_flag;
 extern PID_Controller pid_move_x, pid_move_y;
+float angle_z_filter;
 
 void kalman_init(KalmanState* state, float q, float r, float p, float initial_value);
 float kalman_update(KalmanState* state, float measurement);
@@ -280,6 +281,7 @@ void TIM7_IRQHandler(void)
 		// get_6050_data();
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
 		angle_z -= gz * 0.001;
+		angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
 		//get the pid output
 		pid_compute_angle(&pid_angle, angle_z);
 		delta_v = pid_angle.output;

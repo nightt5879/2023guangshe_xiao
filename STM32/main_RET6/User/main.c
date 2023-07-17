@@ -14,7 +14,7 @@
 #define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
 #define STBLE_TIME 30
 #define MOVE_X 40
-#define MOVE_Y 50
+#define MOVE_Y 30
 void stop_car(void);
 void init(void);
 void send_to_win(void);
@@ -53,10 +53,12 @@ int main(void)
 {
 	init();
 	Delay_ms(1000);
+	mpu_6050_corretion();
+	Delay_ms(1000);
 	//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
 	toggle_delta_v(1);
-	control_move(-MOVE_X,0);
-	// control_move(0,MOVE_Y);
+//	control_move(-MOVE_X,0);
+//	control_move(0,MOVE_Y);
 	// move_control_main(0,-40);
 	// move_control_main(40,0);
 //	Delay_s(1);

@@ -21,6 +21,7 @@ void toggle_delta_v(int enable);
 void control_move(float target_disatance_1, float target_distance_2);
 void close_to_target(void);
 void stop_the_car(void);
+float complementary_filter(float input1, float input2, float alpha);
 
 
 #define MOTOR_FL 1
@@ -44,7 +45,7 @@ void stop_the_car(void);
 #define ALPHA_Y 1.0f
 #define ALPHA_Z 0.0f
 #define CORNER_X 8.0f
-#define CORNER_Y 3.5f
+#define CORNER_Y 4.0f
 /**
   * @brief  initialize the pid control structure
   * @param  None
