@@ -144,6 +144,14 @@ class FineTune:
                 continue
             index = i
             break
+        index2 = None
+        for i in range(200):
+            if (scan_img[i, :] == 255).all() and (scan_img[:, i] == 255).all() and (scan_img[399 - i, :] == 255).all() and (
+                    scan_img[:, 399 - i] == 255).all():
+                continue
+            index2 = i
+            break
+        index = min([index,index2])
         return img[index:400-index,index:400-index],  scan_img[index:400-index,index:400-index]
 
     def get_angle_dis(self, now_xy, img, angle_range=180, cal_dis=False,
