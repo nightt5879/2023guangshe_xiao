@@ -22,11 +22,7 @@ def get_obs(small_labyrinth_file="./img/small_labyrinth.png"):
     return obs
 
 
-# if __name__ == '__main__':
-#     obs = get_obs(small_labyrinth_file="../img/small_labyrinth.png")
-# else:
-#     obs = get_obs()
-obs = get_obs()
+
 
 
 class Env:
@@ -563,6 +559,9 @@ def isCorner(distance):
 
 class pathPlaner:
     def __init__(self, mine_points, our_color):
+        # 获取墙壁信息
+        global obs
+        obs = get_obs()
         # 把宝藏位置转换成我们所需的正确的宝藏格式
         self.eight_mines = [(x * 2 - 1, (11 - y) * 2 - 1) for (x, y) in mine_points]
         self.our_color = our_color
