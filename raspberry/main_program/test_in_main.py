@@ -72,16 +72,16 @@ def select_team():
     :return: red or blue
     """
     team_of = ""
-    img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/select.jpg")
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/select.jpg")
     show_lcd(img_start)  # show the picture of the select team
     select_button = button_with_wait()
     if select_button == "one_press":
-        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red.jpg")
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/red.jpg")
         show_lcd(img_start)  # show the picture of the select team
         team_of = "red"
     elif select_button == "two_press":
         team_of = "blue"
-        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue.jpg")
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/blue.jpg")
         show_lcd(img_start)  # show the picture of the select team
     return team_of
 
