@@ -216,6 +216,8 @@ def get_loc():
     cap = cv2.VideoCapture(0)
     while True:
         success, img = cap.read()
+        if success is False:
+            continue
         show_lcd(img)
         flag, points = find_scaling_points(img)
         if flag:
@@ -242,7 +244,7 @@ def get_loc():
                     #     # 如果只是单击以下按键，那就跳过这张图片继续进行识别
                     #     continue
                     # show_lcd(cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/success.jpg"))
-                    return loc
+                    return loc, new_img3
         cv2.waitKey(25)  # 按数字0就是前进1帧
 
 

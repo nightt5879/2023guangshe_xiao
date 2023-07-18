@@ -14,7 +14,8 @@ import cv2
 
 from .get_map import show_lcd
 
-path = os.path.join(os.getcwd(), "numbers")
+path = os.path.join(os.getcwd(), "util/numbers")
+# print(path)
 
 
 def countdown(n: int):
