@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="pi@192.168.137.6:22 password (4)" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="pi@192.168.137.6:22 password (5)" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="pi@192.168.137.6:22 password">
@@ -25,6 +25,13 @@
         </serverdata>
       </paths>
       <paths name="pi@192.168.137.6:22 password (4)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/pi/Desktop/main_program" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="pi@192.168.137.6:22 password (5)">
         <serverdata>
           <mappings>
             <mapping deploy="/home/pi/Desktop/main_program" local="$PROJECT_DIR$" />
