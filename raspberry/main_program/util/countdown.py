@@ -12,7 +12,7 @@ import time
 
 import cv2
 
-from ..util.get_map import show_lcd
+from .get_map import show_lcd
 
 path = os.path.join(os.getcwd(), "numbers")
 

@@ -213,7 +213,7 @@ def get_loc():
     T = Treasure(1)
 
     # cap = cv2.VideoCapture("./videos/output.avi")
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     while True:
         success, img = cap.read()
         show_lcd(img)
