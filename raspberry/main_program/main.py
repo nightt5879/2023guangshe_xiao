@@ -1,3 +1,4 @@
+from util.countdown import countdown
 from util.get_map import get_loc
 from util.get_map import show_lcd
 from util.get_path import pathPlaner
@@ -172,8 +173,9 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         PWM = PID.OneDin(Now)
         pwm = int(PWM)
         # print(pwm)
-        sum = int((Sum[Line - 101] + Sum[Line - 102] + Sum[Line - 103] + Sum[Line - 104] + Sum[Line - 105] + Sum[Line - 106] +
-                   Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        sum = int(
+            (Sum[Line - 101] + Sum[Line - 102] + Sum[Line - 103] + Sum[Line - 104] + Sum[Line - 105] + Sum[Line - 106] +
+             Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         if sum >= SumMax and break_flag > 40:  # 不要再刚转弯开始巡线就break
             max_time += 1
             # c.car_stop()
@@ -203,6 +205,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         Cam.Delay(1)
     # Cam.Release()
     # print('Tracking done')
+
 
 def right_90():
     """
@@ -316,6 +319,7 @@ def classify_treasure(team_of="red"):
         class_of = "fake"
     return class_of, color_of_treasure
 
+
 def hit_the_treasure(hit_treasure_time):
     """
     撞击宝藏
@@ -331,12 +335,14 @@ def hit_the_treasure(hit_treasure_time):
     c.car_stop()
     time.sleep(0.5)
 
+
 if __name__ == '__main__':
     team = select_team()  # 本次比赛的队伍颜色
     mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
+    countdown(10)  # 倒计时
     planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-    print(mine_points)
-    print(planer.paths)  # 初始化环节完成
+    # print(mine_points)
+    # print(planer.paths)  # 初始化环节完成
     # instantiate all functions.
     c = move.Car()
     i = move.Infrared()
@@ -393,16 +399,16 @@ if __name__ == '__main__':
             PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax + 5000, SumMin, 400, break_mod=1, break_time=break_time_long,
                             user_max_time=5)
             # detect the treasure
-            treasure,color = classify_treasure()
+            treasure, color = classify_treasure()
             if color == team:  # 颜色相同，优化路径
                 planer.update_paths()
             print(treasure)
             if treasure == "fake":  # 掉头就跑
-                hit_flag = "no_hit" # no hit the treasure
+                hit_flag = "no_hit"  # no hit the treasure
                 left_90_with_stop()
                 left_90_with_stop(0.43)
             elif treasure == "true":  # hit the treasure
-                hit_flag = "hit" # hit the treasure
+                hit_flag = "hit"  # hit the treasure
                 PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=350,
                                 break_mod=1, break_time=break_time_short + 30)
                 c.car_stop()
@@ -414,7 +420,7 @@ if __name__ == '__main__':
             c.car_stop()
             time.sleep(0.3)
             # 观察宝藏
-            treasure,color = classify_treasure()
+            treasure, color = classify_treasure()
             if color == team:  # 颜色相同，优化路径
                 planer.update_paths()
             print(treasure)
@@ -435,4 +441,4 @@ if __name__ == '__main__':
 
                 c.car_forward(400, 400)
                 time.sleep(0.3)
-                c.car_stop() # 等待下一次指令
+                c.car_stop()  # 等待下一次指令

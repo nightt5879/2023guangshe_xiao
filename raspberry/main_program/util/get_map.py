@@ -6,9 +6,12 @@ from util import LCD_2inch4
 from PIL import Image, ImageFilter
 import RPi.GPIO as GPIO
 import time
+
 disp = LCD_2inch4.LCD_2inch4()
 disp.Init()
 disp.clear()
+
+
 def perspective_trans(corner: list, map_img):
     """
     透视变换
@@ -156,18 +159,20 @@ def find_squares(map_img):
     print("我找到了方块数量：", sum, squares)
     return bin, blur, output_img
 
+
 def show_lcd(frame):
     image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     image = image.resize((320, 240), Image.ANTIALIAS)
     image = image.filter(ImageFilter.SHARPEN)
     disp.ShowImage(image)
 
+
 def button_input():
     BUTTON_PIN = 18  # 按钮连接的GPIO口
     # 选择BCM模式
     GPIO.setmode(GPIO.BCM)
     # 设置GPIO口为输入
-    GPIO.setup(BUTTON_PIN, GPIO.IN,pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     press_flag = 0
     press_time = 0
@@ -176,7 +181,7 @@ def button_input():
         # if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
         #     print('Button is not pressed')
         if GPIO.input(BUTTON_PIN) == GPIO.LOW:
-            time.sleep(0.1) # 按键消除抖动
+            time.sleep(0.1)  # 按键消除抖动
             if GPIO.input(BUTTON_PIN) == GPIO.LOW:
                 press_flag = 1
                 # print('Button is pressed')
@@ -196,6 +201,7 @@ def button_input():
         time.sleep(0.1)
     # GPIO.cleanup()  # 不能清楚因为本来有使用GPIO
     return button
+
 
 def get_loc():
     """
@@ -222,20 +228,23 @@ def get_loc():
                     show_lcd(new_img3)
                     # cv2.imshow("treasure", new_img3)
                     # key = input("输入y表示接受这个识别结果")
-                    key = button_input()
-                    if key == "short_press":
-                        # 长按就表示这个图像是可以用的，那就使用这次识别出来的坐标
-                        # print(loc)
-                        img_success = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/success.jpg")
-                        if img_success is None:
-                            print("未成功加载图片")
-                        show_lcd(img_success)
-                        return loc
-
-                    elif key == "long_press":
-                        # 如果只是单击以下按键，那就跳过这张图片继续进行识别
-                        continue
+                    # key = button_input()
+                    # if key == "short_press":
+                    #     # 长按就表示这个图像是可以用的，那就使用这次识别出来的坐标
+                    #     # print(loc)
+                    #     img_success = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/success.jpg")
+                    #     if img_success is None:
+                    #         print("未成功加载图片")
+                    #     show_lcd(img_success)
+                    #     return loc
+                    #
+                    # elif key == "long_press":
+                    #     # 如果只是单击以下按键，那就跳过这张图片继续进行识别
+                    #     continue
+                    # show_lcd(cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/success.jpg"))
+                    return loc
         cv2.waitKey(25)  # 按数字0就是前进1帧
+
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture("output.avi")
