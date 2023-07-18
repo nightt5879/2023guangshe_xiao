@@ -4,6 +4,8 @@ from util.get_map import show_lcd
 from util.get_path2 import pathPlaner
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
+from util.map_rec import MapArchRecognizer
+
 # below is the other import
 import cv2
 import time
@@ -90,6 +92,12 @@ if __name__ == '__main__':
     GPIO_init()  # 初始化GPIO
     team = select_team() # 选择队伍
     mine_points,mine_img = get_loc()  # 摄像头捕获视频识别出宝藏位置
+     # 实例化一个地图架构解析对象
+    mapAnalysiser = MapArchRecognizer(mine_img)
+    # 转换地图得到21 * 21的矩阵
+    map_array = mapAnalysiser.analysis_map()
+    # 把识别出来的21 * 21矩阵保存起来（这一步必须在planner对象初始化之前完成）
+    cv2.imwrite("./imgs/small_labyrinth.png", map_array)
     time.sleep(1)
     planer = pathPlaner(mine_points,team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
     print(planer.paths_list)
