@@ -34,12 +34,13 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "E:/robot/project/2023guangshe_xiao/raspberry/main_program",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "vcs.Git",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -57,6 +58,7 @@
       <workItem from="1689646764019" duration="1344000" />
       <workItem from="1689648209161" duration="496000" />
       <workItem from="1689648711047" duration="4234000" />
+      <workItem from="1689760980797" duration="3916000" />
     </task>
     <servers />
   </component>

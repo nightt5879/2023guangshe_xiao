@@ -49,6 +49,7 @@ uint8_t send_flag = 0;
 float sys_clock;
 uint16_t test_flag = 0;
 float deceleration_factor;
+uint8_t test_id;
 int main(void)
 {
 	init();
@@ -68,6 +69,7 @@ int main(void)
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
+		test_id = MPU6050_GetID();
 		send_to_win();
 //		if(distance_flag == 1)
 //		{
@@ -159,6 +161,7 @@ void send_to_win(void)
 		data[18] = distance_y_filter;
 		data[19] = move_target_distance_x;
 		data[20] = move_target_distance_y;
+		data[21] = test_id;
 		send_data(data, CH_COUNT);
 	}
 }

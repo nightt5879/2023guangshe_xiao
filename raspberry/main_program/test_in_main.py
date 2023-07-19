@@ -1,9 +1,12 @@
 # 包的导入
+import sys
+sys.path.insert(0, "/home/pi/.local/lib/python3.7/site-packages")
 import os
 os.chdir("/home/pi/Desktop/main_program")
 from util.get_map import get_loc
 from util.get_map import show_lcd
 from util.get_path2 import pathPlaner
+from util.lidar3 import Lidar
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
 from util.map_rec import MapArchRecognizer
@@ -133,7 +136,15 @@ def thread_rotating():
                 # print(rotate_angle)
                 servo_bottom.set_angle(rotate_angle - 180)
         time.sleep(0.5)
-            
+
+# 回调函数，会在引脚状态改变时被调用
+def callback_function(channel):
+    print('Detected edge on channel %s' % channel)
+    with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
+        pass
+    os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
+
+
 if __name__ == '__main__':
     GPIO_init()  # 初始化GPIO
     # 启动舵机子线程
@@ -141,6 +152,7 @@ if __name__ == '__main__':
     t2 = threading.Thread(target=thread_nodding)
     t1.start()
     t2.start()
+    # 查看状态
     team = select_team() # 选择队伍
     control_servo(servo_top, 90, 90)
     mine_points,mine_img = get_loc()    # 摄像头捕获视频识别出宝藏位置
@@ -150,5 +162,8 @@ if __name__ == '__main__':
     time.sleep(1)
     planer = pathPlaner(mine_points,team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
     print(planer.paths_list)
-    # countdown(10)  # 倒计时
+    countdown(10)  # 倒计时
+    lidar = Lidar(img=map_array,model_path='./model/ultra_simple')  # 初始化雷达
+    GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
+
     # print(1)

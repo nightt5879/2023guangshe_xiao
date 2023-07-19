@@ -2,7 +2,7 @@ from os import popen
 from time import time
 import math
 import numpy as np
-from fine_tune import FineTune
+from .fine_tune import FineTune
 import cv2
 
 

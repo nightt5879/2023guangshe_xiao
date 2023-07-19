@@ -51,19 +51,19 @@ class HalfCircleServo(Servo):
         if self.target != angle:
             self.target = angle
         self.pwm.ChangeDutyCycle(2.5 + 10 * angle / 180)
+
+        # if the time too long, you can not use the two code below
         time.sleep(0.5)
         self.pwm.ChangeDutyCycle(0)
+
         # update the servo's angle
         self.angle = angle
 
     def get_angle(self):
         return self.angle
-    
-    
-def control_servo(vertical_servo, vertical_angle: int, horizontal_angle: int):
-    global rotate_angle
-    vertical_servo.target = vertical_angle
-    rotate_angle = horizontal_angle
+
+
+rotate_angle = 0
 
 
 if __name__ == '__main__':
@@ -101,15 +101,16 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BCM)
 
     # define the three servo
-    servo1 = HalfCircleServo(4)
-    servo2 = HalfCircleServo(17)
-    servo3 = HalfCircleServo(27)
+    servo1 = HalfCircleServo(24)
+    servo2 = HalfCircleServo(23)
+    servo3 = HalfCircleServo(18)
 
     # set the servo's rotate angle
     servo1.target = 90
     servo2.target = 0
     servo3.target = 0
-    rotate_angle = 0
+
+
 
     # create two threads to control the servo and read the angle
     t1 = threading.Thread(target=thread_rotating)
@@ -120,12 +121,13 @@ if __name__ == '__main__':
     """
     the process of the control other parts and set the servo's angle
     """
-    
+    control_servo(servo1, 90, 90)
     while True:
+
         # set the servo's vertical angle
         head_angle = int(input("please input the head angle: "))
         # only set the servo1's angle, and remain the rotate angle unchanged
-        control_servo(servo1, head_angle, rotate_angle)
+        # control_servo(servo1, head_angle, rotate_angle)
         # set the servo's rotate angle
         rotate_angle = int(input("please input the rotate angle: "))
         # only set the servo2 and servo3's angle, and remain the servo1's angle unchanged
