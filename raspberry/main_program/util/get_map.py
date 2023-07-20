@@ -213,7 +213,7 @@ def get_loc():
     T = Treasure(1)
 
     # cap = cv2.VideoCapture("./videos/output.avi")
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(-1) # -1就是使用默认摄像头 防止报错
     while True:
         success, img = cap.read()
         if success is False:

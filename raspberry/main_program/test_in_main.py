@@ -23,12 +23,15 @@ from move import path
 from util.countdown import countdown
 from util import servo
 import threading
+import pickle
+
 # 全局参数
 BUTTON_INPUT = 21  # 按钮连接的GPIO口
 SERVO_PIN_TOP = 24  # 云台舵机1连接的GPIO口
 SERVO_PIN_MEDIUM = 23  # 云台舵机2连接的GPIO口
 SERVO_PIN_BOTTOM = 18  # 云台舵机3连接的GPIO口
 rotate_angle = 0  # 云台旋转的角度
+TOP_ANGLE = 120 # 看宝藏的上面舵机角度
 
 
 def GPIO_init():
@@ -86,6 +89,16 @@ def button_with_wait():
         time.sleep(0.1)
     # GPIO.cleanup()  lcd需要使用不能清除GPIO口
     return button
+def wait_the_press():
+    """
+    等待按键按下
+    """
+    while True:
+        if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
+            time.sleep(0.1)  # 按键消除抖动
+            if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
+                    print('Button is pressed')
+                    break
 
 
 def select_team():
@@ -146,6 +159,7 @@ def callback_function(channel):
 
 
 if __name__ == '__main__':
+    GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
     GPIO_init()  # 初始化GPIO
     # 启动舵机子线程
     t1 = threading.Thread(target=thread_rotating)
@@ -153,17 +167,77 @@ if __name__ == '__main__':
     t1.start()
     t2.start()
     # 查看状态
-    team = select_team() # 选择队伍
-    control_servo(servo_top, 90, 90)
-    mine_points,mine_img = get_loc()    # 摄像头捕获视频识别出宝藏位置
-    mapAnalysiser = MapArchRecognizer(mine_img)      # 实例化一个地图架构解析对象
-    map_array = mapAnalysiser.analysis_map()        # 转换地图得到21 * 21的矩阵
-    cv2.imwrite("./imgs/small_labyrinth.png", map_array)     # 把识别出来的21 * 21矩阵保存起来（这一步必须在planner对象初始化之前完成）
-    time.sleep(1)
-    planer = pathPlaner(mine_points,team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
+    if os.path.exists("restart.txt"):
+        print("中断开始")
+        # 读取宝藏位置和队伍颜色
+        with open('mine_points.pkl', 'rb') as f:
+            mine_points = pickle.load(f)
+        with open('team.pkl', 'rb') as f:
+            team = pickle.load(f)
+        mine_img = cv2.imread("mine_img.png")  # 读取"mine_img.png"文件
+        # 读取完成后是一样的操作
+        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+        os.remove("restart.txt")  # 删除"restart.txt"文件
+        countdown(3)  # 倒计时
+    else:
+        print("正常的开始")
+        team = select_team()  # 选择队伍
+        control_servo(servo_top, 90, 90)
+        mine_points, mine_img = get_loc()  # 摄像头捕获视频识别出宝藏位置
+        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+        # 下面是保存的部分
+        cv2.imwrite("mine_img.png", mine_img)  # 把识别出来的地图保存起来
+        with open('mine_points.pkl', 'wb') as f:
+            pickle.dump(mine_points, f)
+        with open('team.pkl', 'wb') as f:
+            pickle.dump(team, f)
+        # 下面是正常读取部分
+        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+        countdown(2)  # 倒计时
+    # time.sleep(1)
     print(planer.paths_list)
-    countdown(10)  # 倒计时
+    print(mine_points)
+    print(team)
     lidar = Lidar(img=map_array,model_path='./model/ultra_simple')  # 初始化雷达
+    # MPU6050校准之类的工作
+    # 准备出发
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
+    show_lcd(img_start)
+    wait_the_press()  # 等待按键
+    countdown(2)  # 倒计时
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
+    show_lcd(img_start)
     GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
+    while planer.paths_list:
+        path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
+        action = path['action']
+        direct = path['direct']
+        print(direct)
+        if direct == "上":
+            control_servo(servo_top, TOP_ANGLE, 180)
+        elif direct == "下":
+            control_servo(servo_top, TOP_ANGLE, 0)
+        elif direct == "左":
+            control_servo(servo_top, TOP_ANGLE, 270)
+        elif direct == "右":
+            control_servo(servo_top, TOP_ANGLE, 90)
+        while action:  # 执行一个路径
+            action_move = action.pop(0)
+            print(action_move)
+            time.sleep(1)
+        # 宝藏识别
+        # if true  撞宝藏
+        # elif fake 不撞
+        # 更新路劲
+        # 保存此时的宝藏位置
+        planer.update_paths()
+        print (mine_points)
+
+        time.sleep(2)
 
     # print(1)
