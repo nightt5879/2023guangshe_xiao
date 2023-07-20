@@ -156,11 +156,13 @@ def callback_function(channel):
     GPIO.remove_event_detect(BUTTON_INPUT)
     with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
-    os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
+    os.execl(sys.executable, sys.executable, *sys.argv)
+    # os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
 
+# def main():
 
 if __name__ == '__main__':
-    # GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
+    GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
     GPIO_init()  # 初始化GPIO
     # 启动舵机子线程
     t1 = threading.Thread(target=thread_rotating)
