@@ -5,7 +5,7 @@ import os
 os.chdir("/home/pi/Desktop/main_program")
 from util.get_map import get_loc
 from util.get_map import show_lcd
-from util.get_path2 import pathPlaner
+from util.get_path1 import pathPlaner
 from util.lidar3 import Lidar
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
@@ -153,13 +153,14 @@ def thread_rotating():
 # 回调函数，会在引脚状态改变时被调用
 def callback_function(channel):
     print('Detected edge on channel %s' % channel)
+    GPIO.remove_event_detect(BUTTON_INPUT)
     with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
     os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
 
 
 if __name__ == '__main__':
-    GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
+    # GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
     GPIO_init()  # 初始化GPIO
     # 启动舵机子线程
     t1 = threading.Thread(target=thread_rotating)
@@ -213,7 +214,7 @@ if __name__ == '__main__':
     img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
     show_lcd(img_start)
     GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
-    while planer.paths_list:
+    while True:
         path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
         action = path['action']
         direct = path['direct']
@@ -230,14 +231,21 @@ if __name__ == '__main__':
             action_move = action.pop(0)
             print(action_move)
             time.sleep(1)
+
         # 宝藏识别
         # if true  撞宝藏
         # elif fake 不撞
+        if len(planer.paths_list) == 0:
+            break
         # 更新路劲
         # 保存此时的宝藏位置
-        planer.update_paths()
-        print (mine_points)
+        # mine = input("请输入宝藏情况：")
+        planer.update(mine = 0)
+        print(planer.ori_mines)
+        print(mine_points)
+        # 转换成新的mine_points
+        # 保存新的mine_points
 
         time.sleep(2)
-
+    print("test done")
     # print(1)
