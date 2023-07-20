@@ -5,7 +5,8 @@
 
 extern uint8_t Serial_TxPacket[];
 extern uint8_t Serial_RxPacket[];
-
+void UART2_Init(void);
+void UART2_SendByte(uint8_t byte);
 void Serial_Init(void);
 void Serial_SendByte(uint8_t Byte);
 void Serial_SendArray(uint8_t *Array, uint16_t Length);

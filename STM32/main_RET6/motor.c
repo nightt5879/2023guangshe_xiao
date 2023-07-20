@@ -503,22 +503,52 @@ void TIM6_IRQHandler(void)
         // complementary filter
         distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
         distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
-        pid_move_x.setpoint = move_target_distance_x;
-        pid_move_y.setpoint = move_target_distance_y;
-        pid_compute(&pid_move_x, distance_x_filter);
-        pid_compute(&pid_move_y, distance_y_filter);
+        if (distance_x_uart == 0 && distance_y_uart == 0)  // it mean move to the corner
+        {
+          if (fl_target_speed > 0 && fr_target_speed > 0 && bl_target_speed > 0 && br_target_speed > 0) // it mean forward
+          {
+              //cheak the corner, if the corner stop the car
+                //stop the car
+                //finish the one move, uart send to the raspberry
+              //cheak the gray input if out of the line correction the car
+          }
+          else if (fl_target_speed < 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed < 0)
+          {
+              distance_x = -distance_x_filter;
+              distance_y = -distance_y_filter;
+          }
+          else if (fl_target_speed > 0 && fr_target_speed < 0 && bl_target_speed > 0 && br_target_speed < 0)
+          {
+              distance_x = distance_x_filter;
+              distance_y = -distance_y_filter;
+          }
+          else if (fl_target_speed < 0 && fr_target_speed > 0 && bl_target_speed < 0 && br_target_speed > 0)
+          {
+              distance_x = -distance_x_filter;
+              distance_y = distance_y_filter;
+          }
+        }
+        else  //it mean move a distance and then stop
+        {
+
+        }
+        // below are the distance PID control we dont need it right now
+        // pid_move_x.setpoint = move_target_distance_x;
+        // pid_move_y.setpoint = move_target_distance_y;
+        // pid_compute(&pid_move_x, distance_x_filter);
+        // pid_compute(&pid_move_y, distance_y_filter);
         // if the distance is less than the threshold, then stop the motor
         //here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
-        fl_target_speed = pid_move_y.output + pid_move_x.output;
-        fr_target_speed = pid_move_y.output - pid_move_x.output;
-        bl_target_speed = pid_move_y.output - pid_move_x.output;
-        br_target_speed = pid_move_y.output + pid_move_x.output;
-        if (corner_flag)
-       {
-           cheak_corner();
-       }
+        // fl_target_speed = pid_move_y.output + pid_move_x.output;
+        // fr_target_speed = pid_move_y.output - pid_move_x.output;
+        // bl_target_speed = pid_move_y.output - pid_move_x.output;
+        // br_target_speed = pid_move_y.output + pid_move_x.output;
+      //   if (corner_flag)
+      //  {
+      //      cheak_corner();
+      //  }
         // it is close to the target
-        close_to_target();
+        // close_to_target();
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }

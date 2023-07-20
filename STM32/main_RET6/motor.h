@@ -24,6 +24,8 @@ void stop_the_car(void);
 float complementary_filter(float input1, float input2, float alpha);
 
 
+extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed; // send the speed to the uart
+extern int16_t distance_x_uart, distance_y_uart; // get the disatnce target from the uart
 #define MOTOR_FL 1
 #define MOTOR_FR 2
 #define MOTOR_BL 3
@@ -60,5 +62,6 @@ typedef struct
     float output;           // the add output
 } PID_Controller;
 extern PID_Controller pid_fl, pid_fr, pid_bl, pid_br;
+
 	
 #endif

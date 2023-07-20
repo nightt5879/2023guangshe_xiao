@@ -129,6 +129,8 @@ void init(void)
 	//init the angle pid and interrupt init (1ms)
 	init_pid_angle();
 	TIM7_Configuration();
+	//serial to the raspberry
+	Serial_Init();
 	//get the system clock
 	RCC_ClocksTypeDef RCC_Clocks;
 	RCC_GetClocksFreq(&RCC_Clocks);

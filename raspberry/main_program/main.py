@@ -345,6 +345,7 @@ if __name__ == '__main__':
     # print(planer.paths)  # 初始化环节完成
     # instantiate all functions.
     c = move.Car()
+    print("初始化成功")
     i = move.Infrared()
     S = gpio.Screen()
     Cam = Vision.Camera(0, 320, 240)

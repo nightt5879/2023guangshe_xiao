@@ -6,6 +6,7 @@
         "misc.h": "c",
         "mpu6050.h": "c",
         "6050control.h": "c",
-        "uart.h": "c"
+        "uart.h": "c",
+        "iterator": "c"
     }
 }

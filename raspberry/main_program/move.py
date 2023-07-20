@@ -6,7 +6,7 @@ class Car:
         """
         init the car
         """
-        self.car_com1 = serial.Serial("/dev/ttyAMA2", 115200)  # init the car com
+        self.car_com1 = serial.Serial("/dev/ttyAMA1", 115200)  # init the car com
         self.data = [0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFE]  # init the data
         """
         there are eight digits in the data, first 0xFF is the heda, 0xFE is the end
@@ -122,13 +122,66 @@ class Car:
         self.data[2] = 0x00
         self.car_com1.write(self.data)
 
-    def car_cheak_data(self,data_byte):
+    def car_cheak_data(self):
         """
         the car cheak data
         :param data_byte: the data byte
         """
         received_data = self.car_com1.read()
         print(received_data)
+
+    def car_forward_mecanum(self, forward_speed, correction_speed, distance):
+        """
+        the car forward with mecanum wheel
+        :param forward_speed: the speed of forward
+        :param correction_speed: the speed of correction
+        :parm distance: the distance of move, if it's 0 it mean move until the corner
+        """
+        self.data[1] = 0x07
+        self.data[2] = distance
+        self.data[3] = forward_speed
+        self.data[4] = correction_speed
+        self.car_com1.write(self.data)
+
+    def car_backward_mecaum(self, backward_speed, correction_speed, distance):
+        """
+        the car backward with mecanum wheel
+        :param backward_speed: the speed of backward
+        :param correction_speed: the speed of correction
+        :parm distance: the distance of move, if it's 0 it mean move until the corner
+        """
+        self.data[1] = 0x08
+        self.data[2] = distance
+        self.data[3] = backward_speed
+        self.data[4] = correction_speed
+        self.car_com1.write(self.data)
+
+    def car_move_left_mecaum(self, move_left_speed, correction_speed, distance):
+        """
+        the car moveleft with mecanum wheel
+        :param moveleft_speed: the speed of moveleft
+        :param correction_speed: the speed of correction
+        :parm distance: the distance of move, if it's 0 it mean move until the corner
+        """
+        self.data[1] = 0x09
+        self.data[2] = distance
+        self.data[3] = move_left_speed
+        self.data[4] = correction_speed
+        self.car_com1.write(self.data)
+
+    def car_move_right_mecaum(self, move_right_speed, correction_speed, distance):
+        """
+        the car moveright with mecanum wheel
+        :param moveright_speed: the speed of moveright
+        :param correction_speed: the speed of correction
+        :parm distance: the distance of move, if it's 0 it mean move until the corner
+        """
+        self.data[1] = 0x0A
+        self.data[1] = 0x07
+        self.data[2] = distance
+        self.data[3] = move_right_speed
+        self.data[4] = correction_speed
+        self.car_com1.write(self.data)
 class Infrared:
     def __init__(self):
         """

@@ -185,6 +185,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>test_flag_tim7,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Serial_RxPacket</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

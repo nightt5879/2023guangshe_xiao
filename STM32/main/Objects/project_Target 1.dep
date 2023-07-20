@@ -749,7 +749,7 @@ I (.\Library\stm32f10x_usart.h)(0x649E8D2D)
 I (.\Library\stm32f10x_wwdg.h)(0x649E8D2D)
 I (.\Library\misc.h)(0x649E8D2D)
 F (.\Library\stm32f10x_wwdg.h)(0x649E8D2D)()
-F (.\User\main.c)(0x649E8D2D)(--gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\Library -I .\User-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_MD_VL -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\User\main.c)(0x64B8DF59)(--gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\Library -I .\User-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_MD_VL -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (.\Start\stm32f10x.h)(0x649E8D2D)
 I (.\Start\core_cm3.h)(0x649E8D2D)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
@@ -780,7 +780,7 @@ I (.\Library\stm32f10x_wwdg.h)(0x649E8D2D)
 I (.\Library\misc.h)(0x649E8D2D)
 I (User\Delay.h)(0x649E8D2D)
 I (User\OLED.h)(0x649E8D2D)
-I (User\Serial.h)(0x649E8D2D)
+I (User\Serial.h)(0x64B8CE9C)
 I (E:\keil_v5\ARM\ARMCC\include\stdio.h)(0x5E8E3CC2)
 F (.\User\stm32f10x_conf.h)(0x649E8D2D)()
 F (.\User\stm32f10x_it.c)(0x649E8D2D)(--gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\Library -I .\User-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_MD_VL -DUSE_STDPERIPH_DRIVER-o .\objects\stm32f10x_it.o --omf_browse .\objects\stm32f10x_it.crf --depend .\objects\stm32f10x_it.d)
@@ -996,7 +996,7 @@ I (.\Library\stm32f10x_wwdg.h)(0x649E8D2D)
 I (.\Library\misc.h)(0x649E8D2D)
 I (User\Timer.h)(0x649E8D2D)
 I (User\CountSensor.h)(0x649E8D2D)
-F (.\User\Serial.c)(0x649E8D2D)(--gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\Library -I .\User-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_MD_VL -DUSE_STDPERIPH_DRIVER-o .\objects\serial.o --omf_browse .\objects\serial.crf --depend .\objects\serial.d)
+F (.\User\Serial.c)(0x64B8DE84)(--gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I .\Start -I .\Library -I .\User-IE:\keil_v5\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="538" -DSTM32F10X_MD_VL -DUSE_STDPERIPH_DRIVER-o .\objects\serial.o --omf_browse .\objects\serial.crf --depend .\objects\serial.d)
 I (.\Start\stm32f10x.h)(0x649E8D2D)
 I (.\Start\core_cm3.h)(0x649E8D2D)
 I (E:\keil_v5\ARM\ARMCC\include\stdint.h)(0x5E8E3CC2)
@@ -1025,6 +1025,6 @@ I (.\Library\stm32f10x_tim.h)(0x649E8D2D)
 I (.\Library\stm32f10x_usart.h)(0x649E8D2D)
 I (.\Library\stm32f10x_wwdg.h)(0x649E8D2D)
 I (.\Library\misc.h)(0x649E8D2D)
-I (User\Serial.h)(0x649E8D2D)
+I (User\Serial.h)(0x64B8CE9C)
 I (E:\keil_v5\ARM\ARMCC\include\stdio.h)(0x5E8E3CC2)
 I (E:\keil_v5\ARM\ARMCC\include\stdarg.h)(0x5E8E3CC2)
