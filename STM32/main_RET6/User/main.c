@@ -42,7 +42,12 @@ extern float speed_y;
 extern float delta_v;
 extern uint8_t distance_flag; // the time in the thread in 0.01s
 extern float distance_x_filter,distance_y_filter,move_target_distance_x,move_target_distance_y;
+extern float fr_target_speed, fl_target_speed, br_target_speed, bl_target_speed;
 extern uint8_t corner_flag;
+extern uint8_t right_modle[], left_modle[], front_modle[], back_modle[];
+extern int16_t distance_x_uart, distance_y_uart, correction_speed; // get the disatnce target from the uart
+extern uint8_t one_move_flag;
+uint8_t speed_test;
 //send the data to the computer
 float data[CH_COUNT]; 
 uint8_t send_flag = 0;
@@ -53,31 +58,43 @@ uint8_t test_id;
 int main(void)
 {
 	init();
-	Delay_ms(1000);
-	mpu_6050_corretion();
-	Delay_ms(1000);
+	// Delay_ms(1000);
+	// mpu_6050_corretion();
+	// Delay_ms(1000);
 	//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
-	toggle_delta_v(1);
-//	control_move(-MOVE_X,0);
-//	control_move(0,MOVE_Y);
+	toggle_delta_v(0);
+	// control_move(MOVE_X,0);
+	// control_move(0,-MOVE_Y);
 	// move_control_main(0,-40);
 	// move_control_main(40,0);
 //	Delay_s(1);
 //	 move_control_main(80,80);
 //	control_motor_speed(speeds, control_flags);	
-	distance_flag = 0;
+	// distance_flag = 0;
+	// speed_test = 3;
+	// fl_target_speed = 3;
+	// fr_target_speed = 3;
+	// bl_target_speed = 3;
+	// br_target_speed = 3;
+
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
 		test_id = MPU6050_GetID();
 		send_to_win();
-//		if(distance_flag == 1)
-//		{
-//			break_flag++;
-//			//control the car
-//			if(break_flag == 1) control_move(0,MOVE_Y);
-//			// else if (break_flag == 1)
-//		}
+		read_gray_scale_module(right_modle, left_modle, front_modle, back_modle);
+		if(one_move_flag == 1 && distance_flag == 1)
+		{
+			one_move_flag = 0;
+			distance_flag = 0;
+			// Delay_ms(10);
+			//control the car
+			Serial_SendByte(0x01);
+		}
+		// else
+		// {
+		// 	Serial_SendByte(0x02);
+		// }
 
 		if (break_flag > 1)
 		{
@@ -108,9 +125,9 @@ void stop_car(void)
 void init(void)
 {
 	SystemInit();
-	Delay_ms(100);
+	// Delay_ms(100);
 	//6050 and 
-	init_6050();
+	// init_6050();
 	//control of the motor, include 4PWM and 4DIR
 	motor_init();
 	//init the gray input
@@ -127,8 +144,8 @@ void init(void)
 	//UART init
 	UART4_Init();
 	//init the angle pid and interrupt init (1ms)
-	init_pid_angle();
-	TIM7_Configuration();
+	// init_pid_angle();
+	// TIM7_Configuration();
 	//serial to the raspberry
 	Serial_Init();
 	//get the system clock

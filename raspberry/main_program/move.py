@@ -128,6 +128,8 @@ class Car:
         :param data_byte: the data byte
         """
         received_data = self.car_com1.read()
+        # while self.car_com1.in_waiting: # 清空缓冲区
+        #     self.car_com1.read(self.car_com1.in_waiting)
         print(received_data)
 
     def car_forward_mecanum(self, forward_speed, correction_speed, distance):
@@ -181,6 +183,30 @@ class Car:
         self.data[2] = distance
         self.data[3] = move_right_speed
         self.data[4] = correction_speed
+        self.car_com1.write(self.data)
+
+    def car_send_distance_positive(self, y_distance, x_distance):
+        """
+        the car send distance positive
+        Args:
+        :param y_distance: positive y distance
+        :param x_distance: positive x distance
+        """
+        self.data[1] = 0x0B
+        self.data[2] = y_distance
+        self.data[3] = x_distance
+        self.car_com1.write(self.data)
+
+    def car_send_distance_negative(self, y_distance, x_distance):
+        """
+        the car send distance positive
+        Args:
+        :param y_distance: negative y distance
+        :param x_distance: negative x distance
+        """
+        self.data[1] = 0x0C
+        self.data[2] = y_distance
+        self.data[3] = x_distance
         self.car_com1.write(self.data)
 class Infrared:
     def __init__(self):

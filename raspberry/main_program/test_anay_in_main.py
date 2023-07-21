@@ -1,12 +1,29 @@
 import move
+import time
 
 c = move.Car()
 
 if __name__ == "__main__":
-    print("test start")
-    c.car_forward_mecanum(10,2,0)
+    # print("test start")
+    # c.car_send_distance_positive(10,0)
     # c.car_com1.write(b"1")
-    print("send done")
+    # print("send done")
+    c.car_send_distance_positive(40, 0)
+    c.car_cheak_data()
+    time.sleep(0.1)
+    c.car_send_distance_negative(0,50)
+    c.car_cheak_data()
+    time.sleep(0.1)
+    c.car_send_distance_negative(37,0)
+    c.car_cheak_data()
+    time.sleep(0.1)
+    c.car_send_distance_negative(0,50)
+    c.car_cheak_data()
+    time.sleep(0.1)
+    c.car_send_distance_positive(40,0)
+    c.car_cheak_data()
+    time.sleep(0.1)
+    c.car_send_distance_negative(0,50)
     c.car_cheak_data()
     # print("receive done")
     # while True:

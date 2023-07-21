@@ -4,12 +4,18 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 #include <string.h>
+#include "motor.h"
 
 int16_t distance_x_uart, distance_y_uart, speed, correction_speed;
-extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed; // get the speed from the motor
+uint8_t one_move_flag = 0;
+extern float fl_speed, fr_speed, bl_speed, br_speed;
+extern float distance_x_encoder, distance_y_encoder, angle_z_encoder;
+extern float target_distance_x, target_distance_y;
+extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
+extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
 extern int16_t distance_x_uart, distance_y_uart; // send the distance to the motor
 
-extern uint8_t correction_speed;
+extern int16_t correction_speed;
 /**
   * @brief  init USART4
   * @retval None
@@ -267,40 +273,54 @@ void USART2_IRQHandler(void)
                     distance_y_uart =  Serial_RxPacket[1]; // positive
                     speed = Serial_RxPacket[2];
                     correction_speed = Serial_RxPacket[3];
-                    fl_target_speed = speed;
-                    fr_target_speed = speed;
-                    bl_target_speed = speed;
-                    br_target_speed = speed;
+                    // fl_target_speed = speed;
+                    // fr_target_speed = speed;
+                    // bl_target_speed = speed;
+                    // br_target_speed = speed;
                 }
                 else if (Serial_RxPacket[0] == 0x08) // backward to the corner
                 {
                     distance_y_uart =  -Serial_RxPacket[1];  //negetive
                     speed = Serial_RxPacket[2];
                     correction_speed = Serial_RxPacket[3];
-                    fl_target_speed = -speed;
-                    fr_target_speed = -speed;
-                    bl_target_speed = -speed;
-                    br_target_speed = -speed;
+                    // fl_target_speed = -speed;
+                    // fr_target_speed = -speed;
+                    // bl_target_speed = -speed;
+                    // br_target_speed = -speed;
                 }
                 else if (Serial_RxPacket[0] == 0x09) // move left to the corner
                 {
                     distance_x_uart =  -Serial_RxPacket[1]; // negetive
                     speed = Serial_RxPacket[2];
                     correction_speed = Serial_RxPacket[3];
-                    fl_target_speed = -speed;
-                    fr_target_speed = speed;
-                    bl_target_speed = speed;
-                    br_target_speed = -speed;
+                    // fl_target_speed = -speed;
+                    // fr_target_speed = speed;
+                    // bl_target_speed = speed;
+                    // br_target_speed = -speed;
                 }
                 else if (Serial_RxPacket[0] == 0xA9) // move left to the corner
                 {
                     distance_y_uart =  Serial_RxPacket[1]; // positive
                     speed = Serial_RxPacket[2];
                     correction_speed = Serial_RxPacket[3];
-                    fl_target_speed = speed;
-                    fr_target_speed = -speed;
-                    bl_target_speed = -speed;
-                    br_target_speed = speed;
+                    // fl_target_speed = speed;
+                    // fr_target_speed = -speed;
+                    // bl_target_speed = -speed;
+                    // br_target_speed = speed;
+                }
+                else if (Serial_RxPacket[0] == 0x0B)  // send the distance positve
+                {
+                    one_move_flag = 1;
+                    stop_the_car();
+                    distance_y_uart = Serial_RxPacket[1]; 
+                    distance_x_uart = Serial_RxPacket[2];
+                }
+                else if (Serial_RxPacket[0] == 0x0C)
+                {
+                    one_move_flag = 1;
+                    stop_the_car();
+                    distance_y_uart = -Serial_RxPacket[1];
+                    distance_x_uart = -Serial_RxPacket[2];
                 }
 			Serial_TxPacket[1] = Serial_RxPacket[1];
 			Serial_TxPacket[2] = Serial_RxPacket[2];

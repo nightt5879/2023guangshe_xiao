@@ -57,6 +57,7 @@ extern float angle_z;
 extern float distance_x;
 extern float distance_y;
 extern uint16_t break_flag;
+extern uint8_t speed_test;
 
 float distance_x_filter, distance_y_filter; //the filtter data
 //angle pid return delta_v
@@ -70,13 +71,15 @@ uint8_t distance_flag = 0;
 //gray input
 uint8_t left_modle[5];
 uint8_t right_modle[5];
+uint8_t front_modle[5];
+uint8_t back_modle[5];
 uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 3, ki = 4, kd = 8;  // These values should be tuned for your specific system
+float kp = 4, ki = 12, kd = 4;  // These values should be tuned for your specific system
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
-float move_kp_y = 0.065, move_ki_y = 0.0, move_kd_y = 0;  // These values should be tuned for your specific system
+float move_kp_y = 0.235, move_ki_y = 0.0, move_kd_y = 1;  // These values should be tuned for your specific system
 float move_kp_x = 0.225, move_ki_x = 0.0, move_kd_x = 2;  // These values should be tuned for your specific system
 
 float complementary_filter(float input1, float input2, float alpha);
@@ -503,52 +506,88 @@ void TIM6_IRQHandler(void)
         // complementary filter
         distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
         distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
-        if (distance_x_uart == 0 && distance_y_uart == 0)  // it mean move to the corner
-        {
-          if (fl_target_speed > 0 && fr_target_speed > 0 && bl_target_speed > 0 && br_target_speed > 0) // it mean forward
-          {
+        // if (distance_x_uart == 0 && distance_y_uart == 0)  // it mean move to the corner
+        // {
+          // if (speed_test > 0 ) // it mean forward
+          // {
+          //   read_gray_scale_module(right_modle, left_modle, front_modle, back_modle);// it mean the front is the corner 
+          //   // if (front_modle[1] == 1 && front_modle[3] == 0)   // correct to the left
+          //   // {
+          //   //     fr_target_speed = speed_test + CORR_TEST;
+          //   //     fl_target_speed = speed_test - CORR_TEST;
+          //   //     bl_target_speed = speed_test - CORR_TEST;
+          //   //     br_target_speed = speed_test + CORR_TEST;
+          //   // }
+          //   // else if (front_modle[1] == 0 && front_modle[3] == 1)  // correct to the right
+          //   // {
+          //   //     fr_target_speed = speed_test + CORR_TEST;
+          //   //     fl_target_speed = speed_test - CORR_TEST;
+          //   //     bl_target_speed = speed_test - CORR_TEST;
+          //   //     br_target_speed = speed_test + CORR_TEST;
+          //   fr_target_speed = speed_test;
+          //   fl_target_speed = speed_test;
+          //   bl_target_speed = speed_test;
+          //   br_target_speed = speed_test;
+          //   if (left_modle[0] == 1 || right_modle[0] == 1)  // it mean the corner
+          //   {
+          //     fl_target_speed = 0;
+          //     fr_target_speed = 0;
+          //     bl_target_speed = 0;
+          //     br_target_speed = 0; // stop the car
+          //     speed_test = 0;
+          //   }
+            // if (left_modle[0] == 1 || right_modle[0] == 1)  // stop the car
+            // {
+            //   fl_target_speed = 0;
+            //   fr_target_speed = 0;
+            //   bl_target_speed = 0;
+            //   br_target_speed = 0;
+            //   speed_test = 0;
+            // }
               //cheak the corner, if the corner stop the car
                 //stop the car
                 //finish the one move, uart send to the raspberry
               //cheak the gray input if out of the line correction the car
-          }
-          else if (fl_target_speed < 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed < 0)
-          {
-              distance_x = -distance_x_filter;
-              distance_y = -distance_y_filter;
-          }
-          else if (fl_target_speed > 0 && fr_target_speed < 0 && bl_target_speed > 0 && br_target_speed < 0)
-          {
-              distance_x = distance_x_filter;
-              distance_y = -distance_y_filter;
-          }
-          else if (fl_target_speed < 0 && fr_target_speed > 0 && bl_target_speed < 0 && br_target_speed > 0)
-          {
-              distance_x = -distance_x_filter;
-              distance_y = distance_y_filter;
-          }
-        }
-        else  //it mean move a distance and then stop
-        {
+          // }
+          // else if (fl_target_speed < 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed < 0) // backward
+          // {
+          //     distance_x = -distance_x_filter;
+          //     distance_y = -distance_y_filter;
+          // }
+          // else if (fl_target_speed < 0 && fr_target_speed > 0 && bl_target_speed > 0 && br_target_speed < 0) // left
+          // {
+          //     // distance_x = distance_x_filter;
+          //     // distance_y = -distance_y_filter;
+          // }
+          // else if (fl_target_speed > 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed > 0) //right
+          // {
+          //     distance_x = -distance_x_filter;
+          //     distance_y = distance_y_filter;
+          // }
+        // }
+        // else  //it mean move a distance and then stop
+        // {
 
-        }
+        // }
         // below are the distance PID control we dont need it right now
-        // pid_move_x.setpoint = move_target_distance_x;
-        // pid_move_y.setpoint = move_target_distance_y;
-        // pid_compute(&pid_move_x, distance_x_filter);
-        // pid_compute(&pid_move_y, distance_y_filter);
+        move_target_distance_x = distance_x_uart;
+        move_target_distance_y = distance_y_uart;
+        pid_move_x.setpoint = move_target_distance_x;
+        pid_move_y.setpoint = move_target_distance_y;
+        pid_compute(&pid_move_x, distance_x_filter);
+        pid_compute(&pid_move_y, distance_y_filter);
         // if the distance is less than the threshold, then stop the motor
-        //here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
-        // fl_target_speed = pid_move_y.output + pid_move_x.output;
-        // fr_target_speed = pid_move_y.output - pid_move_x.output;
-        // bl_target_speed = pid_move_y.output - pid_move_x.output;
-        // br_target_speed = pid_move_y.output + pid_move_x.output;
+        // here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
+        fl_target_speed = pid_move_y.output + pid_move_x.output;
+        fr_target_speed = pid_move_y.output - pid_move_x.output;
+        bl_target_speed = pid_move_y.output - pid_move_x.output;
+        br_target_speed = pid_move_y.output + pid_move_x.output;
       //   if (corner_flag)
       //  {
       //      cheak_corner();
       //  }
         // it is close to the target
-        // close_to_target();
+        close_to_target();
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
@@ -584,37 +623,39 @@ void close_to_target(void)
         {
           distance_flag = 1;
           stop_the_car();
+          // Serial_SendByte(0x01);
+          // Serial_SendPacket(); // send to the raspberry
         }
 }
 
 void cheak_corner(void)
 {
-    read_gray_scale_module(right_modle, left_modle);
-    // close_to_target();
-    if ((left_modle[0] || left_modle[4]) && move_target_distance_x < 0) // move to the left
-    {
-        corner_flag = 0;
-        stop_the_car_no_clear_speed();
-        control_move(-CORNER_X,0);
-    }
-    else if((right_modle[0] || right_modle[4]) && move_target_distance_x > 0) // move to the right
-    {
-        corner_flag = 0;
-        stop_the_car_no_clear_speed();
-        control_move(CORNER_X,0);
-    }
-    else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
-    {
-        corner_flag = 0;
-        stop_the_car_no_clear_speed();
-        control_move(0,CORNER_Y);
-    }
-    else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
-    {
-        corner_flag = 0;
-        stop_the_car_no_clear_speed();
-        control_move(0,-CORNER_Y);
-    }
+   read_gray_scale_module(right_modle, left_modle,front_modle,back_modle);
+   // close_to_target();
+   if ((left_modle[0] || left_modle[4]) && move_target_distance_x < 0) // move to the left
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(-CORNER_X,0);
+   }
+   else if((right_modle[0] || right_modle[4]) && move_target_distance_x > 0) // move to the right
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(CORNER_X,0);
+   }
+   else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(0,CORNER_Y);
+   }
+   else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(0,-CORNER_Y);
+   }
 }
 
 void stop_the_car(void)
@@ -631,11 +672,13 @@ void stop_the_car(void)
     distance_y_filter = 0;
     move_target_distance_x = 0;
     move_target_distance_y = 0;
+    distance_x_uart = 0;
+    distance_y_uart = 0;
 }
 
 void stop_the_car_no_clear_speed(void)
 {
-      distance_flag = 1;
+      // distance_flag = 1;
       // stop_the_car();
       distance_x_encoder = 0;
       distance_y_encoder = 0;
@@ -643,4 +686,6 @@ void stop_the_car_no_clear_speed(void)
       distance_y = 0;
       distance_x_filter = 0;
       distance_y_filter = 0;
+      distance_x_uart = 0;
+      distance_y_uart = 0;
 }
