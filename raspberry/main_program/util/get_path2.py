@@ -744,13 +744,22 @@ class pathPlaner:
                         return self.update_paths()
                     else:
                         # 如果是红色方
-                        if self.false_mine_num == 1:
-                            # 下一个宝藏可以直接装。不需要识别。不需要修改路径
-                            return True
-                        elif self.true_mine_num == 3 and self.false_mine_num == 0:
-                            # 同象限若还有宝藏。一定是假的已方宝藏。删掉这个路径
-                            return self.update_paths()
-                        return False
+                        index = len(self.quadrant_mines) - len(self.paths)
+                        now_xy, car_direct, quadrant = self.quadrant_mines[index]
+
+                        # 删除已经遇到过的宝藏
+                        for i in range(index + 1):
+                            self.quadrant_mines.pop(0)
+                            self.ori_mines.pop(0)
+                        if self.quadrant_mines[0][2] == quadrant:
+                            if self.false_mine_num == 1:
+                                # 下一个宝藏可以直接装。不需要识别。不需要修改路径
+                                return True
+                            elif self.true_mine_num == 3 and self.false_mine_num == 0:
+                                # 同象限若还有宝藏。一定是假的已方宝藏。删掉这个路径
+                                return self.update_paths()
+                        else:
+                            return False
                 # 红假、红真
                 elif mine in (2, 3):
                     # 如果是红色方
@@ -765,13 +774,22 @@ class pathPlaner:
                         return self.update_paths()
                     else:
                         # 如果是蓝色方
-                        if self.false_mine_num == 1:
-                            # 下一个宝藏可以直接撞。不需要识别。不需要修改路径
-                            return True
-                        elif self.true_mine_num == 3 and self.false_mine_num == 0:
-                            # 同象限若还有宝藏。一定是假的已方宝藏。删掉这个路径
-                            return self.update_paths()
-                        return False
+                        index = len(self.quadrant_mines) - len(self.paths)
+                        now_xy, car_direct, quadrant = self.quadrant_mines[index]
+
+                        # 删除已经遇到过的宝藏
+                        for i in range(index + 1):
+                            self.quadrant_mines.pop(0)
+                            self.ori_mines.pop(0)
+                        if self.quadrant_mines[0][2] == quadrant:
+                            if self.false_mine_num == 1:
+                                # 下一个宝藏可以直接撞。不需要识别。不需要修改路径
+                                return True
+                            elif self.true_mine_num == 3 and self.false_mine_num == 0:
+                                # 同象限若还有宝藏。一定是假的已方宝藏。删掉这个路径
+                                return self.update_paths()
+                        else:
+                            return False
             else:
                 return self.update_paths()
         else:
