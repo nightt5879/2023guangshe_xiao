@@ -77,10 +77,10 @@ uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 4, ki = 12, kd = 4;  // These values should be tuned for your specific system
+float kp = 3, ki = 6, kd = 2;  // These values should be tuned for your specific system
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
-float move_kp_y = 0.235, move_ki_y = 0.0, move_kd_y = 1;  // These values should be tuned for your specific system
-float move_kp_x = 0.225, move_ki_x = 0.0, move_kd_x = 2;  // These values should be tuned for your specific system
+float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // These values should be tuned for your specific system
+float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // These values should be tuned for your specific system
 
 float complementary_filter(float input1, float input2, float alpha);
 void close_to_target(void);
@@ -340,8 +340,8 @@ void TIM6_Configuration(void)
     TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM6_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -614,12 +614,13 @@ float complementary_filter(float input1, float input2, float alpha) {
 
 void close_to_target(void)
 {
-    if (abs(move_target_distance_x - distance_x_filter) < POSITION_THRESHOLD &&
-          abs(move_target_distance_y - distance_y_filter) < POSITION_THRESHOLD &&
+    if (abs(move_target_distance_x - distance_x_filter) < POSITION_THRESHOLD_X &&
+          abs(move_target_distance_y - distance_y_filter) < POSITION_THRESHOLD_Y &&
           abs(fl_speed) < SPEED_THRESHOLD &&
           abs(fr_speed) < SPEED_THRESHOLD &&
           abs(bl_speed) < SPEED_THRESHOLD &&
-          abs(br_speed) < SPEED_THRESHOLD) 
+          abs(br_speed) < SPEED_THRESHOLD &&
+          one_move_flag == 1) 
         {
           distance_flag = 1;
           stop_the_car();

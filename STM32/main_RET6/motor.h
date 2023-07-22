@@ -26,9 +26,9 @@ float complementary_filter(float input1, float input2, float alpha);
 
 extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed; // send the speed to the uart
 extern int16_t distance_x_uart, distance_y_uart, correction_speed; // get the disatnce target from the uart
+extern uint8_t one_move_flag;
 extern uint8_t Serial_TxPacket[];
 extern uint8_t Serial_RxPacket[];
-extern uint8_t one_move_flag;
 #define MOTOR_FL 1
 #define MOTOR_FR 2
 #define MOTOR_BL 3
@@ -41,7 +41,8 @@ extern uint8_t one_move_flag;
 #define COS45 0.707f //cos45 for the speed calculate
 #define MAX_OUTPUT 200 //max pwm
 #define MIN_OUTPUT 0  // min pwm
-#define POSITION_THRESHOLD 1.0f 
+#define POSITION_THRESHOLD_X 1.0f 
+#define POSITION_THRESHOLD_Y 4.0f
 #define SPEED_THRESHOLD 0.3f   
 #define X_FACTOR 11.6f
 #define Y_FACTOR 20.5f

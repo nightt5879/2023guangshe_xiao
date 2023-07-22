@@ -62,9 +62,10 @@ int main(void)
 	// mpu_6050_corretion();
 	// Delay_ms(1000);
 	//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
-	toggle_delta_v(0);
+	toggle_delta_v(1);
 	// control_move(MOVE_X,0);
-	// control_move(0,-MOVE_Y);
+	// control_move(0,MOVE_Y);
+	// one_move_flag = 1;
 	// move_control_main(0,-40);
 	// move_control_main(40,0);
 //	Delay_s(1);
@@ -125,9 +126,9 @@ void stop_car(void)
 void init(void)
 {
 	SystemInit();
-	// Delay_ms(100);
+	Delay_ms(100);
 	//6050 and 
-	// init_6050();
+	init_6050();
 	//control of the motor, include 4PWM and 4DIR
 	motor_init();
 	//init the gray input
@@ -144,8 +145,8 @@ void init(void)
 	//UART init
 	UART4_Init();
 	//init the angle pid and interrupt init (1ms)
-	// init_pid_angle();
-	// TIM7_Configuration();
+	init_pid_angle();
+	TIM7_Configuration();
 	//serial to the raspberry
 	Serial_Init();
 	//get the system clock

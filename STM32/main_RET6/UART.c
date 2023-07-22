@@ -115,8 +115,8 @@ void Serial_Init(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_Init(&NVIC_InitStructure);
 
     USART_Cmd(USART2, ENABLE);
@@ -321,6 +321,18 @@ void USART2_IRQHandler(void)
                     stop_the_car();
                     distance_y_uart = -Serial_RxPacket[1];
                     distance_x_uart = -Serial_RxPacket[2];
+                }
+                else if (Serial_RxPacket[0] == 0x0D) // control the MPU 6050
+                {
+                    if (Serial_RxPacket[1] == 0) // stop the angle and correction
+                    {
+                        toggle_delta_v(0);
+                        mpu_6050_corretion();
+                    }
+                    else if (Serial_RxPacket[1] == 1)
+                    {
+                        toggle_delta_v(1);
+                    }
                 }
 			Serial_TxPacket[1] = Serial_RxPacket[1];
 			Serial_TxPacket[2] = Serial_RxPacket[2];

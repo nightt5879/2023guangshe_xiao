@@ -91,6 +91,7 @@ void mpu_6050_corretion(void)
 	GX_CORR /= 2;
 	GY_CORR /= 2;
 	GZ_CORR /= 2;
+	angle_z = 0;  //reset the angle_z
 }
 
 /**
@@ -171,7 +172,7 @@ void TIM7_Configuration(void)
     TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);

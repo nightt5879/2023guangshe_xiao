@@ -130,7 +130,7 @@ class Car:
         received_data = self.car_com1.read()
         # while self.car_com1.in_waiting: # 清空缓冲区
         #     self.car_com1.read(self.car_com1.in_waiting)
-        print(received_data)
+        # print(received_data)
 
     def car_forward_mecanum(self, forward_speed, correction_speed, distance):
         """
@@ -207,6 +207,16 @@ class Car:
         self.data[1] = 0x0C
         self.data[2] = y_distance
         self.data[3] = x_distance
+        self.car_com1.write(self.data)
+
+    def control_6050(self, open_or_not):
+        """
+        the control 6050
+        Args:
+            open_or_not: 0x01 open 6050, 0x00 close 6050
+        """
+        self.data[1] = 0x0D
+        self.data[2] = open_or_not
         self.car_com1.write(self.data)
 class Infrared:
     def __init__(self):
