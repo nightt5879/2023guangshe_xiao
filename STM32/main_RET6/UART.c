@@ -6,16 +6,14 @@
 #include <string.h>
 #include "motor.h"
 
-int16_t distance_x_uart, distance_y_uart, speed, correction_speed;
-uint8_t one_move_flag = 0;
-extern float fl_speed, fr_speed, bl_speed, br_speed;
-extern float distance_x_encoder, distance_y_encoder, angle_z_encoder;
-extern float target_distance_x, target_distance_y;
-extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
-extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
+int16_t distance_x_uart, distance_y_uart, speed;
+uint8_t one_move_flag = 0;  // the flag use for the uart
 extern int16_t distance_x_uart, distance_y_uart; // send the distance to the motor
+// the data send rx and tx, the Flag is use for confirm the data is recived(if you want to use it not in the interrupt)
+uint8_t Serial_TxPacket[6];				//FF 01 02 03 04 05 06FE
+uint8_t Serial_RxPacket[6];
+uint8_t Serial_RxFlag;
 
-extern int16_t correction_speed;
 /**
   * @brief  init USART4
   * @retval None
@@ -61,6 +59,10 @@ struct Frame {
     unsigned char tail[4];
 };
 
+/**
+  * @brief  send the data frame
+  * @retval None
+  */
 void USART_SendFrame(USART_TypeDef* USARTx, struct Frame *frame) {
     uint8_t *p = (uint8_t*)frame;
     for(int i = 0; i < sizeof(struct Frame); i++) {
@@ -70,6 +72,10 @@ void USART_SendFrame(USART_TypeDef* USARTx, struct Frame *frame) {
     }
 }
 
+/**
+  * @brief  send the data
+  * @retval None
+  */
 void send_data(float *data, uint8_t size) {
     struct Frame frame;
     size = size < CH_COUNT ? size : CH_COUNT;
@@ -79,10 +85,10 @@ void send_data(float *data, uint8_t size) {
     USART_SendFrame(UART4, &frame);
 }
 
-uint8_t Serial_TxPacket[6];				//FF 01 02 03 04 FE
-uint8_t Serial_RxPacket[6];
-uint8_t Serial_RxFlag;
-
+/**
+ * @brief  init the USART2
+ * @retval None
+*/
 void Serial_Init(void)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);  //Enable the USART2 periph clock
@@ -115,58 +121,28 @@ void Serial_Init(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; // the first priority, second is the angle, thrid is the motor
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_Init(&NVIC_InitStructure);
 
     USART_Cmd(USART2, ENABLE);
 }
 
-//void Serial_Init(void)
-//{
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-//	
-//	GPIO_InitTypeDef GPIO_InitStructure;
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIO_Init(GPIOA, &GPIO_InitStructure);
-//	
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIO_Init(GPIOA, &GPIO_InitStructure);
-//	
-//	USART_InitTypeDef USART_InitStructure;
-//	USART_InitStructure.USART_BaudRate = 115200;
-//	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-//	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-//	USART_InitStructure.USART_Parity = USART_Parity_No;
-//	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-//	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-//	USART_Init(USART1, &USART_InitStructure);
-//	
-//	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-//	
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-//	
-//	NVIC_InitTypeDef NVIC_InitStructure;
-//	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-//	NVIC_Init(&NVIC_InitStructure);
-//	
-//	USART_Cmd(USART1, ENABLE);
-//}
-
+/**
+ * @brief  send the data
+ * here is the byte, use the while to confirm the data is send
+ * @retval None
+*/
 void Serial_SendByte(uint8_t Byte)
 {
 	USART_SendData(USART2, Byte);
 	while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
 }
 
+/**
+ * @brief  send the array
+ * @retval None
+*/
 void Serial_SendArray(uint8_t *Array, uint16_t Length)
 {
 	uint16_t i;
@@ -176,6 +152,10 @@ void Serial_SendArray(uint8_t *Array, uint16_t Length)
 	}
 }
 
+/**
+ * @brief  send the string
+ * @retval None
+*/
 void Serial_SendString(char *String)
 {
 	uint8_t i;
@@ -185,6 +165,10 @@ void Serial_SendString(char *String)
 	}
 }
 
+/**
+ * @brief  send the number
+ * @retval None
+*/
 uint32_t Serial_Pow(uint32_t X, uint32_t Y)
 {
 	uint32_t Result = 1;
@@ -195,6 +179,10 @@ uint32_t Serial_Pow(uint32_t X, uint32_t Y)
 	return Result;
 }
 
+/**
+ * @brief  send the number
+ * @retval None
+*/
 void Serial_SendNumber(uint32_t Number, uint8_t Length)
 {
 	uint8_t i;
@@ -204,23 +192,10 @@ void Serial_SendNumber(uint32_t Number, uint8_t Length)
 	}
 }
 
-//int fputc(int ch, FILE *f)
-//{
-//	Serial_SendByte(ch);
-//	return ch;
-//}
-
-//void Serial_Printf(char *format, ...)
-//{
-//	char String[100];
-//	va_list arg;
-//	va_start(arg, format);
-//	vsprintf(String, format, arg);
-//	va_end(arg);
-//	Serial_SendString(String);
-//}
-
-
+/**
+ * @brief  send the packet
+ * @retval None
+*/
 void Serial_SendPacket(void)
 {
 	Serial_SendByte(0xFF);
@@ -228,6 +203,11 @@ void Serial_SendPacket(void)
 	Serial_SendByte(0xFE);
 }
 
+/**
+ * @brief  get the flag
+ * if the flag is 1, the data is recived
+ * @retval None
+*/
 uint8_t Serial_GetRxFlag(void)
 {
 	if (Serial_RxFlag == 1)
@@ -238,6 +218,10 @@ uint8_t Serial_GetRxFlag(void)
 	return 0;
 }
 
+/**
+ * @brief  the interrupt of the USART2
+ * @retval None
+*/
 void USART2_IRQHandler(void)
 {
     static uint8_t RxState = 0;
@@ -268,59 +252,19 @@ void USART2_IRQHandler(void)
             {
                 RxState = 0;
                 Serial_RxFlag = 1;
-                if (Serial_RxPacket[0] == 0x07) // forward to the corner
+                if (Serial_RxPacket[0] == 0x0B)  // send the distance positve
                 {
-                    distance_y_uart =  Serial_RxPacket[1]; // positive
-                    speed = Serial_RxPacket[2];
-                    correction_speed = Serial_RxPacket[3];
-                    // fl_target_speed = speed;
-                    // fr_target_speed = speed;
-                    // bl_target_speed = speed;
-                    // br_target_speed = speed;
-                }
-                else if (Serial_RxPacket[0] == 0x08) // backward to the corner
-                {
-                    distance_y_uart =  -Serial_RxPacket[1];  //negetive
-                    speed = Serial_RxPacket[2];
-                    correction_speed = Serial_RxPacket[3];
-                    // fl_target_speed = -speed;
-                    // fr_target_speed = -speed;
-                    // bl_target_speed = -speed;
-                    // br_target_speed = -speed;
-                }
-                else if (Serial_RxPacket[0] == 0x09) // move left to the corner
-                {
-                    distance_x_uart =  -Serial_RxPacket[1]; // negetive
-                    speed = Serial_RxPacket[2];
-                    correction_speed = Serial_RxPacket[3];
-                    // fl_target_speed = -speed;
-                    // fr_target_speed = speed;
-                    // bl_target_speed = speed;
-                    // br_target_speed = -speed;
-                }
-                else if (Serial_RxPacket[0] == 0xA9) // move left to the corner
-                {
-                    distance_y_uart =  Serial_RxPacket[1]; // positive
-                    speed = Serial_RxPacket[2];
-                    correction_speed = Serial_RxPacket[3];
-                    // fl_target_speed = speed;
-                    // fr_target_speed = -speed;
-                    // bl_target_speed = -speed;
-                    // br_target_speed = speed;
-                }
-                else if (Serial_RxPacket[0] == 0x0B)  // send the distance positve
-                {
-                    one_move_flag = 1;
                     stop_the_car();
                     distance_y_uart = Serial_RxPacket[1]; 
                     distance_x_uart = Serial_RxPacket[2];
+                    one_move_flag = 1;
                 }
                 else if (Serial_RxPacket[0] == 0x0C)
                 {
-                    one_move_flag = 1;
                     stop_the_car();
                     distance_y_uart = -Serial_RxPacket[1];
                     distance_x_uart = -Serial_RxPacket[2];
+                    one_move_flag = 1;
                 }
                 else if (Serial_RxPacket[0] == 0x0D) // control the MPU 6050
                 {
@@ -334,11 +278,11 @@ void USART2_IRQHandler(void)
                         toggle_delta_v(1);
                     }
                 }
-			Serial_TxPacket[1] = Serial_RxPacket[1];
-			Serial_TxPacket[2] = Serial_RxPacket[2];
-			Serial_TxPacket[3] = Serial_RxPacket[3];
-			Serial_TxPacket[4] = Serial_RxPacket[4];
-			Serial_TxPacket[5] = Serial_RxPacket[5];
+			// Serial_TxPacket[1] = Serial_RxPacket[1];
+			// Serial_TxPacket[2] = Serial_RxPacket[2];
+			// Serial_TxPacket[3] = Serial_RxPacket[3];
+			// Serial_TxPacket[4] = Serial_RxPacket[4];
+			// Serial_TxPacket[5] = Serial_RxPacket[5];
             }
 		
         }
