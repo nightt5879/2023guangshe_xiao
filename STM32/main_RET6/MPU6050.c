@@ -77,7 +77,7 @@ void MPU6050_Init(void)
 	
 	I2C_InitTypeDef I2C_InitStructure;
 	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
-	I2C_InitStructure.I2C_ClockSpeed = 50000;
+	I2C_InitStructure.I2C_ClockSpeed = 10000;
 	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
@@ -90,7 +90,7 @@ void MPU6050_Init(void)
 	MPU6050_WriteReg(MPU6050_PWR_MGMT_2, 0x00);
 	MPU6050_WriteReg(MPU6050_SMPLRT_DIV, 0x09);
 	MPU6050_WriteReg(MPU6050_CONFIG, 0x06);
-	MPU6050_WriteReg(MPU6050_GYRO_CONFIG, 0x00);
+	MPU6050_WriteReg(MPU6050_GYRO_CONFIG, 0x18);
 	MPU6050_WriteReg(MPU6050_ACCEL_CONFIG, 0x00);
 }
 

@@ -18,9 +18,17 @@ uint8_t Read_BR_Direction(void);
 void TIM6_Configuration(void);
 void TIM6_IRQHandler(void);
 void toggle_delta_v(int enable);
-void control_move(char axis,float target_disatance);
+void control_move(float target_disatance_1, float target_distance_2);
+void close_to_target(void);
+void stop_the_car(void);
+float complementary_filter(float input1, float input2, float alpha);
 
 
+extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed; // send the speed to the uart
+extern int16_t distance_x_uart, distance_y_uart, correction_speed; // get the disatnce target from the uart
+extern uint8_t one_move_flag;
+extern uint8_t Serial_TxPacket[];
+extern uint8_t Serial_RxPacket[];
 #define MOTOR_FL 1
 #define MOTOR_FR 2
 #define MOTOR_BL 3
@@ -31,9 +39,20 @@ void control_move(char axis,float target_disatance);
 #define RADIUS 3.15f  //the radius of the wheel cm
 #define PI 3.14f  //the pi
 #define COS45 0.707f //cos45 for the speed calculate
-#define MAX_OUTPUT 500 //max pwm
+#define MAX_OUTPUT 200 //max pwm
 #define MIN_OUTPUT 0  // min pwm
-#define DSITANCE_THRESHOLD  2.5//Distance Threshold
+#define POSITION_THRESHOLD_X 1.0f 
+#define POSITION_THRESHOLD_Y 4.0f
+#define SPEED_THRESHOLD 0.3f   
+#define X_FACTOR 11.6f
+#define Y_FACTOR 20.5f
+#define Z_FACTOR 64.17f
+#define ALPHA_X 1.0f
+#define ALPHA_Y 1.0f
+#define ALPHA_Z 0.0f
+#define CORNER_X 8.0f
+#define CORNER_Y 2.0f
+#define CORR_TEST 1.5f
 /**
   * @brief  initialize the pid control structure
   * @param  None
@@ -48,5 +67,6 @@ typedef struct
     float output;           // the add output
 } PID_Controller;
 extern PID_Controller pid_fl, pid_fr, pid_bl, pid_br;
+
 	
 #endif

@@ -32,3 +32,5 @@
 .\objects\6050control.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\6050control.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\6050control.o: MPU6050.h
+.\objects\6050control.o: motor.h
+.\objects\6050control.o: GPIO.h

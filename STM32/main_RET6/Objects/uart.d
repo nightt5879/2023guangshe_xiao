@@ -30,3 +30,4 @@
 .\objects\uart.o: .\Library\stm32f10x_wwdg.h
 .\objects\uart.o: .\Library\misc.h
 .\objects\uart.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\uart.o: motor.h

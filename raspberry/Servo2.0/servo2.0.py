@@ -6,7 +6,6 @@
 import threading
 import RPi.GPIO as GPIO
 import time
-import pygame
 
 
 class Servo:
@@ -61,7 +60,8 @@ class HalfCircleServo(Servo):
         return self.angle
     
     
-def control_servo(vertical_servo, rotate_angle, vertical_angle: int, horizontal_angle: int):
+def control_servo(vertical_servo, vertical_angle: int, horizontal_angle: int):
+    global rotate_angle
     vertical_servo.target = vertical_angle
     rotate_angle = horizontal_angle
 
@@ -120,25 +120,13 @@ if __name__ == '__main__':
     """
     the process of the control other parts and set the servo's angle
     """
-    pygame.init()
-    window = pygame.display.set_mode((100, 100))
-    pygame.display.set_caption("keyboard_control")
     
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    servo1.target -= 10
-                    print(servo1.target)
-                elif event.key == pygame.K_DOWN:
-                    servo1.target += 10
-                    print(servo1.target)
-                elif event.key == pygame.K_LEFT:
-                    rotate_angle += 90
-                    print(rotate_angle)
-                elif event.key == pygame.K_RIGHT:
-                    rotate_angle -= 90
-                    print(rotate_angle)
+        # set the servo's vertical angle
+        head_angle = int(input("please input the head angle: "))
+        # only set the servo1's angle, and remain the rotate angle unchanged
+        control_servo(servo1, head_angle, rotate_angle)
+        # set the servo's rotate angle
+        rotate_angle = int(input("please input the rotate angle: "))
+        # only set the servo2 and servo3's angle, and remain the servo1's angle unchanged
+        control_servo(servo1, servo1.angle, rotate_angle)

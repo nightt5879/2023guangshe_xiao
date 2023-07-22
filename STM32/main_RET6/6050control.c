@@ -3,12 +3,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include "MPU6050.h"
+#include "motor.h"
+#include "GPIO.h"
 
 
 //pid
-float kp_angle = 0.1, ki_angle = 0.01, kd_angle = 0;
+float kp_angle = 0.10, ki_angle = 0.0, kd_angle = 8;
 #define MAX_ACC 0.3
-#define ANGLE_MIN 6
+#define ANGLE_MIN 1.5
+#define MAX_OUTPUT_ANGLE 5
 //delta V
 float delta_v = 0;
 
@@ -31,6 +34,23 @@ float speed_x = 0;
 float speed_y = 0;
 uint8_t ax_zero = 0;
 uint8_t ay_zero = 0;
+
+//extern from the motor.c
+extern float fl_speed, fr_speed, bl_speed, br_speed;
+extern float distance_x_encoder, distance_y_encoder, angle_z_encoder;
+extern float target_distance_x, target_distance_y;
+extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
+extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
+extern uint8_t distance_flag;
+extern PID_Controller pid_move_x, pid_move_y;
+float angle_z_filter;
+
+void kalman_init(KalmanState* state, float q, float r, float p, float initial_value);
+float kalman_update(KalmanState* state, float measurement);
+
+
+uint16_t test_flag_tim7  =0;
+KalmanState state_ax, state_ay, state_gz;
 /**
   * @brief  low pass filter
   * @retval None
@@ -71,6 +91,7 @@ void mpu_6050_corretion(void)
 	GX_CORR /= 2;
 	GY_CORR /= 2;
 	GZ_CORR /= 2;
+	angle_z = 0;  //reset the angle_z
 }
 
 /**
@@ -82,7 +103,13 @@ void init_6050(void)
 	MPU6050_Init();
 	ID = MPU6050_GetID();
 	mpu_6050_corretion();  // correct the data of the 6050
+	// Initialize the Kalman filter state for each sensor reading
+
+    kalman_init(&state_ax, 0.1, 0.1, 1, 0); // You may need to adjust the noise parameters and initial value
+    kalman_init(&state_ay, 0.1, 0.1, 1, 0); // based on your specific sensor characteristics
+    kalman_init(&state_gz, 0.1, 0.1, 1, 0); 
 }
+
 
 /**
   * @brief  get the data of the 6050 
@@ -101,12 +128,22 @@ void get_6050_data(void)
 	gz_corr_done = abs(GZ - GZ_CORR) < LOW_PASS_FILTR ? 0 : GZ - GZ_CORR;
 	//low pass filter
 	// Use the low pass filter function on the corrected data.
-	ax = low_pass_filter(ax_corr_done / 32768.0 * 2.0, ax_prev);
-	ay = low_pass_filter(ay_corr_done / 32768.0 * 2.0, ay_prev);
-	az = low_pass_filter(az_corr_done / 32768.0 * 2.0, az_prev);
-	gx = low_pass_filter(gx_corr_done / 32768.0 * 250.0, gx_prev);
-	gy = low_pass_filter(gy_corr_done / 32768.0 * 250.0, gy_prev);
-	gz = low_pass_filter(gz_corr_done / 32768.0 * 250.0, gz_prev);
+	// ax = low_pass_filter(ax_corr_done / 32768.0 * 2.0, ax_prev);
+	// ay = low_pass_filter(ay_corr_done / 32768.0 * 2.0, ay_prev);
+	// az = low_pass_filter(az_corr_done / 32768.0 * 2.0, az_prev);
+	// gx = low_pass_filter(gx_corr_done / 32768.0 * 1000.0, gx_prev);
+	// gy = low_pass_filter(gy_corr_done / 32768.0 * 1000.0, gy_prev);
+	// gz = low_pass_filter(gz_corr_done / 32768.0 * 1000.0, gz_prev);
+	ax = ax_corr_done / 32768.0 * 2.0;
+	ay = ay_corr_done / 32768.0 * 2.0;
+	az = az_corr_done / 32768.0 * 2.0;
+	gx = gx_corr_done / 32768.0 * 2000.0;
+	gy = gy_corr_done / 32768.0 * 2000.0;
+	gz =gz_corr_done / 32768.0 * 2000.0;
+	//
+	ax = kalman_update(&state_ax, ax);
+	ay = kalman_update(&state_ay, ay);
+	gz = kalman_update(&state_gz, gz);
 
 	// Update the previous values for the next loop.
 	ax_prev = ax;
@@ -135,7 +172,7 @@ void TIM7_Configuration(void)
     TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -219,6 +256,8 @@ void pid_compute_angle(PID_Position *pid, float measurement)
     // Calculate control variable
     float calculated_value = P + I + D;
 	// get the output
+	if (calculated_value > MAX_OUTPUT_ANGLE) calculated_value = MAX_OUTPUT_ANGLE;
+	else if (calculated_value < -MAX_OUTPUT_ANGLE) calculated_value = -MAX_OUTPUT_ANGLE;
     pid->output = calculated_value;
     //control the min and max of the output
     // if (pid->output > MAX_OUTPUT)
@@ -242,7 +281,8 @@ void TIM7_IRQHandler(void)
 		}
 		// get_6050_data();
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
-		angle_z += gz * 0.001;
+		angle_z -= gz * 0.001;
+		angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
 		//get the pid output
 		pid_compute_angle(&pid_angle, angle_z);
 		delta_v = pid_angle.output;
@@ -267,7 +307,81 @@ void TIM7_IRQHandler(void)
 		//values that are too small will not be accumulated.
 		if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
 		if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
+//		if (corner_flag)
+//        {
+//            cheak_corner();
+//        }
         // Clear interrupt flag.
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }
 }
+
+
+
+
+void kalman_init(KalmanState* state, float q, float r, float p, float initial_value) {
+    state->q = q;
+    state->r = r;
+    state->p = p;
+    state->x = initial_value;
+}
+
+float kalman_update(KalmanState* state, float measurement) {
+    // prediction update
+    state->p = state->p + state->q;
+
+    // measurement update
+    state->k = state->p / (state->p + state->r);
+    state->x = state->x + state->k * (measurement - state->x);
+    state->p = (1 - state->k) * state->p;
+
+    return state->x;
+}
+
+
+// void cheak_corner(void)
+// {
+//     read_gray_scale_module(right_modle, left_modle);
+// //	corner_flag = 0;
+//     if (left_modle[0] || left_modle[4] || right_modle[0]|| right_modle[4]) // it mean close to the conrner
+//     {
+// 		test_flag_tim7 ++;
+// 		close_to_target();
+// 	// 	if(move_target_distance_x == 0) // it mean the robot is in the Y aixs
+// 	// 	{
+// 	// 		distance_x_encoder = 0;
+// 	// 		distance_y_encoder = 0;
+// 	// 		distance_x = 0;
+// 	// 		distance_y = 0;
+// 	// 		distance_x_filter = 0;
+// 	// 		distance_y_filter = 0;
+// 	// 		move_target_distance_x = 0;
+// 	// 		if (move_target_distance_y > 0)  // it mean forward
+// 	// 		{
+// 	// 		move_target_distance_y = CORNER_Y;
+// 	// 		}
+// 	// 		else if (move_target_distance_y < 0) // it mean backward
+// 	// 		{
+// 	// 		move_target_distance_y = -CORNER_Y;
+// 	// 		}
+//     //   }
+//     //     else if (move_target_distance_y == 0) // it mean the robot is in the X aixs
+//     //   {
+// 	// 		distance_x_encoder = 0;
+// 	// 		distance_y_encoder = 0;
+// 	// 		distance_x = 0;
+// 	// 		distance_y = 0;
+// 	// 		distance_x_filter = 0;
+// 	// 		distance_y_filter = 0;
+// 	// 		move_target_distance_y = 0;
+// 	// 		if (move_target_distance_x > 0)  // it mean forward
+// 	// 		{
+// 	// 			move_target_distance_x = CORNER_X;
+// 	// 		}
+// 	// 		else if (move_target_distance_x < 0) // it mean backward
+// 	// 		{
+// 	// 			move_target_distance_x = -CORNER_X;
+// 	// 		}
+//     //   }
+//     }
+// }

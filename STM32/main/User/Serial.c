@@ -9,42 +9,93 @@ uint8_t Serial_RxFlag;
 
 void Serial_Init(void)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
-	USART_InitTypeDef USART_InitStructure;
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_Init(USART1, &USART_InitStructure);
-	
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_Init(&NVIC_InitStructure);
-	
-	USART_Cmd(USART1, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    
+    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    USART_InitTypeDef USART_InitStructure;
+    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART2, &USART_InitStructure);
+    
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+    
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_Init(&NVIC_InitStructure);
+    
+    USART_Cmd(USART2, ENABLE);
 }
+
+//void UART2_Init(void)
+//{
+//    GPIO_InitTypeDef GPIO_InitStructure;
+//    USART_InitTypeDef USART_InitStructure;
+
+//    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+//    // Configure USART2 Tx (PA.02) as alternate function push-pull
+//    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+//    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+//    // Configure USART2 Rx (PA.03) as input floating
+//    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+//    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+//    // USART2 configuration
+//	USART_InitStructure.USART_BaudRate = 115200;
+//	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+//	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+//	USART_InitStructure.USART_Parity = USART_Parity_No;
+//	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+//	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+//	USART_Init(USART2, &USART_InitStructure);
+
+
+
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+//	
+//	NVIC_InitTypeDef NVIC_InitStructure;
+//	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+//	NVIC_Init(&NVIC_InitStructure);
+//	// Enable USART2
+//    USART_Cmd(USART2, ENABLE);
+//}
+
+void UART2_SendByte(uint8_t byte)
+{
+    // Transmit Data Register (USART_DR) is not empty
+    while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+    USART_SendData(USART2, byte);
+}
+
+
 
 void Serial_SendByte(uint8_t Byte)
 {
@@ -121,6 +172,46 @@ uint8_t Serial_GetRxFlag(void)
 		return 1;
 	}
 	return 0;
+}
+
+uint8_t test_flag = 0;
+void USART2_IRQHandler(void)
+{
+    static uint8_t RxState = 0;
+    static uint8_t pRxPacket = 0;
+    if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET)
+    {
+		test_flag ++;
+        uint8_t RxData = USART_ReceiveData(USART2);
+        UART2_SendByte(0x01);
+        if (RxState == 0)
+        {
+            if (RxData == 0xFF)
+            {
+                RxState = 1;
+                pRxPacket = 0;
+            }
+        }
+        else if (RxState == 1)
+        {
+            Serial_RxPacket[pRxPacket] = RxData;
+            pRxPacket ++;
+            if (pRxPacket >= 6)
+            {
+                RxState = 2;
+            }
+        }
+        else if (RxState == 2)
+        {
+            if (RxData == 0xFE)
+            {
+                RxState = 0;
+                Serial_RxFlag = 1;
+            }
+        }
+        
+        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+    }
 }
 
 void USART1_IRQHandler(void)

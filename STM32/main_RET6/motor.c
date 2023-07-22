@@ -21,6 +21,11 @@ float fl_speed = 0;
 float fr_speed = 0;
 float bl_speed = 0;
 float br_speed = 0;
+//Number of rotations made
+float fl_num = 0;
+float fr_num = 0;
+float bl_num = 0;
+float br_num = 0;
 //the speed postive and negetive
 int8_t fl_speed_dir = 0;
 int8_t fr_speed_dir = 0;
@@ -44,24 +49,44 @@ uint8_t br_dir = 0;
 // use for test
 uint16_t test_a = 0;
 uint16_t test_b = 0;
-float distance = 0; // the move of the car
+float distance_x_encoder = 0; // the move of the car
+float distance_y_encoder = 0; // the move of the car
+float angle_z_encoder = 0; // the angle of the car
+//the 6050 data from the car
+extern float angle_z;
+extern float distance_x;
+extern float distance_y;
 extern uint16_t break_flag;
+extern uint8_t speed_test;
+
+float distance_x_filter, distance_y_filter; //the filtter data
 //angle pid return delta_v
 extern float delta_v;
 int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
 //move pid value
-char move_axis = 'n';
-float move_target_distance;
+float move_target_distance_x = 0;
+float move_target_distance_y = 0;
 //distance flag
 uint8_t distance_flag = 0;
-
+//gray input
+uint8_t left_modle[5];
+uint8_t right_modle[5];
+uint8_t front_modle[5];
+uint8_t back_modle[5];
+uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 0.7  , ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-PID_Controller pid_move;  //the distance pid controller
-float move_kp = 0.225, move_ki = 0.0005, move_kd = 0.8;  // These values should be tuned for your specific system
+float kp = 3, ki = 6, kd = 2;  // These values should be tuned for your specific system
+PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
+float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // These values should be tuned for your specific system
+float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // These values should be tuned for your specific system
 
+float complementary_filter(float input1, float input2, float alpha);
+void close_to_target(void);
+void cheak_corner(void);
+void stop_the_car(void);
+void stop_the_car_no_clear_speed(void);
 
 /**
   * @brief  initialize the motor include the pwm and the direction gpio
@@ -315,8 +340,8 @@ void TIM6_Configuration(void)
     TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM6_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -353,7 +378,8 @@ void init_pid(void)
     pid_init(&pid_fr, kp, ki, kd, fr_target_speed);
     pid_init(&pid_bl, kp, ki, kd, bl_target_speed);
     pid_init(&pid_br, kp, ki, kd, br_target_speed);
-    pid_init(&pid_move, move_kp, move_ki, move_kd, 0.0);
+    pid_init(&pid_move_x, move_kp_x, move_ki_x, move_kd_x, 0.0);
+    pid_init(&pid_move_y, move_kp_y, move_ki_y, move_kd_y, 0.0);
 }
 
 /**
@@ -394,10 +420,10 @@ void pid_compute(PID_Controller *pid, float measurement)
         pid->output = -MAX_OUTPUT;
 }
 
-void control_move(char axis,float target_disatance)
+void control_move(float target_disatance_1, float target_distance_2)
 {
-  move_axis = axis;
-  move_target_distance = target_disatance;
+  move_target_distance_x = target_disatance_1;
+  move_target_distance_y = target_distance_2;
 }
 /**
   * @brief  the interrupt handler for TIM5 using for PID control of the motor
@@ -408,12 +434,12 @@ void TIM6_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
     {
-		    test_a += 1;
-        if (test_a >= 100)
-        {
-          test_a = 0;
-          test_b ++;
-        }
+		    // test_a += 1;
+        // if (test_a >= 100)
+        // {
+        //   test_a = 0;
+        //   test_b ++;
+        // }
         send_flag = 1;
         fl_dir = Read_FL_Direction();
         fr_dir = Read_FR_Direction();
@@ -439,19 +465,25 @@ void TIM6_IRQHandler(void)
         if (br_dir == 0) br_speed_dir = 1;
         else br_speed_dir = -1;
         //The gear ratio is 3:7, and the encoder has 1024 lines. into the ISR is 10ms
-        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  cm/s
-        br_speed = br_speed_dir * ((float)br_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        bl_speed = bl_speed_dir *((float)bl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        fl_speed = fl_speed_dir *((float)fl_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
-        fr_speed = fr_speed_dir *((float)fr_counter / 7) * 3 * 100 / 1024 * COS45 * RADIUS ;
+        //Therefore, the speed of wheel (vertical) is (counter/7) * 3 / 1024 * 100 * R * COS45  r/s
+        //the cycle in 10ms postive mean forward, negative mean backward
+        fl_num = fl_speed_dir *((float)fl_counter / 7) * 3 / 1024;
+        fr_num = fr_speed_dir *((float)fr_counter / 7) * 3 / 1024;
+        bl_num = bl_speed_dir *((float)bl_counter / 7) * 3 / 1024;
+        br_num = br_speed_dir * ((float)br_counter / 7) * 3 / 1024;
+        // get the speed of the wheel R/s
+        fl_speed = fl_num * 100;
+        fr_speed = fr_num * 100;
+        bl_speed = bl_num * 100;
+        br_speed = br_num * 100;
         //get the resived speed
         // Apply PID control
-        if(delta_v_enable) 
+        if(delta_v_enable)   // angle control
         {
-            pid_fl.setpoint = fl_target_speed - delta_v;  // Update the setpoint if it has changed
-            pid_fr.setpoint = fr_target_speed + delta_v;
-            pid_bl.setpoint = bl_target_speed - delta_v;  // Update the setpoint if it has changed
-            pid_br.setpoint = br_target_speed + delta_v;
+            pid_fl.setpoint = fl_target_speed + delta_v;  // Update the setpoint if it has changed
+            pid_fr.setpoint = fr_target_speed - delta_v;
+            pid_bl.setpoint = bl_target_speed + delta_v;  // Update the setpoint if it has changed
+            pid_br.setpoint = br_target_speed - delta_v;
         } else
         {
             pid_fl.setpoint = fl_target_speed;  // Update the setpoint if it has changed
@@ -461,62 +493,101 @@ void TIM6_IRQHandler(void)
         }
         pid_compute(&pid_fl, fl_speed);
         control_motor(MOTOR_FL,(int)pid_fl.output);
-
         pid_compute(&pid_fr, fr_speed);
         control_motor(MOTOR_FR,(int)pid_fr.output);
-
         pid_compute(&pid_bl, bl_speed);
         control_motor(MOTOR_BL, (int)pid_bl.output);
-
         pid_compute(&pid_br, br_speed);
         control_motor(MOTOR_BR, (int)pid_br.output);
-//        distance += (fl_speed + fr_speed + bl_speed + br_speed) * 0.01;
-        //define the forward and the move to the right is positive, and the backward and the move to the left is negative
-        //this car is only used for translation operations.
-        //the left side forward dir is 1, the right side forward dir is 0
-        if(fl_dir == 1 && bl_dir == 1 && fr_dir == 0 && br_dir == 0) // it mean forward
-            distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 0 && bl_dir == 0 && fr_dir == 1 && br_dir == 1) // it mean backward
-            distance -= ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 5.2;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 1 && bl_dir == 0 && fr_dir == 1 && br_dir == 0) // it mean move to the right
-            distance += ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 4.6;//* 2 * PI * RADIUS * COS45 ;  //
-        else if (fl_dir == 0 && bl_dir == 1 && fr_dir == 0 && br_dir == 1) // it mean move to the left
-            distance -= ((float)br_counter + (float)bl_counter + (float)fl_counter + (float)fr_counter)/
-            7 * 3 / 1024 * 4.6;//* 2 * PI * RADIUS * COS45 ;  //
-        else
-            distance += 0;
-		// break_flag ++;
-    //below are the distance PID
-    pid_move.setpoint = move_target_distance;
-    pid_compute(&pid_move, distance);
-    if(abs(pid_move.setpoint - distance) < DSITANCE_THRESHOLD)
-    { 
-      // distance_flag += 1;
-      // distance = 0;
-      // move_target_distance = 0;
-      pid_move.output = 0; // Close enough to the target.
-    }
-    // axis X
-    if (move_axis == 'x')
-    {
-        fl_target_speed = pid_move.output;
-        fr_target_speed = pid_move.output;
-        bl_target_speed = pid_move.output;
-        br_target_speed = pid_move.output;
-    }
-    else if( move_axis == 'y')
-    {
-        move_kp = 0.32;
-        move_ki = 0.0;
-        move_kd = 0.0;  // y axis value of pid
-        fl_target_speed = pid_move.output;
-        fr_target_speed = -pid_move.output;
-        bl_target_speed = -pid_move.output;
-        br_target_speed = pid_move.output;
-    }
+        // get the x y disatnce and the Z angle
+        distance_x_encoder += ((fl_num - bl_num + br_num - fr_num) / 2) * X_FACTOR; // the X distance
+        distance_y_encoder += ((fl_num + bl_num + fr_num + br_num) / 4) * Y_FACTOR; // the Y distance
+        angle_z_encoder += ((fl_num + bl_num - fr_num - br_num) / 4) * Z_FACTOR; // the Z angle
+        // complementary filter
+        distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
+        distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
+        // if (distance_x_uart == 0 && distance_y_uart == 0)  // it mean move to the corner
+        // {
+          // if (speed_test > 0 ) // it mean forward
+          // {
+          //   read_gray_scale_module(right_modle, left_modle, front_modle, back_modle);// it mean the front is the corner 
+          //   // if (front_modle[1] == 1 && front_modle[3] == 0)   // correct to the left
+          //   // {
+          //   //     fr_target_speed = speed_test + CORR_TEST;
+          //   //     fl_target_speed = speed_test - CORR_TEST;
+          //   //     bl_target_speed = speed_test - CORR_TEST;
+          //   //     br_target_speed = speed_test + CORR_TEST;
+          //   // }
+          //   // else if (front_modle[1] == 0 && front_modle[3] == 1)  // correct to the right
+          //   // {
+          //   //     fr_target_speed = speed_test + CORR_TEST;
+          //   //     fl_target_speed = speed_test - CORR_TEST;
+          //   //     bl_target_speed = speed_test - CORR_TEST;
+          //   //     br_target_speed = speed_test + CORR_TEST;
+          //   fr_target_speed = speed_test;
+          //   fl_target_speed = speed_test;
+          //   bl_target_speed = speed_test;
+          //   br_target_speed = speed_test;
+          //   if (left_modle[0] == 1 || right_modle[0] == 1)  // it mean the corner
+          //   {
+          //     fl_target_speed = 0;
+          //     fr_target_speed = 0;
+          //     bl_target_speed = 0;
+          //     br_target_speed = 0; // stop the car
+          //     speed_test = 0;
+          //   }
+            // if (left_modle[0] == 1 || right_modle[0] == 1)  // stop the car
+            // {
+            //   fl_target_speed = 0;
+            //   fr_target_speed = 0;
+            //   bl_target_speed = 0;
+            //   br_target_speed = 0;
+            //   speed_test = 0;
+            // }
+              //cheak the corner, if the corner stop the car
+                //stop the car
+                //finish the one move, uart send to the raspberry
+              //cheak the gray input if out of the line correction the car
+          // }
+          // else if (fl_target_speed < 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed < 0) // backward
+          // {
+          //     distance_x = -distance_x_filter;
+          //     distance_y = -distance_y_filter;
+          // }
+          // else if (fl_target_speed < 0 && fr_target_speed > 0 && bl_target_speed > 0 && br_target_speed < 0) // left
+          // {
+          //     // distance_x = distance_x_filter;
+          //     // distance_y = -distance_y_filter;
+          // }
+          // else if (fl_target_speed > 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed > 0) //right
+          // {
+          //     distance_x = -distance_x_filter;
+          //     distance_y = distance_y_filter;
+          // }
+        // }
+        // else  //it mean move a distance and then stop
+        // {
+
+        // }
+        // below are the distance PID control we dont need it right now
+        move_target_distance_x = distance_x_uart;
+        move_target_distance_y = distance_y_uart;
+        pid_move_x.setpoint = move_target_distance_x;
+        pid_move_y.setpoint = move_target_distance_y;
+        pid_compute(&pid_move_x, distance_x_filter);
+        pid_compute(&pid_move_y, distance_y_filter);
+        // if the distance is less than the threshold, then stop the motor
+        // here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
+        fl_target_speed = pid_move_y.output + pid_move_x.output;
+        fr_target_speed = pid_move_y.output - pid_move_x.output;
+        bl_target_speed = pid_move_y.output - pid_move_x.output;
+        br_target_speed = pid_move_y.output + pid_move_x.output;
+      //   if (corner_flag)
+      //  {
+      //      cheak_corner();
+      //  }
+        // it is close to the target
+        close_to_target();
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
@@ -531,3 +602,91 @@ void toggle_delta_v(int enable)
     delta_v_enable = enable;
 }
 
+/**
+  * @brief  Complementary filtering
+  * @param  input1, input2, alpha
+  * here apha is the weight of the input1
+  * @retval the result of the filtering
+  */
+float complementary_filter(float input1, float input2, float alpha) {
+    return alpha * input1 + (1 - alpha) * input2;
+}
+
+void close_to_target(void)
+{
+    if (abs(move_target_distance_x - distance_x_filter) < POSITION_THRESHOLD_X &&
+          abs(move_target_distance_y - distance_y_filter) < POSITION_THRESHOLD_Y &&
+          abs(fl_speed) < SPEED_THRESHOLD &&
+          abs(fr_speed) < SPEED_THRESHOLD &&
+          abs(bl_speed) < SPEED_THRESHOLD &&
+          abs(br_speed) < SPEED_THRESHOLD &&
+          one_move_flag == 1) 
+        {
+          distance_flag = 1;
+          stop_the_car();
+          // Serial_SendByte(0x01);
+          // Serial_SendPacket(); // send to the raspberry
+        }
+}
+
+void cheak_corner(void)
+{
+   read_gray_scale_module(right_modle, left_modle,front_modle,back_modle);
+   // close_to_target();
+   if ((left_modle[0] || left_modle[4]) && move_target_distance_x < 0) // move to the left
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(-CORNER_X,0);
+   }
+   else if((right_modle[0] || right_modle[4]) && move_target_distance_x > 0) // move to the right
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(CORNER_X,0);
+   }
+   else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(0,CORNER_Y);
+   }
+   else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
+   {
+       corner_flag = 0;
+       stop_the_car_no_clear_speed();
+       control_move(0,-CORNER_Y);
+   }
+}
+
+void stop_the_car(void)
+{
+    fl_target_speed = 0;
+    fr_target_speed = 0;
+    bl_target_speed = 0;
+    br_target_speed = 0;
+    distance_x_encoder = 0;
+    distance_y_encoder = 0;
+    distance_x = 0;
+    distance_y = 0;
+    distance_x_filter = 0;
+    distance_y_filter = 0;
+    move_target_distance_x = 0;
+    move_target_distance_y = 0;
+    distance_x_uart = 0;
+    distance_y_uart = 0;
+}
+
+void stop_the_car_no_clear_speed(void)
+{
+      // distance_flag = 1;
+      // stop_the_car();
+      distance_x_encoder = 0;
+      distance_y_encoder = 0;
+      distance_x = 0;
+      distance_y = 0;
+      distance_x_filter = 0;
+      distance_y_filter = 0;
+      distance_x_uart = 0;
+      distance_y_uart = 0;
+}

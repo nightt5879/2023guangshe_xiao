@@ -169,17 +169,17 @@ void init_gray_scale_module_gpio(void)
     GPIO_InitTypeDef GPIO_InitStructure;
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
 
-    // Configure PC7, PC6, PC0, PC1, PC2, PC3 as input pins
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+    // Configure PC7, PC6, PC0, PC1, PC2, PC3, PC15, PC14, PC13, PC4, PC5 as input pins
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_4 | GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    // Configure PB15, PB14, PB13 as input pins
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13;
+    // Configure PB15, PB14, PB13, PB0, PB1 as input pins
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_0 | GPIO_Pin_1;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    // Configure PA1 as input pin
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+    // Configure PA1, PA5, PA6, PA7 as input pins
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
@@ -187,9 +187,11 @@ void init_gray_scale_module_gpio(void)
   * @brief  read the gray scale module value
   * @param rightModuleValues: the value of the right module
   * @param leftModuleValues: the value of the left module
+  * @param frontModuleValues: the value of the front module
+  * @param backModuleValues: the value of the back module
   * @retval None
   */
-void read_gray_scale_module(uint8_t* rightModuleValues, uint8_t* leftModuleValues) 
+void read_gray_scale_module(uint8_t* rightModuleValues, uint8_t* leftModuleValues, uint8_t* frontModuleValues, uint8_t* backModuleValues) 
 {
     // Read the value of the right module's GPIO pins
     rightModuleValues[0] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7);
@@ -204,5 +206,18 @@ void read_gray_scale_module(uint8_t* rightModuleValues, uint8_t* leftModuleValue
     leftModuleValues[2] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2);
     leftModuleValues[3] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3);
     leftModuleValues[4] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1);
-}
 
+    // Read the value of the front module's GPIO pins
+    frontModuleValues[0] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_15);
+    frontModuleValues[1] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_14);
+    frontModuleValues[2] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13);
+    frontModuleValues[3] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5);
+    frontModuleValues[4] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_6);
+
+    // Read the value of the back module's GPIO pins
+    backModuleValues[0] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_7);
+    backModuleValues[1] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_4);
+    backModuleValues[2] = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
+    backModuleValues[3] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0);
+    backModuleValues[4] = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1);
+}

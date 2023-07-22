@@ -9,5 +9,13 @@ void mpu_6050_corretion(void);
 void TIM7_Configuration(void);
 void get_6050_data(void);
 void init_pid_angle(void);
+
+typedef struct {
+    float q; // process noise covariance
+    float r; // measurement noise covariance
+    float x; // estimated value
+    float p; // estimation error covariance
+    float k; // adaptive Kalman gain
+} KalmanState;
 	
 #endif

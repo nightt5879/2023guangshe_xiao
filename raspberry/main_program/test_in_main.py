@@ -1,8 +1,16 @@
+# 包的导入
+import sys
+sys.path.insert(0, "/home/pi/.local/lib/python3.7/site-packages")
+import os
+os.chdir("/home/pi/Desktop/main_program")
 from util.get_map import get_loc
 from util.get_map import show_lcd
-from util.get_path import pathPlaner
+from util.get_path1 import pathPlaner
+from util.lidar3 import Lidar
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
+from util.map_rec import MapArchRecognizer
+
 # below is the other import
 import cv2
 import time
@@ -10,10 +18,38 @@ import RPi.GPIO as GPIO
 import move
 from YYJ import GPIO_RPi
 from YYJ import Vision
-from control import gpio
-import os
 import sys
 from move import path
+from util.countdown import countdown
+from util import servo
+import threading
+import pickle
+
+# 全局参数
+BUTTON_INPUT = 21  # 按钮连接的GPIO口
+SERVO_PIN_TOP = 24  # 云台舵机1连接的GPIO口
+SERVO_PIN_MEDIUM = 23  # 云台舵机2连接的GPIO口
+SERVO_PIN_BOTTOM = 18  # 云台舵机3连接的GPIO口
+rotate_angle = 0  # 云台旋转的角度
+TOP_ANGLE = 120 # 看宝藏的上面舵机角度
+
+
+def GPIO_init():
+    """
+    初始化所有的树莓派GPIO引脚
+    """
+    global rotate_angle, servo_top, servo_medium, servo_bottom
+    # 按键输入的init
+    GPIO.setmode(GPIO.BCM)
+    BUTTON_PIN = BUTTON_INPUT
+    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    servo_top = servo.HalfCircleServo(SERVO_PIN_TOP)
+    servo_medium = servo.HalfCircleServo(SERVO_PIN_MEDIUM)
+    servo_bottom = servo.HalfCircleServo(SERVO_PIN_BOTTOM)
+    # set the servo's rotate angle
+    servo_top.target = 90
+    servo_medium.target = 0
+    servo_bottom.target = 0
 
 
 def button_with_wait():
@@ -22,12 +58,6 @@ def button_with_wait():
     如果再次按下按钮，就返回two_press 此时对应的是蓝队
     :return: one_press or two_press
     """
-    BUTTON_PIN = 18  # 按钮连接的GPIO口
-    # 选择BCM模式
-    GPIO.setmode(GPIO.BCM)
-    # 设置GPIO口为输入
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
     press_flag = 0
     press_flag_down = 0
     press_time = 0
@@ -35,20 +65,20 @@ def button_with_wait():
         # 如果按键被按下
         # if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
         #     print('Button is not pressed')
-        if press_flag == 1 and GPIO.input(BUTTON_PIN) == GPIO.HIGH:  # 按下松开后开始计时
+        if press_flag == 1 and GPIO.input(BUTTON_INPUT) == GPIO.HIGH:  # 按下松开后开始计时
             press_time += 1
-        if GPIO.input(BUTTON_PIN) == GPIO.LOW:
+        if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
             time.sleep(0.1)  # 按键消除抖动
-            if GPIO.input(BUTTON_PIN) == GPIO.LOW:
+            if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
                 press_flag = 1
                 if press_flag_down == 1:  # 第二次按下
                     print("two_press")
                     button = "two_press"
                     break
                 # print('Button is pressed'
-        if GPIO.input(BUTTON_PIN) == GPIO.HIGH and press_flag == 1:
+        if GPIO.input(BUTTON_INPUT) == GPIO.HIGH and press_flag == 1:
             time.sleep(0.1)
-            if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
+            if GPIO.input(BUTTON_INPUT) == GPIO.HIGH:
                 press_flag_down = 1
         if press_time > 10:
             print("one_press")
@@ -59,6 +89,16 @@ def button_with_wait():
         time.sleep(0.1)
     # GPIO.cleanup()  lcd需要使用不能清除GPIO口
     return button
+def wait_the_press():
+    """
+    等待按键按下
+    """
+    while True:
+        if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
+            time.sleep(0.1)  # 按键消除抖动
+            if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
+                    print('Button is pressed')
+                    break
 
 
 def select_team():
@@ -67,402 +107,148 @@ def select_team():
     :return: red or blue
     """
     team_of = ""
-    img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/select.jpg")
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/select.jpg")
     show_lcd(img_start)  # show the picture of the select team
     select_button = button_with_wait()
     if select_button == "one_press":
-        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red.jpg")
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/red.jpg")
         show_lcd(img_start)  # show the picture of the select team
-        team_of = "红色"
+        team_of = "red"
     elif select_button == "two_press":
-        team_of = "蓝色"
-        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue.jpg")
+        team_of = "blue"
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/blue.jpg")
         show_lcd(img_start)  # show the picture of the select team
     return team_of
 
 
-def slove_path(path, hit_flag="hit"):
-    """
-    根据路径规划的结果，进行路径的解决,每次只解决一条路径（使用pop取出 ）
-    :param path: 输入的路径
-    :param hit_flag: 是否撞击了宝藏
-    :return: 单条路径的list
-    """
-    move_list = []
-    one_path = []
-    # 9,1 11,3 1,5 7,5 19,7 9,9 11,9 15,9 5,11 9,11 11,11 1,13 13,15 19,15 9,17 11,19
-    non_intersection_points = [(9, 1), (11, 3), (1, 5), (7, 5), (19, 7), (9, 9), (11, 9), (15, 9), (5, 11), (9, 11),
-                               (11, 11), (1, 13), (13, 15), (19, 15), (9, 17), (11, 19),
-                               (17,5), (17,19), (3,1), (3,15),
-                               (3,1), (3,15), (17,5), (17,19),(7,9),(13,11)]                   # 统一 所有的非交叉路口+直走都去掉
-    # 11,1 1,3 13,5 15,7 3,9 17,11 5,13 7,15 19,17 9,19
-    fork_road = [(11, 1), (1, 3), (13, 5), (15, 7), (3, 9), (17, 11), (5, 13), (7, 15), (19, 17), (9, 19)]
-    # 1，1 19，5 15，7 1，15 5，13 19，19
-    long_length_path = [(1, 1), (19, 5), (15, 7), (1, 15), (5, 13), (19, 19), (7, 7),
-                        (13, 13)]  # it means those path need one more move step the other are the short length path
-    for j in range(len(path)):  # path points
-        if path[j]["now_xy"] in non_intersection_points and path[j]["move_mode"] == "前进":  # 只需要消除这个点上的前进指令
-            pass
-        else:
-            one_path.append(path[j]["move_mode"])
-    if path[j]["now_xy"] in long_length_path and path[j]["move_mode"] == "前进":
-        one_path.pop()
-        one_path.append("长线")
-    else:
-        one_path.append("短线")
-    move_list.append(one_path)
-    print("origin:",move_list)
-    # if hit the treasure, the car turnover.so it need to change the direction
-    if hit_flag == "hit":
-        if move_list[0][0] == "左转" and move_list[0][1] == "左转":
-            # no need the turning
-            move_list[0].pop(0)
-            move_list[0].pop(0)
-        # change the direction
-        elif move_list[0][0] == "左转":
-            move_list[0][0] = "右转"
-        elif move_list[0][0] == "右转":
-            move_list[0][0] = "左转"
-    elif hit_flag == "no_hit":  # do not need to change the direction
+def control_servo(vertical_servo, vertical_angle: int, horizontal_angle: int):
+    global rotate_angle
+    vertical_servo.target = vertical_angle
+    rotate_angle = horizontal_angle
+
+
+def thread_nodding():
+    while True:
+        if servo_top.target != servo_top.angle:
+            servo_top.set_angle(servo_top.target)
+        time.sleep(0.5)
+
+
+def thread_rotating():
+    global rotate_angle
+    while True:
+        if rotate_angle != servo_medium.angle + servo_bottom.angle:
+            rotate_angle = servo_medium.clamp_number(rotate_angle, 0, 360)
+            if 0 <= rotate_angle <= 180:
+                # check the servo_bottom's angle
+                if servo_bottom.angle != 0:
+                    servo_bottom.set_angle(0)
+                servo_medium.set_angle(rotate_angle)
+            elif 180 < rotate_angle <= 360:
+                servo_medium.set_angle(180)
+                # print(rotate_angle)
+                servo_bottom.set_angle(rotate_angle - 180)
+        time.sleep(0.5)
+
+# 回调函数，会在引脚状态改变时被调用
+def callback_function(channel):
+    print('Detected edge on channel %s' % channel)
+    GPIO.remove_event_detect(BUTTON_INPUT)
+    with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
-    print("new:", move_list)
-    return move_list
+    os.execl(sys.executable, sys.executable, *sys.argv)
+    # os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
 
-
-def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
-                    user_max_time=1,non_break_time = 30):
-    """
-    PID巡线
-    :param K: 总体的缩放比例
-    :param Kp: 比例参数
-    :param Ki: 积分参数
-    :param Kd: 微分参数
-    :param Line: 需要巡线的线位置
-    :param SumMax: 黑色像素点max阈值
-    :param SumMin: 黑色像素点你min阈值
-    :param base_speed: 小车基本速度
-    :param break_mod: 是否需要在规定时间内停止
-    :param break_time: 规定的时间
-    :param back_mod: 倒车（没用了）
-    :param user_max_time: 达到max阈值的次数，满足后才会break。防止偶然误差
-    :return: no return
-    """
-    # 初始化摄像头
-    # global Cam
-    global one_path_done
-    break_flag = 0  # for the pid in time break
-    max_time = 0
-    min_time = 0
-    # 初始化PID模块
-    PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
-    for i in range(1):  # Clear the buffer.
-        Cam.ReadImg(0, 320, 0, 150)
-        cv2.waitKey(1)
-    while True:
-        Cam.ReadImg(0, 320, 0, 150)
-        Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
-        # Cam.ShowImg(Cam.Img)
-        # Cam.ShowImg(Dst, 'Dst')
-        Now = int((Centre[Line] +
-                   Centre[Line - 5] + Centre[Line + 5] +
-                   Centre[Line - 4] + Centre[Line + 4] +
-                   Centre[Line - 3] + Centre[Line + 3] +
-                   Centre[Line - 2] + Centre[Line + 2] +
-                   Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
-        PWM = PID.OneDin(Now)
-        pwm = int(PWM)
-        # print(pwm)
-        sum = int((Sum[Line - 101] + Sum[Line - 102] + Sum[Line - 103] + Sum[Line - 104] + Sum[Line - 105] + Sum[Line - 106] +
-                   Sum[Line - 107] + Sum[Line - 108] + Sum[Line - 109]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
-        if sum >= SumMax and break_flag > non_break_time:  # 不要再刚转弯开始巡线就break
-            # print("max")
-            # break
-            max_time += 1
-        elif 10 <= sum <= SumMin and break_flag > non_break_time: # 小于一定值也跳出来
-            # print("min")
-            # break
-            min_time += 1
-        if max_time >= user_max_time or min_time >= user_max_time * 3:  # enough max or min time
-            print("max:", max_time, "min:", min_time,"sum:",sum)
-            break
-        if break_mod == 1 and break_flag >= break_time:
-            print("break time max")
-            c.car_stop()
-            break
-        pwm_1 = base_speed - pwm
-        pwm_2 = base_speed + pwm
-        # pwm range is 0-1000
-        pwm_1 = max(0, min(1000, pwm_1))
-        pwm_2 = max(0, min(1000, pwm_2))
-        c.car_forward(pwm_1, pwm_2)
-        break_flag += 1
-        Cam.Delay(1)
-    c.car_stop()
-
-
-def classify_treasure(team_of="红色"):
-    """
-    识别宝藏
-    :param team_of:  队伍颜色
-    :return:
-        class_of: 宝藏的类别
-        color_of: 宝藏的颜色
-    """
-    global cap
-    mine_dict = {
-        0: "蓝色三角",
-        1: "蓝色圆形",
-        2: "红色圆形",
-        3: "红色三角",
-    }
-    mine_classifier = MinesClassifier(paddle_model="./model/MobileNet_big.nb")  # 加载模型
-    color_of_treasure = ""  # 用于得到宝藏的颜色
-    list_of_treasure = [0, 0, 0, 0, 0]  # 0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角 4:无类别
-    print("in here")
-    threshold = 0.35  # 阈值
-    # for i in range(5):  # 清除缓冲区
-    #     success, img = cap.read()
-    #     cv2.imshow("img", img)
-    #     cv2.waitKey(1)
-    while True:
-        success, img = cap.read()
-        if success:
-            print("success")
-            cv2.imshow("img", img)
-            result, pro = mine_classifier.recognize_img(img)
-            # print(pro)
-            if mine_dict[result] == "蓝色三角" and pro[0] > threshold:
-                print("蓝色三角")
-                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue_triangle.jpg")  # 显示图片
-                show_lcd(img_start)  # 允许起飞
-                list_of_treasure[0] += 1
-            elif mine_dict[result] == "蓝色圆形" and pro[1] > threshold:
-                print("蓝色圆形")
-                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/blue_round.jpg")  # 显示图片
-                show_lcd(img_start)  # 允许起飞
-                list_of_treasure[1] += 1
-            elif mine_dict[result] == "红色圆形" and pro[2] > threshold:
-                print("红色圆形")
-                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red_round.jpg")  # 显示图片
-                show_lcd(img_start)  # 允许起飞
-                list_of_treasure[2] += 1
-            elif mine_dict[result] == "红色三角" and pro[3] > threshold:
-                print("红色三角")
-                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/red_triangle.jpg")  # 显示图片
-                show_lcd(img_start)  # 允许起飞
-                list_of_treasure[3] += 1
-            else:
-                list_of_treasure[4] += 1
-                img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/no_treasure.jpg")  # 显示图片
-                show_lcd(img_start)  # 允许起飞
-            # sum of the list_of_treasure
-            if list_of_treasure[0] > 10 or list_of_treasure[1] > 10 or \
-                    list_of_treasure[2] > 10 or list_of_treasure[3] > 10 or list_of_treasure[4] > 10:
-                break
-            print(pro)
-            cv2.waitKey(1)
-    print(list_of_treasure)
-    max_index = list_of_treasure.index(max(list_of_treasure))  # 找到最大的下角标
-    if max_index <= 3:  # 防止识别到的是no_treasure的情况
-        color_of_treasure = mine_dict[max_index][:2]  # 取出前两个字得到颜色
-    # 分辨宝藏是真的还是假的,0:蓝色三角 1:蓝色圆形 2:红色圆形 3:红色三角
-    if team_of == "红色" and list_of_treasure[2] > 10:
-        class_of = "fake"
-    elif team_of == "红色" and list_of_treasure[3] > 10:
-        class_of = "true"
-    elif team_of == "蓝色" and list_of_treasure[0] > 10:
-        class_of = "fake"
-    elif team_of == "蓝色" and list_of_treasure[1] > 10:
-        class_of = "true"
-    else:
-        print("no treasure")
-        class_of = "fake"
-    return class_of, color_of_treasure
-
-def hit_the_treasure(hit_treasure_time):
-    """
-    撞击宝藏
-    :param hit_treasure_time: 撞击运动的时间
-    :return: no return
-    """
-    c.car_forward(450, 450)
-    time.sleep(hit_treasure_time)
-    c.car_stop()
-    time.sleep(0.5)
-    c.car_back(450, 450)
-    time.sleep(hit_treasure_time)
-    c.car_stop()
-    time.sleep(0.5)
+# def main():
 
 if __name__ == '__main__':
-    start_over = 0
-    while start_over == 0:
-        team = select_team()  # 本次比赛的队伍颜色
-        print(team)
-        while True:
-            try:
-                mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
-                break
-            except:
-                print("出错，重新调用")
-                time.sleep(1)
-        # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
-        planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-        img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/ready_to_go.jpg")# 显示图片
-        show_lcd(img_start)
-        # 单击确定起飞
-        input_key = button_input()
-        if input_key == "short_press":
-            start_over = 1  # it means the game is start
-        elif input_key == "long_press":
-            pass  # do nothing restart the start
-    # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
-    # planer = pathPlaner(mine_points)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长
-    img_start = cv2.imread("/home/pi/Desktop/guangshe2023/main_program/util/go.jpg")  # 显示图片
-    show_lcd(img_start)  # 允许起飞
-    time.sleep(1)  # 以防突然走了 延时一点点稳妥
-    # mine_points = [(7, 10), (3, 10), (7, 6), (5, 9), (6, 2), (4, 5), (8, 1), (4, 1)]
-    # team = "红色"
-    c = move.Car()
-    i = move.Infrared()
-    S = gpio.Screen()
-    Cam = Vision.Camera(0, 320, 240)
-    cap = cv2.VideoCapture(1)
-    cap.set(4, 240)
-    cap.set(3, 320)
-    # init all the variable
-    hit_flag = "no_hit"
-    # K is the proportion.the other are the parameter of the PID
-    K = 0.5
-    Kp = 3
-    Ki = 0
-    Kd = 8
-    Line = 120  # which line choose to follow
-    SumMax = 340  # max of the black points
-    SumMin = 50  # min of the black points
-    treasure_corner = 0
-    one_path_done = 0  # in case for the stop in the middle of the path
-    speed = 580  # the car speed
-    break_time_long = 80  # 110  long line break time
-    break_time_short = 50  # short line break time
-    double_order = 1
-    double_order = 1
-    # below is the start of the program
-    c.car_forward(400, 400)    # go forward to get in the maze
-    time.sleep(0.8)
-    c.car_stop()
-    #开头先处理一个path
-    now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
-    move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
-    # below is the main loop
+    GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
+    GPIO_init()  # 初始化GPIO
+    # 启动舵机子线程
+    t1 = threading.Thread(target=thread_rotating)
+    t2 = threading.Thread(target=thread_nodding)
+    t1.start()
+    t2.start()
+    # 查看状态
+    if os.path.exists("restart.txt"):
+        print("中断开始")
+        # 读取宝藏位置和队伍颜色
+        with open('mine_points.pkl', 'rb') as f:
+            mine_points = pickle.load(f)
+        with open('team.pkl', 'rb') as f:
+            team = pickle.load(f)
+        mine_img = cv2.imread("mine_img.png")  # 读取"mine_img.png"文件
+        # 读取完成后是一样的操作
+        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+        os.remove("restart.txt")  # 删除"restart.txt"文件
+        countdown(3)  # 倒计时
+    else:
+        print("正常的开始")
+        team = select_team()  # 选择队伍
+        control_servo(servo_top, 90, 90)
+        mine_points, mine_img = get_loc()  # 摄像头捕获视频识别出宝藏位置
+        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+        # 下面是保存的部分
+        cv2.imwrite("mine_img.png", mine_img)  # 把识别出来的地图保存起来
+        with open('mine_points.pkl', 'wb') as f:
+            pickle.dump(mine_points, f)
+        with open('team.pkl', 'wb') as f:
+            pickle.dump(team, f)
+        # 下面是正常读取部分
+        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+        countdown(2)  # 倒计时
+    # time.sleep(1)
+    print(planer.paths_list)
+    print(mine_points)
+    print(team)
+    lidar = Lidar(img=map_array,model_path='./model/ultra_simple')  # 初始化雷达
+    # MPU6050校准之类的工作
+    # 准备出发
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
+    show_lcd(img_start)
+    wait_the_press()  # 等待按键
+    countdown(2)  # 倒计时
+    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
+    show_lcd(img_start)
+    GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
     while True:
-        for j in range(len(move_list[0])):
-            if j == len(move_list[0]) - 1:
-                one_path_done = 1
-            if move_list[0][j] == "前进":
-                treasure_corner = 0
-                PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, speed)
-                c.car_forward(speed, speed)
-                time.sleep(0.2)
-                c.car_stop()
-                double_order = 1
-                # print("forward done")
-            elif move_list[0][j] == "长线" or move_list[0][j] == "短线":
-                # 如果读到这两个说明是最后的部分了，不要在进行双指令读取了 会超出列表的index然后出问题的
-                pass
-            elif (move_list[0][j] == "右转" and move_list[0][j + 1] == "右转") or (move_list[0][j] == "左转" and move_list[0][j + 1] == "左转"):
-                """
-                如果两个连续的转弯表示了掉头，这个时候进行直接转180度 
-                需要注意的是下一个指令读取还会读取到转弯，所以需要一个标志位（连续转弯后必接直走）
-                把标志位置0  前进会把标志位置1 就完成了双指令读取
-                """
-                c.car_turn_right_6050(12000)
-                double_order = 0
-            elif move_list[0][j] == "左转" and double_order:
-                treasure_corner = 1
-                c.car_turn_left_6050(4500)
-                # print("left done")
-            elif move_list[0][j] == "右转" and double_order:
-                treasure_corner = 1
-                c.car_turn_right_6050(4500)
+        path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
+        action = path['action']
+        direct = path['direct']
+        print(direct)
+        if direct == "上":
+            control_servo(servo_top, TOP_ANGLE, 180)
+        elif direct == "下":
+            control_servo(servo_top, TOP_ANGLE, 0)
+        elif direct == "左":
+            control_servo(servo_top, TOP_ANGLE, 270)
+        elif direct == "右":
+            control_servo(servo_top, TOP_ANGLE, 90)
+        while action:  # 执行一个路径
+            action_move = action.pop(0)
+            print(action_move)
+            time.sleep(1)
 
-                # print("right done")
-        if len(planer.paths) == 0:  # 如果路径列表为空,表示已经找完了所有宝藏了,那么就要离开迷宫了
-            c.car_forward(400, 400)
-            time.sleep(3)  # 让小车继续直走一段距离然后就走出迷宫了
-            c.car_stop()
+        # 宝藏识别
+        # if true  撞宝藏
+        # elif fake 不撞
+        if len(planer.paths_list) == 0:
             break
-        # finish one path
-        if move_list[0][j] == "长线":  #
-            c.car_stop()
-            time.sleep(1)
-            # print("start long line")
-            PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax + 5000, SumMin, 400, break_mod=1, break_time=break_time_long,
-                            user_max_time=5)
-            # detect the treasure
-            treasure,color = classify_treasure(team)
-            if color == team and len(planer.paths) != 0:  # 颜色相同并且
-                print("优化路径")
-                planer.update_paths()
-            print(treasure,color)
-            if treasure == "fake":  # 掉头就跑
-                hit_flag = "hit" # 长线一律当撞过 掉头
-                c.car_turn_right_6050(12000)
-                PIDLineTracking(K, 5, Ki, 5, Line, SumMax, 0, 400,non_break_time=30,user_max_time=3)  # 回到开头交叉路口
-                c.car_forward(400, 400)
-                time.sleep(0.45)
-                c.car_stop()
-                print("long no hit done")
-            elif treasure == "true":  # hit the treasure
-                hit_flag = "hit" # 长线一律当撞过 掉头
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=350,
-                                break_mod=1, break_time=break_time_short)
-                c.car_stop()
-                time.sleep(0.5)
-                hit_the_treasure(0.7)
-                c.car_turn_right_6050(10700) # 稍微转少一点
-                PIDLineTracking(K, 5, Ki, 5, Line, 400, 0, 400,   # it means no break with the min
-                                non_break_time=60,)  # 回到开头交叉路口
-                c.car_forward(400, 400)
-                time.sleep(0.45)
-                c.car_stop()
-                print("long hit done")
-        elif move_list[0][j] == "短线":  # done short line need to back to the cross road
-            c.car_stop()
-            time.sleep(1)
-            # 观察宝藏
-            treasure,color = classify_treasure(team)
-            if color == team:  # 颜色相同，优化路径
-                print("优化路径")
-                planer.update_paths()
-            print(treasure,color)
-            if treasure == "fake":
-                hit_flag = "no_hit"  # 没撞宝藏 等待下次更新
-            elif treasure == "true":
-                hit_flag = "hit"  # 撞了宝藏
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=100, base_speed=400,
-                                break_mod=1, break_time=break_time_short)
-                # detect the treasure
-                c.car_stop()
-                time.sleep(0.5)
-                hit_the_treasure(0.7)
-                c.car_turn_right_6050(10500)  # 由于有几率装完偏移  并且老偏移那一边 转少一点
-                PIDLineTracking(K=0.5, Kp=5, Ki=0, Kd=3, Line=120, SumMax=450, SumMin=0, base_speed=370 # it means no break with the min
-                                , back_mod=0,user_max_time=3)  # back to the cross road
-                c.car_forward(400, 400)
-                time.sleep(0.5)
-                c.car_stop() # 等待下一次指令
-                time.sleep(0.5)
-                print("short hit done")
-        now_path = planer.paths.pop(0)  # 取总路径中第一个路径为当前要走的路径
-        move_list = slove_path(now_path, hit_flag)  # 提取出需要的指令
-    Cam.Release()
-    cap.release()
-    # input_key = button_input()
-    # if input_key == "short_press":
-    #     print("Restarting program...")
-    #     os.execv(sys.executable, ['python', "/home/pi/Desktop/guangshe2023/main_program/test_in_main.py"])
-    # elif input_key == "long_press":
-    #     print("Ending program...")
+        # 更新路劲
+        # 保存此时的宝藏位置
+        # mine = input("请输入宝藏情况：")
+        planer.update(mine = 0)
+        print(planer.ori_mines)
+        print(mine_points)
+        # 转换成新的mine_points
+        mine_points = [((x+1)//2, 11-(y+1)//2) for (x, y) in planer.ori_mines]
+        # 保存新的mine_points
+    
+        time.sleep(2)
     print("test done")
-
+    # print(1)
