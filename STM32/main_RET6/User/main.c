@@ -1,4 +1,4 @@
-#include "stm32f10x.h"                  // Device header
+#include "stm32f10x.h"
 #include "delay.h"
 #include "motor.h"
 #include "UART.h"
@@ -6,61 +6,44 @@
 #include "MPU6050.h"
 #include <stdlib.h>
 #include "GPIO.h"
+//below are the test define
 #define TEST_PWM_DUTY 100
 #define TARGET_DISTANCE 40
 #define TEST_SPEED 6
-#define DECELERATION_DISTANCE 20  // Decelerate when 10 units away from the target
-#define REVERSE_DISTANCE 0  // Reverse when 10 units away from the target
 #define STBLE_TIME 30
 #define MOVE_X 40
 #define MOVE_Y 30
+//below are the function define
 void stop_car(void);
 void init(void);
 void send_to_win(void);
 void move_control_main(float target_x, float target_y);
 
-float speeds[] = {TEST_SPEED, TEST_SPEED, TEST_SPEED, TEST_SPEED};
-uint8_t control_flags[] = {1,1,1,1};
-uint16_t break_flag = 0;
-
-// the four speed of the motor
-extern float fl_speed; 
-extern float fr_speed;
-extern float bl_speed;
-extern float br_speed;
-//the distance move of the car
-extern float distance_x_encoder;
-extern float distance_y_encoder;
-extern float angle_z_encoder;
-//the 6050 data from the car
-extern float angle_z;
-extern float distance_x;
-extern float distance_y;
-extern float speed_x;
-extern float speed_y;
-extern float delta_v;
-extern uint8_t distance_flag; // the time in the thread in 0.01s
+float speeds[] = {TEST_SPEED, TEST_SPEED, TEST_SPEED, TEST_SPEED}; // use for control the 4 motor
+uint8_t control_flags[] = {1,1,1,1};  // 1 mean control the motor, 0 mean not control the motor
+extern float fl_speed, fr_speed, bl_speed,br_speed;  // the four speed of the motor test from encoder
+extern float distance_x_encoder, distance_y_encoder, angle_z_encoder; //the distance move of the car (encoder)
+extern float angle_z, distance_x, distance_y, speed_x, speed_y, delta_v; //the 6050 data from the car (angle and speed)
+//move and the control of the car
 extern float distance_x_filter,distance_y_filter,move_target_distance_x,move_target_distance_y;
 extern float fr_target_speed, fl_target_speed, br_target_speed, bl_target_speed;
-extern uint8_t corner_flag;
-extern uint8_t right_modle[], left_modle[], front_modle[], back_modle[];
-extern int16_t distance_x_uart, distance_y_uart, correction_speed; // get the disatnce target from the uart
-extern uint8_t one_move_flag;
-uint8_t speed_test;
-//send the data to the computer
-float data[CH_COUNT]; 
+// the flag and the modle input of the gray
+extern uint8_t distance_flag, corner_flag, right_modle[], left_modle[], front_modle[], back_modle[];
+extern int16_t distance_x_uart, distance_y_uart; // get the disatnce target from the uart
+extern uint8_t one_move_flag;  // when the uart send a message, this flag will turning to 1, you can find it in the UART.X
+float data[CH_COUNT]; // the data send to the computer
 uint8_t send_flag = 0;
-float sys_clock;
-uint16_t test_flag = 0;
-float deceleration_factor;
-uint8_t test_id;
+// using for test
+uint16_t test_flag = 0;  
+uint16_t break_flag = 0;
+uint8_t test_id;  //sometime need to use send mpu-6050 id, cheaking if the mpu-6050 is working
 int main(void)
 {
 	init();
 	toggle_delta_v(1);
 	while (1)
 	{	
-		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
+		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
 		send_to_win();
 		if(one_move_flag == 1 && distance_flag == 1)
 		{
@@ -69,8 +52,7 @@ int main(void)
 			Serial_SendByte(0x01);
 		}
 	}
-	//stop the motor
-	stop_car();
+	stop_car(); //stop the motor
 }
 
 void stop_car(void)
@@ -113,9 +95,6 @@ void init(void)
 	//serial to the raspberry
 	Serial_Init();
 	//get the system clock
-	RCC_ClocksTypeDef RCC_Clocks;
-	RCC_GetClocksFreq(&RCC_Clocks);
-	sys_clock = (float)RCC_Clocks.SYSCLK_Frequency;
 }
 
 void send_to_win(void)
