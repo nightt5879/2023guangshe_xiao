@@ -506,69 +506,6 @@ void TIM6_IRQHandler(void)
         // complementary filter
         distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
         distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
-        // if (distance_x_uart == 0 && distance_y_uart == 0)  // it mean move to the corner
-        // {
-          // if (speed_test > 0 ) // it mean forward
-          // {
-          //   read_gray_scale_module(right_modle, left_modle, front_modle, back_modle);// it mean the front is the corner 
-          //   // if (front_modle[1] == 1 && front_modle[3] == 0)   // correct to the left
-          //   // {
-          //   //     fr_target_speed = speed_test + CORR_TEST;
-          //   //     fl_target_speed = speed_test - CORR_TEST;
-          //   //     bl_target_speed = speed_test - CORR_TEST;
-          //   //     br_target_speed = speed_test + CORR_TEST;
-          //   // }
-          //   // else if (front_modle[1] == 0 && front_modle[3] == 1)  // correct to the right
-          //   // {
-          //   //     fr_target_speed = speed_test + CORR_TEST;
-          //   //     fl_target_speed = speed_test - CORR_TEST;
-          //   //     bl_target_speed = speed_test - CORR_TEST;
-          //   //     br_target_speed = speed_test + CORR_TEST;
-          //   fr_target_speed = speed_test;
-          //   fl_target_speed = speed_test;
-          //   bl_target_speed = speed_test;
-          //   br_target_speed = speed_test;
-          //   if (left_modle[0] == 1 || right_modle[0] == 1)  // it mean the corner
-          //   {
-          //     fl_target_speed = 0;
-          //     fr_target_speed = 0;
-          //     bl_target_speed = 0;
-          //     br_target_speed = 0; // stop the car
-          //     speed_test = 0;
-          //   }
-            // if (left_modle[0] == 1 || right_modle[0] == 1)  // stop the car
-            // {
-            //   fl_target_speed = 0;
-            //   fr_target_speed = 0;
-            //   bl_target_speed = 0;
-            //   br_target_speed = 0;
-            //   speed_test = 0;
-            // }
-              //cheak the corner, if the corner stop the car
-                //stop the car
-                //finish the one move, uart send to the raspberry
-              //cheak the gray input if out of the line correction the car
-          // }
-          // else if (fl_target_speed < 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed < 0) // backward
-          // {
-          //     distance_x = -distance_x_filter;
-          //     distance_y = -distance_y_filter;
-          // }
-          // else if (fl_target_speed < 0 && fr_target_speed > 0 && bl_target_speed > 0 && br_target_speed < 0) // left
-          // {
-          //     // distance_x = distance_x_filter;
-          //     // distance_y = -distance_y_filter;
-          // }
-          // else if (fl_target_speed > 0 && fr_target_speed < 0 && bl_target_speed < 0 && br_target_speed > 0) //right
-          // {
-          //     distance_x = -distance_x_filter;
-          //     distance_y = distance_y_filter;
-          // }
-        // }
-        // else  //it mean move a distance and then stop
-        // {
-
-        // }
         // below are the distance PID control we dont need it right now
         move_target_distance_x = distance_x_uart;
         move_target_distance_y = distance_y_uart;
@@ -679,8 +616,6 @@ void stop_the_car(void)
 
 void stop_the_car_no_clear_speed(void)
 {
-      // distance_flag = 1;
-      // stop_the_car();
       distance_x_encoder = 0;
       distance_y_encoder = 0;
       distance_x = 0;

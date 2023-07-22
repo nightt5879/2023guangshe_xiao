@@ -57,53 +57,17 @@ uint8_t test_id;
 int main(void)
 {
 	init();
-	// Delay_ms(1000);
-	// mpu_6050_corretion();
-	// Delay_ms(1000);
-	//	control_motor(MOTOR_BR, MOTOR_FORWARD, TEST_PWM_DUTY);
 	toggle_delta_v(1);
-	// control_move(MOVE_X,0);
-	// control_move(0,MOVE_Y);
-	// one_move_flag = 1;
-	// move_control_main(0,-40);
-	// move_control_main(40,0);
-//	Delay_s(1);
-//	 move_control_main(80,80);
-//	control_motor_speed(speeds, control_flags);	
-	// distance_flag = 0;
-	// speed_test = 3;
-	// fl_target_speed = 3;
-	// fr_target_speed = 3;
-	// bl_target_speed = 3;
-	// br_target_speed = 3;
-
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main use in interrupt
-		test_id = MPU6050_GetID();
 		send_to_win();
-		read_gray_scale_module(right_modle, left_modle, front_modle, back_modle);
 		if(one_move_flag == 1 && distance_flag == 1)
 		{
 			one_move_flag = 0;
 			distance_flag = 0;
-			// Delay_ms(10);
-			//control the car
 			Serial_SendByte(0x01);
 		}
-		// else
-		// {
-		// 	Serial_SendByte(0x02);
-		// }
-
-		if (break_flag > 1)
-		{
-			stop_the_car();
-		}
-		// if (distance_y_encoder > TARGET_DISTANCE)
-		// {
-		// 	stop_car();
-		// }
 	}
 	//stop the motor
 	stop_car();
@@ -126,7 +90,7 @@ void init(void)
 {
 	SystemInit();
 	Delay_ms(100);
-	//6050 and 
+	//6050
 	init_6050();
 	//control of the motor, include 4PWM and 4DIR
 	motor_init();
@@ -182,18 +146,5 @@ void send_to_win(void)
 		data[20] = move_target_distance_y;
 		data[21] = test_id;
 		send_data(data, CH_COUNT);
-	}
-}
-
-void move_control_main(float target_x, float target_y)
-{
-	while(distance_flag == 0)  //wait for the distance flag
-	{	
-	}
-	if (distance_flag == 1)
-	{
-		distance_flag = 0;
-		corner_flag = 1;
-		control_move(target_x,target_y);
 	}
 }
