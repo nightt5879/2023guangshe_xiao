@@ -6,25 +6,25 @@
 #include "motor.h"
 #include "GPIO.h"
 
-
-//pid
-float kp_angle = 0.10, ki_angle = 0.0, kd_angle = 8;
 #define MAX_ACC 0.3
 #define ANGLE_MIN 1.5
 #define MAX_OUTPUT_ANGLE 5
-//delta V
+
+
+//pid
+float kp_angle = 0.10, ki_angle = 0.0, kd_angle = 8;
+//delta V will control the car to correct the angle
 float delta_v = 0;
 
-uint8_t ID;
-int16_t AX, AY, AZ, GX, GY, GZ;
-float ax, ay, az, gx, gy, gz;
-int16_t AX_CORR, AY_CORR, AZ_CORR, GX_CORR, GY_CORR, GZ_CORR;
-int16_t ax_corr_done, ay_corr_done, az_corr_done, gx_corr_done, gy_corr_done, gz_corr_done;
-float ax_prev = 0, ay_prev = 0, az_prev = 0, gx_prev = 0, gy_prev = 0, gz_prev = 0;
-float now_z = 0;
+uint8_t ID;  // the mpu-6050 ID
+int16_t AX, AY, AZ, GX, GY, GZ; //MPU-6050 raw data
+int16_t AX_CORR, AY_CORR, AZ_CORR, GX_CORR, GY_CORR, GZ_CORR; // MPU6050 zero point data correction.
+int16_t ax_corr_done, ay_corr_done, az_corr_done, gx_corr_done, gy_corr_done, gz_corr_done; // MPU-6050 correction data
+float ax, ay, az, gx, gy, gz; // the calculated six-aixs data. The unit of A is g/s and the unit of G is °/s.
+float ax_prev = 0, ay_prev = 0, az_prev = 0, gx_prev = 0, gy_prev = 0, gz_prev = 0;// use for the low pass filter
+// test the interrupt time of the timer 7
 uint16_t interrupt_a = 0;
 uint8_t interrupt_b = 0;
-
 //below are the x y and z angle result from the 6050
 float angle_z = 0;
 float distance_x = 0;
@@ -36,21 +36,15 @@ uint8_t ax_zero = 0;
 uint8_t ay_zero = 0;
 
 //extern from the motor.c
-extern float fl_speed, fr_speed, bl_speed, br_speed;
 extern float distance_x_encoder, distance_y_encoder, angle_z_encoder;
-extern float target_distance_x, target_distance_y;
-extern float fl_target_speed, fr_target_speed, bl_target_speed, br_target_speed;
-extern float distance_x_filter, distance_y_filter, move_target_distance_x, move_target_distance_y;
-extern uint8_t distance_flag;
-extern PID_Controller pid_move_x, pid_move_y;
-float angle_z_filter;
+float angle_z_filter;  // the angle_z after the filter
 
-void kalman_init(KalmanState* state, float q, float r, float p, float initial_value);
-float kalman_update(KalmanState* state, float measurement);
+//function define
+void kalman_init(KalmanState* state, float q, float r, float p, float initial_value); // kalman filter
+float kalman_update(KalmanState* state, float measurement); // kalman update
 
 
-uint16_t test_flag_tim7  =0;
-KalmanState state_ax, state_ay, state_gz;
+KalmanState state_ax, state_ay, state_gz; // the 3 kalman filter state
 /**
   * @brief  low pass filter
   * @retval None
@@ -172,7 +166,7 @@ void TIM7_Configuration(void)
     TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  // the second priority, the first is the UART
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -230,7 +224,6 @@ void init_pid_angle(void)
   */
 void pid_compute_angle(PID_Position *pid, float measurement)
 {
-    // test_b += 1;
     // Calculate error
     float error = pid->setpoint - measurement;
 	// two small ignore
@@ -254,16 +247,12 @@ void pid_compute_angle(PID_Position *pid, float measurement)
 	pid->prev_error = error;
 
     // Calculate control variable
-    float calculated_value = P + I + D;
-	// get the output
+    float calculated_value = P + I + D; // get the output
+	//control the min and max of the output
 	if (calculated_value > MAX_OUTPUT_ANGLE) calculated_value = MAX_OUTPUT_ANGLE;
 	else if (calculated_value < -MAX_OUTPUT_ANGLE) calculated_value = -MAX_OUTPUT_ANGLE;
     pid->output = calculated_value;
-    //control the min and max of the output
-    // if (pid->output > MAX_OUTPUT)
-    //     pid->output = MAX_OUTPUT;
-    // else if (pid->output < MIN_OUTPUT)
-    //     pid->output = MIN_OUTPUT;
+
 }
 /**
   * @brief  TIM7 interrupt handler
@@ -283,8 +272,7 @@ void TIM7_IRQHandler(void)
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
 		angle_z -= gz * 0.001;
 		angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
-		//get the pid output
-		pid_compute_angle(&pid_angle, angle_z);
+		pid_compute_angle(&pid_angle, angle_z); //get the pid output
 		delta_v = pid_angle.output;
 		//ax is the acceleration, 
 		//so it needs to be multiplied by t squared to obtain the displacement 
@@ -307,11 +295,6 @@ void TIM7_IRQHandler(void)
 		//values that are too small will not be accumulated.
 		if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
 		if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
-//		if (corner_flag)
-//        {
-//            cheak_corner();
-//        }
-        // Clear interrupt flag.
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }
 }
