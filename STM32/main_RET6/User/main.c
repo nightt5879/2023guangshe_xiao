@@ -6,7 +6,7 @@
 #include "MPU6050.h"
 #include <stdlib.h>
 #include "GPIO.h"
-
+//this is the main
 #define TEST_PWM_DUTY 100
 #define TARGET_DISTANCE 40
 #define TEST_SPEED 6
