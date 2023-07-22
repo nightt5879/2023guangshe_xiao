@@ -56,12 +56,9 @@ float angle_z_encoder = 0; // the angle of the car
 extern float angle_z;
 extern float distance_x;
 extern float distance_y;
-extern uint16_t break_flag;
-extern uint8_t speed_test;
 
 float distance_x_filter, distance_y_filter; //the filtter data
-//angle pid return delta_v
-extern float delta_v;
+extern float delta_v; //angle pid return delta_v
 int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
 //move pid value
 float move_target_distance_x = 0;
@@ -76,12 +73,13 @@ uint8_t back_modle[5];
 uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
-// float kp = 0.5, ki = 0.6, kd = 0.5;  // These values should be tuned for your specific system
-float kp = 3, ki = 6, kd = 2;  // These values should be tuned for your specific system
+// float kp = 0.5, ki = 0.6, kd = 0.5;  // 
+float kp = 3, ki = 6, kd = 2;  // the motor speed pid
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
-float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // These values should be tuned for your specific system
-float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // These values should be tuned for your specific system
+float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // distance y pid
+float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // distance x pid
 
+// function define
 float complementary_filter(float input1, float input2, float alpha);
 void close_to_target(void);
 void cheak_corner(void);
@@ -340,7 +338,7 @@ void TIM6_Configuration(void)
     TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM6_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;  // the thrid priority, first is UART, sencond is the angle
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -434,12 +432,6 @@ void TIM6_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
     {
-		    // test_a += 1;
-        // if (test_a >= 100)
-        // {
-        //   test_a = 0;
-        //   test_b ++;
-        // }
         send_flag = 1;
         fl_dir = Read_FL_Direction();
         fr_dir = Read_FR_Direction();
@@ -523,8 +515,7 @@ void TIM6_IRQHandler(void)
       //  {
       //      cheak_corner();
       //  }
-        // it is close to the target
-        close_to_target();
+        close_to_target(); // it is close to the target
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 }
@@ -549,6 +540,13 @@ float complementary_filter(float input1, float input2, float alpha) {
     return alpha * input1 + (1 - alpha) * input2;
 }
 
+/**
+  * @brief  close to the target
+  * it mean when the distance is less than the threshold, and the motor speed is less than the threshold
+  * the most important thing is the one_move_flag, if without it, the car will stop when it start
+  * @param  None
+  * @retval None
+  */
 void close_to_target(void)
 {
     if (abs(move_target_distance_x - distance_x_filter) < POSITION_THRESHOLD_X &&
@@ -566,6 +564,12 @@ void close_to_target(void)
         }
 }
 
+/**
+  * @brief  cheak the corner
+  * i don't not whether it is useful, and whether use it in the future -- 2023/7/22
+  * @param  None
+  * @retval None
+  */
 void cheak_corner(void)
 {
    read_gray_scale_module(right_modle, left_modle,front_modle,back_modle);
@@ -596,6 +600,14 @@ void cheak_corner(void)
    }
 }
 
+/**
+  * @brief  stop the car
+  * clear all the flag so the car will stop
+  * you should konw that the speed pid of the 4 motor, so when it come to ZERO.It not just clear the PWM control of the motor
+  * it will lock the motor, better than just clear the PWM(because of inertia)
+  * @param  None
+  * @retval None
+  */
 void stop_the_car(void)
 {
     fl_target_speed = 0;
@@ -613,6 +625,15 @@ void stop_the_car(void)
     distance_x_uart = 0;
     distance_y_uart = 0;
 }
+
+/**
+  * @brief  stop the car but not clear the speed 
+  * the reason why we use it is: at the beagining. i want to use the gray input to know the current position of the car
+  * when it come to the current position, we can flash the pid control
+  * not clear the speed the car will get a more smooth deceleration
+  * @param  None
+  * @retval None
+  */
 
 void stop_the_car_no_clear_speed(void)
 {
