@@ -246,8 +246,9 @@ if __name__ == '__main__':
         print(planer.ori_mines)
         print(mine_points)
         # 转换成新的mine_points
+        mine_points = [((x+1)//2, 11-(y+1)//2) for (x, y) in planer.ori_mines]
         # 保存新的mine_points
-
+    
         time.sleep(2)
     print("test done")
     # print(1)
