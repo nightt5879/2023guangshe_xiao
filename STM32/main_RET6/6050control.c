@@ -301,7 +301,11 @@ void TIM7_IRQHandler(void)
 
 
 
-
+/**
+  * @brief  initialize the kalman filter
+  * @param  None
+  * @retval None
+  */
 void kalman_init(KalmanState* state, float q, float r, float p, float initial_value) {
     state->q = q;
     state->r = r;
@@ -309,6 +313,12 @@ void kalman_init(KalmanState* state, float q, float r, float p, float initial_va
     state->x = initial_value;
 }
 
+/**
+  * @brief  kalman update
+  * @param  KalmanState* state: the structure of the kalman filter
+  * @param  float measurement: the measurement value
+  * @retval None
+  */
 float kalman_update(KalmanState* state, float measurement) {
     // prediction update
     state->p = state->p + state->q;
@@ -320,51 +330,3 @@ float kalman_update(KalmanState* state, float measurement) {
 
     return state->x;
 }
-
-
-// void cheak_corner(void)
-// {
-//     read_gray_scale_module(right_modle, left_modle);
-// //	corner_flag = 0;
-//     if (left_modle[0] || left_modle[4] || right_modle[0]|| right_modle[4]) // it mean close to the conrner
-//     {
-// 		test_flag_tim7 ++;
-// 		close_to_target();
-// 	// 	if(move_target_distance_x == 0) // it mean the robot is in the Y aixs
-// 	// 	{
-// 	// 		distance_x_encoder = 0;
-// 	// 		distance_y_encoder = 0;
-// 	// 		distance_x = 0;
-// 	// 		distance_y = 0;
-// 	// 		distance_x_filter = 0;
-// 	// 		distance_y_filter = 0;
-// 	// 		move_target_distance_x = 0;
-// 	// 		if (move_target_distance_y > 0)  // it mean forward
-// 	// 		{
-// 	// 		move_target_distance_y = CORNER_Y;
-// 	// 		}
-// 	// 		else if (move_target_distance_y < 0) // it mean backward
-// 	// 		{
-// 	// 		move_target_distance_y = -CORNER_Y;
-// 	// 		}
-//     //   }
-//     //     else if (move_target_distance_y == 0) // it mean the robot is in the X aixs
-//     //   {
-// 	// 		distance_x_encoder = 0;
-// 	// 		distance_y_encoder = 0;
-// 	// 		distance_x = 0;
-// 	// 		distance_y = 0;
-// 	// 		distance_x_filter = 0;
-// 	// 		distance_y_filter = 0;
-// 	// 		move_target_distance_y = 0;
-// 	// 		if (move_target_distance_x > 0)  // it mean forward
-// 	// 		{
-// 	// 			move_target_distance_x = CORNER_X;
-// 	// 		}
-// 	// 		else if (move_target_distance_x < 0) // it mean backward
-// 	// 		{
-// 	// 			move_target_distance_x = -CORNER_X;
-// 	// 		}
-//     //   }
-//     }
-// }
