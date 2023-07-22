@@ -10,66 +10,26 @@
 #include "UART.h"
 #include "6050control.h"
 
-extern uint8_t send_flag;
-//counter of the encoder
-uint16_t fl_counter = 0;
-uint16_t fr_counter = 0;
-uint16_t bl_counter = 0;
-uint16_t br_counter = 0;
-// all speeds are the vertical component velocity of the wheel, measured in cm/s.
-float fl_speed = 0; 
-float fr_speed = 0;
-float bl_speed = 0;
-float br_speed = 0;
-//Number of rotations made
-float fl_num = 0;
-float fr_num = 0;
-float bl_num = 0;
-float br_num = 0;
-//the speed postive and negetive
-int8_t fl_speed_dir = 0;
-int8_t fr_speed_dir = 0;
-int8_t bl_speed_dir = 0;
-int8_t br_speed_dir = 0;
-// the target speed you want to achieve
-float fl_target_speed = 0;
-float fr_target_speed = 0;
-float bl_target_speed = 0;
-float br_target_speed = 0;
-// the motor direction
-uint8_t fl_direction = 0;
-uint8_t fr_direction = 0;
-uint8_t bl_direction = 0;
-uint8_t br_direction = 0;
-// the motro direction input of the gpio
-uint8_t fl_dir = 0;
-uint8_t fr_dir = 0;
-uint8_t bl_dir = 0;
-uint8_t br_dir = 0;
-// use for test
-uint16_t test_a = 0;
-uint16_t test_b = 0;
-float distance_x_encoder = 0; // the move of the car
-float distance_y_encoder = 0; // the move of the car
-float angle_z_encoder = 0; // the angle of the car
-//the 6050 data from the car
-extern float angle_z;
-extern float distance_x;
-extern float distance_y;
-
-float distance_x_filter, distance_y_filter; //the filtter data
+extern uint8_t send_flag; // send to the computer flag
+extern float angle_z, distance_x, distance_y; //the 6050 data distance and angele_z
 extern float delta_v; //angle pid return delta_v
+
+uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
+float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.
+float fl_num = 0, fr_num = 0, bl_num = 0, br_num = 0; //Number of rotations made by the wheel in 10ms
+int8_t fl_speed_dir = 0, fr_speed_dir = 0, bl_speed_dir = 0, br_speed_dir = 0; //the speed postive and negetive 
+float fl_target_speed = 0, fr_target_speed = 0, bl_target_speed = 0, br_target_speed = 0; // the target speed you want to achieve
+uint8_t fl_direction = 0, fr_direction = 0, bl_direction = 0, br_direction = 0; // the motor direction
+uint8_t fl_dir = 0, fr_dir = 0, bl_dir = 0, br_dir = 0; // the motro direction input of the gpio
+uint16_t test_a = 0, test_b = 0; // use for test
+float distance_x_encoder = 0, distance_y_encoder = 0, angle_z_encoder = 0; // encoder cauculate the x y distance and angele_z
+float distance_x_filter, distance_y_filter; //the filtter data
 int delta_v_enable = 0; // Define the global variable. Initially set it to 0 (delta_v disabled)
 //move pid value
 float move_target_distance_x = 0;
 float move_target_distance_y = 0;
-//distance flag
-uint8_t distance_flag = 0;
-//gray input
-uint8_t left_modle[5];
-uint8_t right_modle[5];
-uint8_t front_modle[5];
-uint8_t back_modle[5];
+uint8_t distance_flag = 0; //distance flag
+uint8_t left_modle[5], right_modle[5], front_modle[5], back_modle[5]; //gray input
 uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
@@ -514,7 +474,8 @@ void TIM6_IRQHandler(void)
       //   if (corner_flag)
       //  {
       //      cheak_corner();
-      //  }
+      //  }_fl
+        test_time_flag ++;
         close_to_target(); // it is close to the target
 		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }

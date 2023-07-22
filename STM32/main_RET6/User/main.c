@@ -40,7 +40,7 @@ uint8_t test_id;  //sometime need to use send mpu-6050 id, cheaking if the mpu-6
 int main(void)
 {
 	init();
-	toggle_delta_v(1);
+	toggle_delta_v(0);
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
