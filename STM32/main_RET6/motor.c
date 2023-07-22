@@ -14,6 +14,11 @@ extern uint8_t send_flag; // send to the computer flag
 extern float angle_z, distance_x, distance_y; //the 6050 data distance and angele_z
 extern float delta_v; //angle pid return delta_v
 
+// float kp = 0.5, ki = 0.6, kd = 0.5;  // 
+float kp = 3, ki = 6, kd = 2;  // the motor speed pid
+float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // distance y pid
+float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // distance x pid
+
 uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
 float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.
 float fl_num = 0, fr_num = 0, bl_num = 0, br_num = 0; //Number of rotations made by the wheel in 10ms
@@ -33,11 +38,7 @@ uint8_t left_modle[5], right_modle[5], front_modle[5], back_modle[5]; //gray inp
 uint8_t corner_flag = 1;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
-// float kp = 0.5, ki = 0.6, kd = 0.5;  // 
-float kp = 3, ki = 6, kd = 2;  // the motor speed pid
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
-float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // distance y pid
-float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // distance x pid
 
 // function define
 float complementary_filter(float input1, float input2, float alpha);
