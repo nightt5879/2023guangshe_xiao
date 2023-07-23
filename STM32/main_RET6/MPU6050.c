@@ -77,7 +77,7 @@ void MPU6050_Init(void)
 	
 	I2C_InitTypeDef I2C_InitStructure;
 	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
-	I2C_InitStructure.I2C_ClockSpeed = 10000;
+	I2C_InitStructure.I2C_ClockSpeed = 100000;
 	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
@@ -112,17 +112,20 @@ void MPU6050_GetData(int16_t *AccX, int16_t *AccY, int16_t *AccZ,
 	DataL = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_L);
 	*AccY = (DataH << 8) | DataL;
 	
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);
-	*AccZ = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);
+	// *AccZ = (DataH << 8) | DataL;
+	*AccZ = 0;
 	
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);
-	*GyroX = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);
+	// *GyroX = (DataH << 8) | DataL;
+	*GyroX = 0;
 	
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);
-	*GyroY = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);
+	// *GyroY = (DataH << 8) | DataL;
+	*GyroY = 0;
 	
 	DataH = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_H);
 	DataL = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_L);

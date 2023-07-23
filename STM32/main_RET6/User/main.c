@@ -9,10 +9,10 @@
 //below are the test define
 #define TEST_PWM_DUTY 100
 #define TARGET_DISTANCE 40
-#define TEST_SPEED 6
+#define TEST_SPEED 3
 #define STBLE_TIME 30
-#define MOVE_X 40
-#define MOVE_Y 30
+#define MOVE_X 80
+#define MOVE_Y -80.0f
 //below are the function define
 void stop_car(void);
 void init(void);
@@ -32,40 +32,40 @@ extern uint8_t distance_flag, corner_flag, right_modle[], left_modle[], front_mo
 extern int16_t distance_x_uart, distance_y_uart; // get the disatnce target from the uart
 extern uint8_t one_move_flag;  // when the uart send a message, this flag will turning to 1, you can find it in the UART.X
 float data[CH_COUNT]; // the data send to the computer
-uint8_t send_flag = 0;
-// using for test
-uint16_t test_flag = 0;  
-uint16_t break_flag = 0;
+uint8_t send_flag = 0; // when into the motor interrupt, this flag will turning to 1, send the data to the computer
+uint16_t test_flag = 0, break_flag = 0, test_time_flag = 0;   // using for test
 uint8_t test_id;  //sometime need to use send mpu-6050 id, cheaking if the mpu-6050 is working
 int main(void)
 {
 	init();
-	toggle_delta_v(0);
+	toggle_delta_v(1);
+	// distance_y_uart = MOVE_Y;
+	// distance_x_uart = MOVE_X;
+	// one_move_flag = 1;
 	while (1)
 	{	
-		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
+		// get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
+		// test_id = MPU6050_GetID();
 		send_to_win();
-		if(one_move_flag == 1 && distance_flag == 1)
+		if(distance_flag == 1)
 		{
-			one_move_flag = 0;
 			distance_flag = 0;
 			Serial_SendByte(0x01);
 		}
+		// if (test_time_flag >= 100)
+		// {
+		// 	stop_car();
+		// }
+		// Delay_ms(50);
 	}
-	stop_car(); //stop the motor
 }
 
 void stop_car(void)
 {
-	speeds[0] = 0;
-	speeds[1] = 0;
-	speeds[2] = 0;
-	speeds[3] = 0;
-	control_motor_speed(speeds, control_flags);
-	control_motor(MOTOR_BL, 0);
-	control_motor(MOTOR_BR, 0);
-	control_motor(MOTOR_FL, 0);
-	control_motor(MOTOR_FR, 0);
+	fl_target_speed = 0;
+	fr_target_speed = 0;
+	bl_target_speed = 0;
+	br_target_speed = 0;
 }
 
 void init(void)

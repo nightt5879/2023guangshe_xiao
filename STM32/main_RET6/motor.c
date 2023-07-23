@@ -11,13 +11,14 @@
 #include "6050control.h"
 
 extern uint8_t send_flag; // send to the computer flag
-extern float angle_z, distance_x, distance_y; //the 6050 data distance and angele_z
+extern uint16_t test_time_flag; // the test time flag, give the main accuarte time
+extern float angle_z, distance_x, distance_y, angle_z_filter; //the 6050 data distance and angele_z
 extern float delta_v; //angle pid return delta_v
 
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // 
-float kp = 3, ki = 6, kd = 2;  // the motor speed pid
-float move_kp_y = 0.20, move_ki_y = 0.0, move_kd_y = 1;  // distance y pid
-float move_kp_x = 0.20, move_ki_x = 0.0, move_kd_x = 1;  // distance x pid
+float kp = 20, ki = 2, kd = 10;  // the motor speed pid
+float move_kp_y = 0.20, move_ki_y = Y_KI, move_kd_y = 2;  // distance y pid
+float move_kp_x = 0.24, move_ki_x = X_KI, move_kd_x = 2  ;  // distance x pid
 
 uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
 float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.
@@ -35,7 +36,7 @@ float move_target_distance_x = 0;
 float move_target_distance_y = 0;
 uint8_t distance_flag = 0; //distance flag
 uint8_t left_modle[5], right_modle[5], front_modle[5], back_modle[5]; //gray input
-uint8_t corner_flag = 1;  //the flag of the conner
+uint8_t corner_flag = 0;  //the flag of the conner
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
@@ -459,6 +460,14 @@ void TIM6_IRQHandler(void)
         // complementary filter
         distance_x_filter = complementary_filter(distance_x_encoder, distance_x, ALPHA_X);
         distance_y_filter = complementary_filter(distance_y_encoder, distance_y, ALPHA_Y);
+        if (abs(distance_x_filter) < DISTANCE_THRESHOLD_X)
+        {
+            distance_x_filter = 0;
+        }
+        if (abs(distance_y_filter) < DISTANCE_THRESHOLD_Y)
+        {
+            distance_y_filter = 0;
+        }
         // below are the distance PID control we dont need it right now
         move_target_distance_x = distance_x_uart;
         move_target_distance_y = distance_y_uart;
@@ -472,14 +481,15 @@ void TIM6_IRQHandler(void)
         fr_target_speed = pid_move_y.output - pid_move_x.output;
         bl_target_speed = pid_move_y.output - pid_move_x.output;
         br_target_speed = pid_move_y.output + pid_move_x.output;
-      //   if (corner_flag)
-      //  {
-      //      cheak_corner();
-      //  }_fl
+        if (corner_flag)
+        {
+           cheak_corner();
+        }
         test_time_flag ++;
         close_to_target(); // it is close to the target
-		TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
+        TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
+		
 }
 
 /**
@@ -516,10 +526,17 @@ void close_to_target(void)
           abs(fl_speed) < SPEED_THRESHOLD &&
           abs(fr_speed) < SPEED_THRESHOLD &&
           abs(bl_speed) < SPEED_THRESHOLD &&
-          abs(br_speed) < SPEED_THRESHOLD &&
-          one_move_flag == 1) 
+          abs(br_speed) < SPEED_THRESHOLD) 
         {
-          distance_flag = 1;
+          move_ki_x = X_KI;
+          move_ki_y = Y_KI;
+          if (one_move_flag == 1&& (distance_x_uart != 0 || distance_y_uart != 0)) //it mean control the move
+          {
+              one_move_flag = 0;
+              distance_flag = 1;
+              distance_x_uart = 0;
+              distance_y_uart = 0;
+          }
           stop_the_car();
           // Serial_SendByte(0x01);
           // Serial_SendPacket(); // send to the raspberry
@@ -536,29 +553,33 @@ void cheak_corner(void)
 {
    read_gray_scale_module(right_modle, left_modle,front_modle,back_modle);
    // close_to_target();
-   if ((left_modle[0] || left_modle[4]) && move_target_distance_x < 0) // move to the left
+   if ((left_modle[0] || left_modle[4]) && distance_x_uart < 0) // move to the left
    {
-       corner_flag = 0;
-       stop_the_car_no_clear_speed();
-       control_move(-CORNER_X,0);
+        corner_flag = 0;
+        move_ki_x = X_KI_CORNER;
+        stop_the_car_no_clear_speed();
+        distance_x_uart = -CORNER_X;
    }
-   else if((right_modle[0] || right_modle[4]) && move_target_distance_x > 0) // move to the right
+   else if((right_modle[0] || right_modle[4]) && distance_x_uart > 0) // move to the right
    {
-       corner_flag = 0;
-       stop_the_car_no_clear_speed();
-       control_move(CORNER_X,0);
+        corner_flag = 0;
+        move_ki_x = X_KI_CORNER;
+        stop_the_car_no_clear_speed();
+        distance_x_uart = CORNER_X;
    }
-   else if((left_modle[0] || right_modle[0]) && move_target_distance_y > 0) // move to the forward
+   else if((left_modle[0] || right_modle[0]) && distance_y_uart > 0) // move to the forward
    {
-       corner_flag = 0;
-       stop_the_car_no_clear_speed();
-       control_move(0,CORNER_Y);
+        corner_flag = 0;
+        move_ki_y = Y_KI_CORNER;
+        stop_the_car_no_clear_speed();
+        distance_y_uart = CORNER_Y;
    }
-   else if((left_modle[4] || right_modle[4]) && move_target_distance_y < 0) // move to the backward
+   else if((left_modle[4] || right_modle[4]) && distance_y_uart < 0) // move to the backward
    {
-       corner_flag = 0;
-       stop_the_car_no_clear_speed();
-       control_move(0,-CORNER_Y);
+        corner_flag = 0;
+        move_ki_y = Y_KI_CORNER;
+        stop_the_car_no_clear_speed();
+        distance_y_uart = -CORNER_Y;
    }
 }
 
@@ -578,14 +599,14 @@ void stop_the_car(void)
     br_target_speed = 0;
     distance_x_encoder = 0;
     distance_y_encoder = 0;
+    // angle_z_encoder = 0;
     distance_x = 0;
     distance_y = 0;
     distance_x_filter = 0;
     distance_y_filter = 0;
+    // angle_z_filter = 0;
     move_target_distance_x = 0;
     move_target_distance_y = 0;
-    distance_x_uart = 0;
-    distance_y_uart = 0;
 }
 
 /**

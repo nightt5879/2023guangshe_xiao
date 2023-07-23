@@ -9,6 +9,7 @@
 int16_t distance_x_uart, distance_y_uart, speed;
 uint8_t one_move_flag = 0;  // the flag use for the uart
 extern int16_t distance_x_uart, distance_y_uart; // send the distance to the motor
+extern uint8_t corner_flag; // use for cheak the corner
 // the data send rx and tx, the Flag is use for confirm the data is recived(if you want to use it not in the interrupt)
 uint8_t Serial_TxPacket[6];				//FF 01 02 03 04 05 06FE
 uint8_t Serial_RxPacket[6];
@@ -255,6 +256,7 @@ void USART2_IRQHandler(void)
                 if (Serial_RxPacket[0] == 0x0B)  // send the distance positve
                 {
                     stop_the_car();
+                    corner_flag = 1;
                     distance_y_uart = Serial_RxPacket[1]; 
                     distance_x_uart = Serial_RxPacket[2];
                     one_move_flag = 1;
@@ -262,6 +264,7 @@ void USART2_IRQHandler(void)
                 else if (Serial_RxPacket[0] == 0x0C)
                 {
                     stop_the_car();
+                    corner_flag = 1;
                     distance_y_uart = -Serial_RxPacket[1];
                     distance_x_uart = -Serial_RxPacket[2];
                     one_move_flag = 1;

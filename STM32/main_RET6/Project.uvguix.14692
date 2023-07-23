@@ -93,8 +93,8 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-1</xPos>
-        <yPos>-1</yPos>
+        <xPos>-32000</xPos>
+        <yPos>-32000</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
@@ -3606,9 +3606,9 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>.\User\main.c</Name>
-        <ColumnNumber>10</ColumnNumber>
-        <TopLine>67</TopLine>
-        <CurrentLine>60</CurrentLine>
+        <ColumnNumber>17</ColumnNumber>
+        <TopLine>13</TopLine>
+        <CurrentLine>14</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3634,7 +3634,7 @@
       <Doc>
         <Name>.\6050control.c</Name>
         <ColumnNumber>0</ColumnNumber>
-        <TopLine>309</TopLine>
+        <TopLine>302</TopLine>
         <CurrentLine>323</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
@@ -3669,9 +3669,9 @@
       </Doc>
       <Doc>
         <Name>.\GPIO.c</Name>
-        <ColumnNumber>56</ColumnNumber>
+        <ColumnNumber>4</ColumnNumber>
         <TopLine>61</TopLine>
-        <CurrentLine>74</CurrentLine>
+        <CurrentLine>75</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3696,9 +3696,9 @@
       </Doc>
       <Doc>
         <Name>.\MPU6050.c</Name>
-        <ColumnNumber>0</ColumnNumber>
-        <TopLine>79</TopLine>
-        <CurrentLine>93</CurrentLine>
+        <ColumnNumber>46</ColumnNumber>
+        <TopLine>61</TopLine>
+        <CurrentLine>80</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

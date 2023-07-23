@@ -2,8 +2,8 @@ import move
 import time
 
 c = move.Car()
-DIS_X = 45
-DIS_Y = 40
+DIS_X = 50
+DIS_Y = 43
 def move_forward(distance):
     c.car_send_distance_positive(distance, 0)
     c.car_cheak_data()
@@ -23,6 +23,12 @@ if __name__ == "__main__":
     # c.control_6050(0)
     # time.sleep(1)
     # c.control_6050(1)
+    move_left(DIS_X)
+    time.sleep(0.5)
     move_forward(DIS_Y)
-    move_backward(DIS_Y)
+    time.sleep(0.5)
+    move_left(DIS_X)
+    time.sleep(0.5)
+    move_forward(DIS_Y)
+    # time.sleep(0.5)
     print("test done")

@@ -7,12 +7,12 @@
 #include "GPIO.h"
 
 #define MAX_ACC 0.3
-#define ANGLE_MIN 1.5
+#define ANGLE_MIN 0.1
 #define MAX_OUTPUT_ANGLE 5
 
 
 //pid
-float kp_angle = 0.10, ki_angle = 0.0, kd_angle = 8;
+float kp_angle = 0.20, ki_angle = 0.0, kd_angle = 4;
 //delta V will control the car to correct the angle
 float delta_v = 0;
 
@@ -38,13 +38,12 @@ uint8_t ay_zero = 0;
 //extern from the motor.c
 extern float distance_x_encoder, distance_y_encoder, angle_z_encoder;
 float angle_z_filter;  // the angle_z after the filter
-
 //function define
 void kalman_init(KalmanState* state, float q, float r, float p, float initial_value); // kalman filter
 float kalman_update(KalmanState* state, float measurement); // kalman update
 
 
-KalmanState state_ax, state_ay, state_gz; // the 3 kalman filter state
+KalmanState state_ax, state_ay, state_gz, state_angle_z; // the 3 kalman filter state
 /**
   * @brief  low pass filter
   * @retval None
@@ -94,14 +93,15 @@ void mpu_6050_corretion(void)
   */
 void init_6050(void)
 {
-	MPU6050_Init();
-	ID = MPU6050_GetID();
-	mpu_6050_corretion();  // correct the data of the 6050
+	// MPU6050_Init();
+	// ID = MPU6050_GetID();
+	// mpu_6050_corretion();  // correct the data of the 6050
 	// Initialize the Kalman filter state for each sensor reading
 
     kalman_init(&state_ax, 0.1, 0.1, 1, 0); // You may need to adjust the noise parameters and initial value
     kalman_init(&state_ay, 0.1, 0.1, 1, 0); // based on your specific sensor characteristics
     kalman_init(&state_gz, 0.1, 0.1, 1, 0); 
+	kalman_init(&state_angle_z, 0.1, 0.1, 1, 0);
 }
 
 
@@ -116,9 +116,9 @@ void get_6050_data(void)
 	// Check the absolute values of the corrected data and set small values to 0.
 	ax_corr_done = abs(AX - AX_CORR) < LOW_PASS_FILTR ? 0 : AX - AX_CORR;
 	ay_corr_done = abs(AY - AY_CORR) < LOW_PASS_FILTR ? 0 : AY - AY_CORR;
-	az_corr_done = abs(AZ - AZ_CORR - GRAVITY) < LOW_PASS_FILTR ? 0 : AZ - AZ_CORR - GRAVITY;
-	gx_corr_done = abs(GX - GX_CORR) < LOW_PASS_FILTR ? 0 : GX - GX_CORR;
-	gy_corr_done = abs(GY - GY_CORR) < LOW_PASS_FILTR ? 0 : GY - GY_CORR;
+	// az_corr_done = abs(AZ - AZ_CORR - GRAVITY) < LOW_PASS_FILTR ? 0 : AZ - AZ_CORR - GRAVITY;
+	// gx_corr_done = abs(GX - GX_CORR) < LOW_PASS_FILTR ? 0 : GX - GX_CORR;
+	// gy_corr_done = abs(GY - GY_CORR) < LOW_PASS_FILTR ? 0 : GY - GY_CORR;
 	gz_corr_done = abs(GZ - GZ_CORR) < LOW_PASS_FILTR ? 0 : GZ - GZ_CORR;
 	//low pass filter
 	// Use the low pass filter function on the corrected data.
@@ -130,9 +130,9 @@ void get_6050_data(void)
 	// gz = low_pass_filter(gz_corr_done / 32768.0 * 1000.0, gz_prev);
 	ax = ax_corr_done / 32768.0 * 2.0;
 	ay = ay_corr_done / 32768.0 * 2.0;
-	az = az_corr_done / 32768.0 * 2.0;
-	gx = gx_corr_done / 32768.0 * 2000.0;
-	gy = gy_corr_done / 32768.0 * 2000.0;
+	// az = az_corr_done / 32768.0 * 2.0;
+	// gx = gx_corr_done / 32768.0 * 2000.0;
+	// gy = gy_corr_done / 32768.0 * 2000.0;
 	gz =gz_corr_done / 32768.0 * 2000.0;
 	//
 	ax = kalman_update(&state_ax, ax);
@@ -140,12 +140,12 @@ void get_6050_data(void)
 	gz = kalman_update(&state_gz, gz);
 
 	// Update the previous values for the next loop.
-	ax_prev = ax;
-	ay_prev = ay;
-	az_prev = az;
-	gx_prev = gx;
-	gy_prev = gy;
-	gz_prev = gz;
+	// ax_prev = ax;
+	// ay_prev = ay;
+	// az_prev = az;
+	// gx_prev = gx;
+	// gy_prev = gy;
+	// gz_prev = gz;
 }
 
 /**
@@ -271,8 +271,9 @@ void TIM7_IRQHandler(void)
 		// get_6050_data();
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
 		angle_z -= gz * 0.001;
+		angle_z_encoder = kalman_update(&state_angle_z, angle_z_encoder);
 		angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
-		pid_compute_angle(&pid_angle, angle_z); //get the pid output
+		pid_compute_angle(&pid_angle, angle_z_filter); //get the pid output
 		delta_v = pid_angle.output;
 		//ax is the acceleration, 
 		//so it needs to be multiplied by t squared to obtain the displacement 
