@@ -24,7 +24,7 @@ class Servo:
         GPIO.setup(self.pin, GPIO.OUT, initial=False)
         self.pwm = GPIO.PWM(self.pin, 50)
         self.pwm.start(0)
-        
+
     @staticmethod
     def clamp_number(num, min_number, max_number):
         return max(min(num, max(min_number, max_number)), min(min_number, max_number))
@@ -36,6 +36,7 @@ class HalfCircleServo(Servo):
 
     :param pin: the servo's gpio pin
     """
+
     def __init__(self, pin):
         super().__init__(pin)
         self.angle = 0
@@ -63,13 +64,13 @@ class HalfCircleServo(Servo):
         return self.angle
 
 
-rotate_angle = 0
-
-
 if __name__ == '__main__':
     """
     the process of the create the thread function
     """
+    rotate_angle = 0
+
+
     def thread_nodding():
         while True:
             if servo1.target != servo1.angle:
@@ -110,8 +111,6 @@ if __name__ == '__main__':
     servo2.target = 0
     servo3.target = 0
 
-
-
     # create two threads to control the servo and read the angle
     t1 = threading.Thread(target=thread_rotating)
     t2 = threading.Thread(target=thread_nodding)
@@ -121,9 +120,9 @@ if __name__ == '__main__':
     """
     the process of the control other parts and set the servo's angle
     """
-    control_servo(servo1, 90, 90)
+    # the function is defined in main file
+    # control_servo(servo1, 90, 90)
     while True:
-
         # set the servo's vertical angle
         head_angle = int(input("please input the head angle: "))
         # only set the servo1's angle, and remain the rotate angle unchanged
@@ -131,4 +130,4 @@ if __name__ == '__main__':
         # set the servo's rotate angle
         rotate_angle = int(input("please input the rotate angle: "))
         # only set the servo2 and servo3's angle, and remain the servo1's angle unchanged
-        control_servo(servo1, servo1.angle, rotate_angle)
+        # control_servo(servo1, servo1.angle, rotate_angle)
