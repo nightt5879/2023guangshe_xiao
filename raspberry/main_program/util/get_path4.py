@@ -570,7 +570,7 @@ class pathPlaner:
         self.our_color = our_color
         self.paths, self.quadrant_mines, self.ori_mines = get_paths(self.eight_mines.copy(), self.eight_mines.copy(),
                                                                     optimize=True)
-
+        self.direct = '上'
         self.get_paths_list()
         # import json
         # print(json.dumps(self.paths_list, indent=4, ensure_ascii=False))
