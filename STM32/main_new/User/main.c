@@ -107,6 +107,7 @@ int main(void)
 						GPIO_Set(3);
 						GPIO_Set(6);
 						acc_GZ = 0; // reset the acc_GZ
+						Serial_SendByte(0x01);
 						break;
 					}
 				}
@@ -140,6 +141,7 @@ int main(void)
 						GPIO_Set(3);
 						GPIO_Set(6);
 						acc_GZ = 0; // reset the acc_GZ
+						Serial_SendByte(0x01);
 						break;
 					}
 				}
