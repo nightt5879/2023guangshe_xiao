@@ -614,7 +614,6 @@ class pathPlaner:
         action_list = []
         for Dict in self.paths_list:
             new_action = []
-            print(Dict)
             for action in Dict['action']:
                 if len(action) > 2:
                     num = action[2:]
@@ -654,11 +653,48 @@ class pathPlaner:
                     elif action == '向左':
                         new_action.append("左转")
                         new_action.append("左转")
-                new_action.append("前进" + num)
+                new_action.append("前进")
                 direct = action[-1]
+            if direct != Dict['direct']:
+                if direct == '上':
+                    if Dict['direct'] == '左':
+                        new_action.append("左转")
+                    elif Dict['direct'] == '向右':
+                        new_action.append("右转")
+                    elif Dict['direct'] == '向下':
+                        new_action.append("左转")
+                        new_action.append("左转")
+                elif direct == '下':
+                    if Dict['direct'] == '向左':
+                        new_action.append("右转")
+                    elif Dict['direct'] == '向右':
+                        new_action.append("左转")
+                    elif Dict['direct'] == '向上':
+                        new_action.append("左转")
+                        new_action.append("左转")
+                elif direct == '左':
+                    if Dict['direct'] == '向上':
+                        new_action.append("右转")
+                    elif Dict['direct'] == '向下':
+                        new_action.append("左转")
+                    elif Dict['direct'] == '向右':
+                        new_action.append("左转")
+                        new_action.append("左转")
+                else:
+                    if Dict['direct'] == '向上':
+                        new_action.append("左转")
+                    elif Dict['direct'] == '向下':
+                        new_action.append("右转")
+                    elif Dict['direct'] == '向左':
+                        new_action.append("左转")
+                        new_action.append("左转")
+            if num == "":
+                num = 1
+            else:
+                num = int(num)+1
+            new_action.append(num)
             action_list.append(new_action)
-            # print(new_action)
-            # exit()
+
         self.paths_list = action_list
 
     def update_paths(self):
