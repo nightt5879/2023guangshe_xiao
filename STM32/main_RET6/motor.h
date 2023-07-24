@@ -50,16 +50,16 @@ extern uint8_t Serial_RxPacket[];
 #define ALPHA_X 1.0f
 #define ALPHA_Y 1.0f
 #define ALPHA_Z 1.0f
-#define CORNER_X 8.0f
-#define CORNER_Y 2.0f
+#define CORNER_X 12.0f
+#define CORNER_Y 6.0f
 #define CORR_TEST 1.5f
 #define DISTANCE_THRESHOLD_X 0.0f
 #define DISTANCE_THRESHOLD_Y 0.0f
 // when close to the corner you need a small speed, so we should use a biger KI
-#define X_KI 0.00005f
-#define Y_KI 0.00005f
-#define X_KI_CORNER 0.00005f
-#define Y_KI_CORNER 0.00005f
+#define X_KI 0.00001f
+#define Y_KI 0.00001f
+#define X_KI_CORNER 0.00001f
+#define Y_KI_CORNER 0.00001f
 /**
   * @brief  initialize the pid control structure
   * @param  None

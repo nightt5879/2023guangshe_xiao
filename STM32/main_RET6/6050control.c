@@ -12,7 +12,7 @@
 
 
 //pid
-float kp_angle = 0.20, ki_angle = 0.0, kd_angle = 4;
+float kp_angle = 0.80, ki_angle = 0.0, kd_angle = 4;
 //delta V will control the car to correct the angle
 float delta_v = 0;
 
@@ -93,9 +93,9 @@ void mpu_6050_corretion(void)
   */
 void init_6050(void)
 {
-	// MPU6050_Init();
-	// ID = MPU6050_GetID();
-	// mpu_6050_corretion();  // correct the data of the 6050
+	MPU6050_Init();
+	ID = MPU6050_GetID();
+	mpu_6050_corretion();  // correct the data of the 6050
 	// Initialize the Kalman filter state for each sensor reading
 
     kalman_init(&state_ax, 0.1, 0.1, 1, 0); // You may need to adjust the noise parameters and initial value

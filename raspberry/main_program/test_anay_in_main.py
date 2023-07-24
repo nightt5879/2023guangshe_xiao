@@ -2,8 +2,8 @@ import move
 import time
 
 c = move.Car()
-DIS_X = 50
-DIS_Y = 43
+DIS_X = 80
+DIS_Y = 80
 def move_forward(distance):
     c.car_send_distance_positive(distance, 0)
     c.car_cheak_data()

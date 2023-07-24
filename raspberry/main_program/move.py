@@ -88,30 +88,32 @@ class Car:
         self.data[6] = right_speed & 0xFF
         self.car_com1.write(self.data)
 
-    def car_turn_left_6050(self,turn_angel):
+    def car_turn_left_6050(self,turn_angel,pwm):
         """
         the car turn left with mpu6050
         :param turn_angel: the turn angel
+        :param pwm: the pwm turning the car
         """
         self.data[1] = 0x05
         self.data[2] = 0x11
         self.data[3] = turn_angel >> 8
         self.data[4] = turn_angel & 0xFF
-        self.data[5] = 0x00
-        self.data[6] = 0x00
+        self.data[5] = pwm >> 8
+        self.data[6] = pwm & 0xFF
         self.car_com1.write(self.data)
 
-    def car_turn_right_6050(self,turn_angel):
+    def car_turn_right_6050(self,turn_angel,pwm):
         """
         the car turn right with mpu6050
         :param turn_angel: the turn angel
+        :param pwm: the pwm turning the car
         """
         self.data[1] = 0x05
         self.data[2] = 0x21
         self.data[3] = turn_angel >> 8
         self.data[4] = turn_angel & 0xFF
-        self.data[5] = 0x00
-        self.data[6] = 0x00
+        self.data[5] = pwm >> 8
+        self.data[6] = pwm & 0xFF
         self.car_com1.write(self.data)
 
     def car_forward_6050(self):

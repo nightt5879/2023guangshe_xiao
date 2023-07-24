@@ -16,9 +16,9 @@ extern float angle_z, distance_x, distance_y, angle_z_filter; //the 6050 data di
 extern float delta_v; //angle pid return delta_v
 
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // 
-float kp = 20, ki = 2, kd = 10;  // the motor speed pid
-float move_kp_y = 0.20, move_ki_y = Y_KI, move_kd_y = 2;  // distance y pid
-float move_kp_x = 0.24, move_ki_x = X_KI, move_kd_x = 2  ;  // distance x pid
+float kp = 20, ki = 4, kd = 10;  // the motor speed pid
+float move_kp_y = 0.13, move_ki_y = Y_KI, move_kd_y = 2;  // distance y pid
+float move_kp_x = 0.13, move_ki_x = X_KI, move_kd_x = 2  ;  // distance x pid
 
 uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
 float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.

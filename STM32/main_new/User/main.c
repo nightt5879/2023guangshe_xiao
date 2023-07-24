@@ -6,8 +6,7 @@
 #include "PWM.h"
 #include "MPU6050.h"
 #include "math.h"
-
-//#include "Key.h"
+#include <stdlib.h>
 
 uint8_t KeyNum;
 uint16_t G1 = 0 ,G2 = 0;
@@ -36,7 +35,6 @@ int main(void)
 	OLED_ShowString(1, 1, "ID:");
 	ID = MPU6050_GetID();
 	OLED_ShowHexNum(1, 4, ID, 2);
-
 	while (1)
 	{
 		// below are the serial port
@@ -90,8 +88,8 @@ int main(void)
 				start_GZ = GZ;
 				GPIO_Set(1); 
 				GPIO_Set(5);
-				PWM_SetCompara(1,500);
-				PWM_SetCompara(2,500);
+				PWM_SetCompara(1,G2);
+				PWM_SetCompara(2,G2);
 				while(1)  // get the 6050 data
 				{
 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
@@ -123,8 +121,8 @@ int main(void)
 				start_GZ = GZ;
 				GPIO_Set(2);
 				GPIO_Set(4);;
-				PWM_SetCompara(1,500);
-				PWM_SetCompara(2,500);
+				PWM_SetCompara(1,G2);
+				PWM_SetCompara(2,G2);
 				while(1)  // get the 6050 data
 				{
 					MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);

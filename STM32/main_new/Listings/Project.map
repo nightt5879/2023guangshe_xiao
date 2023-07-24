@@ -1229,32 +1229,32 @@ Memory Map of the image
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x08000000   0x08000000   0x000000ec   Data   RO            3    RESET               startup_stm32f10x_md.o
-    0x080000ec   0x080000ec   0x00000000   Code   RO         3723  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x080000ec   0x080000ec   0x00000004   Code   RO         3766    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x080000f0   0x080000f0   0x00000004   Code   RO         3769    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080000f4   0x080000f4   0x00000000   Code   RO         3771    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080000f4   0x080000f4   0x00000000   Code   RO         3773    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080000f4   0x080000f4   0x00000008   Code   RO         3774    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080000fc   0x080000fc   0x00000004   Code   RO         3781    .ARM.Collect$$$$0000000E  mc_w.l(entry12b.o)
-    0x08000100   0x08000100   0x00000000   Code   RO         3776    .ARM.Collect$$$$0000000F  mc_w.l(entry10a.o)
-    0x08000100   0x08000100   0x00000000   Code   RO         3778    .ARM.Collect$$$$00000011  mc_w.l(entry11a.o)
-    0x08000100   0x08000100   0x00000004   Code   RO         3767    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x080000ec   0x080000ec   0x00000000   Code   RO         3726  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x080000ec   0x080000ec   0x00000004   Code   RO         3769    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x080000f0   0x080000f0   0x00000004   Code   RO         3772    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080000f4   0x080000f4   0x00000000   Code   RO         3774    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080000f4   0x080000f4   0x00000000   Code   RO         3776    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080000f4   0x080000f4   0x00000008   Code   RO         3777    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080000fc   0x080000fc   0x00000004   Code   RO         3784    .ARM.Collect$$$$0000000E  mc_w.l(entry12b.o)
+    0x08000100   0x08000100   0x00000000   Code   RO         3779    .ARM.Collect$$$$0000000F  mc_w.l(entry10a.o)
+    0x08000100   0x08000100   0x00000000   Code   RO         3781    .ARM.Collect$$$$00000011  mc_w.l(entry11a.o)
+    0x08000100   0x08000100   0x00000004   Code   RO         3770    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
     0x08000104   0x08000104   0x00000024   Code   RO            4    .text               startup_stm32f10x_md.o
-    0x08000128   0x08000128   0x0000014e   Code   RO         3754    .text               mf_w.l(dadd.o)
-    0x08000276   0x08000276   0x000000e4   Code   RO         3756    .text               mf_w.l(dmul.o)
-    0x0800035a   0x0800035a   0x00000022   Code   RO         3758    .text               mf_w.l(dflti.o)
-    0x0800037c   0x0800037c   0x0000001a   Code   RO         3760    .text               mf_w.l(dfltui.o)
-    0x08000396   0x08000396   0x0000003e   Code   RO         3762    .text               mf_w.l(dfixi.o)
-    0x080003d4   0x080003d4   0x00000030   Code   RO         3764    .text               mf_w.l(cdrcmple.o)
-    0x08000404   0x08000404   0x0000001e   Code   RO         3787    .text               mc_w.l(llshl.o)
-    0x08000422   0x08000422   0x00000020   Code   RO         3789    .text               mc_w.l(llushr.o)
-    0x08000442   0x08000442   0x00000024   Code   RO         3791    .text               mc_w.l(llsshr.o)
-    0x08000466   0x08000466   0x00000000   Code   RO         3793    .text               mc_w.l(iusefp.o)
-    0x08000466   0x08000466   0x000000ba   Code   RO         3794    .text               mf_w.l(depilogue.o)
-    0x08000520   0x08000520   0x00000060   Code   RO         3800    .text               mf_w.l(dcmp4.o)
-    0x08000580   0x08000580   0x00000024   Code   RO         3802    .text               mc_w.l(init.o)
-    0x080005a4   0x080005a4   0x00000004   Code   RO         3656    i.BusFault_Handler  stm32f10x_it.o
-    0x080005a8   0x080005a8   0x00000002   Code   RO         3657    i.DebugMon_Handler  stm32f10x_it.o
+    0x08000128   0x08000128   0x0000014e   Code   RO         3757    .text               mf_w.l(dadd.o)
+    0x08000276   0x08000276   0x000000e4   Code   RO         3759    .text               mf_w.l(dmul.o)
+    0x0800035a   0x0800035a   0x00000022   Code   RO         3761    .text               mf_w.l(dflti.o)
+    0x0800037c   0x0800037c   0x0000001a   Code   RO         3763    .text               mf_w.l(dfltui.o)
+    0x08000396   0x08000396   0x0000003e   Code   RO         3765    .text               mf_w.l(dfixi.o)
+    0x080003d4   0x080003d4   0x00000030   Code   RO         3767    .text               mf_w.l(cdrcmple.o)
+    0x08000404   0x08000404   0x0000001e   Code   RO         3790    .text               mc_w.l(llshl.o)
+    0x08000422   0x08000422   0x00000020   Code   RO         3792    .text               mc_w.l(llushr.o)
+    0x08000442   0x08000442   0x00000024   Code   RO         3794    .text               mc_w.l(llsshr.o)
+    0x08000466   0x08000466   0x00000000   Code   RO         3796    .text               mc_w.l(iusefp.o)
+    0x08000466   0x08000466   0x000000ba   Code   RO         3797    .text               mf_w.l(depilogue.o)
+    0x08000520   0x08000520   0x00000060   Code   RO         3803    .text               mf_w.l(dcmp4.o)
+    0x08000580   0x08000580   0x00000024   Code   RO         3805    .text               mc_w.l(init.o)
+    0x080005a4   0x080005a4   0x00000004   Code   RO         3659    i.BusFault_Handler  stm32f10x_it.o
+    0x080005a8   0x080005a8   0x00000002   Code   RO         3660    i.DebugMon_Handler  stm32f10x_it.o
     0x080005aa   0x080005aa   0x00000002   PAD
     0x080005ac   0x080005ac   0x0000002c   Code   RO         3482    i.GPIOInit          gpio.o
     0x080005d8   0x080005d8   0x00000116   Code   RO         1347    i.GPIO_Init         stm32f10x_gpio.o
@@ -1263,7 +1263,7 @@ Memory Map of the image
     0x080006f4   0x080006f4   0x0000007c   Code   RO         3483    i.GPIO_Set          gpio.o
     0x08000770   0x08000770   0x00000004   Code   RO         1355    i.GPIO_SetBits      stm32f10x_gpio.o
     0x08000774   0x08000774   0x0000000a   Code   RO         1358    i.GPIO_WriteBit     stm32f10x_gpio.o
-    0x0800077e   0x0800077e   0x00000004   Code   RO         3658    i.HardFault_Handler  stm32f10x_it.o
+    0x0800077e   0x0800077e   0x00000004   Code   RO         3661    i.HardFault_Handler  stm32f10x_it.o
     0x08000782   0x08000782   0x00000018   Code   RO         1459    i.I2C_AcknowledgeConfig  stm32f10x_i2c.o
     0x0800079a   0x0800079a   0x0000002a   Code   RO         1461    i.I2C_CheckEvent    stm32f10x_i2c.o
     0x080007c4   0x080007c4   0x00000018   Code   RO         1464    i.I2C_Cmd           stm32f10x_i2c.o
@@ -1280,8 +1280,8 @@ Memory Map of the image
     0x08000b08   0x08000b08   0x00000022   Code   RO         3570    i.MPU6050_WaitEvent  mpu6050.o
     0x08000b2a   0x08000b2a   0x00000002   PAD
     0x08000b2c   0x08000b2c   0x00000064   Code   RO         3571    i.MPU6050_WriteReg  mpu6050.o
-    0x08000b90   0x08000b90   0x00000004   Code   RO         3659    i.MemManage_Handler  stm32f10x_it.o
-    0x08000b94   0x08000b94   0x00000002   Code   RO         3660    i.NMI_Handler       stm32f10x_it.o
+    0x08000b90   0x08000b90   0x00000004   Code   RO         3662    i.MemManage_Handler  stm32f10x_it.o
+    0x08000b94   0x08000b94   0x00000002   Code   RO         3663    i.NMI_Handler       stm32f10x_it.o
     0x08000b96   0x08000b96   0x00000002   PAD
     0x08000b98   0x08000b98   0x00000070   Code   RO          137    i.NVIC_Init         misc.o
     0x08000c08   0x08000c08   0x00000014   Code   RO          138    i.NVIC_PriorityGroupConfig  misc.o
@@ -1303,17 +1303,17 @@ Memory Map of the image
     0x08000fc2   0x08000fc2   0x00000002   PAD
     0x08000fc4   0x08000fc4   0x000000a0   Code   RO         3503    i.PWM_Init          pwm.o
     0x08001064   0x08001064   0x0000004e   Code   RO         3504    i.PWM_SetCompara    pwm.o
-    0x080010b2   0x080010b2   0x00000002   Code   RO         3661    i.PendSV_Handler    stm32f10x_it.o
+    0x080010b2   0x080010b2   0x00000002   Code   RO         3664    i.PendSV_Handler    stm32f10x_it.o
     0x080010b4   0x080010b4   0x00000020   Code   RO         1775    i.RCC_APB1PeriphClockCmd  stm32f10x_rcc.o
     0x080010d4   0x080010d4   0x00000020   Code   RO         1777    i.RCC_APB2PeriphClockCmd  stm32f10x_rcc.o
     0x080010f4   0x080010f4   0x000000d4   Code   RO         1785    i.RCC_GetClocksFreq  stm32f10x_rcc.o
-    0x080011c8   0x080011c8   0x00000002   Code   RO         3662    i.SVC_Handler       stm32f10x_it.o
+    0x080011c8   0x080011c8   0x00000002   Code   RO         3665    i.SVC_Handler       stm32f10x_it.o
     0x080011ca   0x080011ca   0x00000002   PAD
     0x080011cc   0x080011cc   0x0000001c   Code   RO         3397    i.Serial_GetRxFlag  serial.o
     0x080011e8   0x080011e8   0x000000b8   Code   RO         3398    i.Serial_Init       serial.o
     0x080012a0   0x080012a0   0x00000008   Code   RO           24    i.SetSysClock       system_stm32f10x.o
     0x080012a8   0x080012a8   0x000000e0   Code   RO           25    i.SetSysClockTo72   system_stm32f10x.o
-    0x08001388   0x08001388   0x00000002   Code   RO         3663    i.SysTick_Handler   stm32f10x_it.o
+    0x08001388   0x08001388   0x00000002   Code   RO         3666    i.SysTick_Handler   stm32f10x_it.o
     0x0800138a   0x0800138a   0x00000002   PAD
     0x0800138c   0x0800138c   0x00000060   Code   RO           27    i.SystemInit        system_stm32f10x.o
     0x080013ec   0x080013ec   0x00000018   Code   RO         2421    i.TIM_Cmd           stm32f10x_tim.o
@@ -1334,16 +1334,16 @@ Memory Map of the image
     0x08001736   0x08001736   0x0000004a   Code   RO         2966    i.USART_ITConfig    stm32f10x_usart.o
     0x08001780   0x08001780   0x000000d8   Code   RO         2967    i.USART_Init        stm32f10x_usart.o
     0x08001858   0x08001858   0x0000000a   Code   RO         2974    i.USART_ReceiveData  stm32f10x_usart.o
-    0x08001862   0x08001862   0x00000004   Code   RO         3664    i.UsageFault_Handler  stm32f10x_it.o
-    0x08001866   0x08001866   0x0000000e   Code   RO         3806    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x08001874   0x08001874   0x00000002   Code   RO         3807    i.__scatterload_null  mc_w.l(handlers.o)
-    0x08001876   0x08001876   0x0000000e   Code   RO         3808    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x08001862   0x08001862   0x00000004   Code   RO         3667    i.UsageFault_Handler  stm32f10x_it.o
+    0x08001866   0x08001866   0x0000000e   Code   RO         3809    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x08001874   0x08001874   0x00000002   Code   RO         3810    i.__scatterload_null  mc_w.l(handlers.o)
+    0x08001876   0x08001876   0x0000000e   Code   RO         3811    i.__scatterload_zeroinit  mc_w.l(handlers.o)
     0x08001884   0x08001884   0x000002a0   Code   RO         3611    i.car_forward       main.o
-    0x08001b24   0x08001b24   0x00000042   Code   RO         3719    i.fmax              m_ws.l(fmax.o)
-    0x08001b66   0x08001b66   0x00000042   Code   RO         3721    i.fmin              m_ws.l(fmin.o)
+    0x08001b24   0x08001b24   0x00000042   Code   RO         3722    i.fmax              m_ws.l(fmax.o)
+    0x08001b66   0x08001b66   0x00000042   Code   RO         3724    i.fmin              m_ws.l(fmin.o)
     0x08001ba8   0x08001ba8   0x000003e8   Code   RO         3612    i.main              main.o
     0x08001f90   0x08001f90   0x000005f0   Data   RO         3305    .constdata          oled.o
-    0x08002580   0x08002580   0x00000020   Data   RO         3804    Region$$Table       anon$$obj.o
+    0x08002580   0x08002580   0x00000020   Data   RO         3807    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080025a0, Size: 0x00000488, Max: 0x00005000, ABSOLUTE)

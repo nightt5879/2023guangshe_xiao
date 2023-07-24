@@ -36,3 +36,4 @@
 .\objects\main.o: .\Hardware\PWM.h
 .\objects\main.o: .\Hardware\MPU6050.h
 .\objects\main.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\math.h
+.\objects\main.o: E:\keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
