@@ -12,11 +12,11 @@
 
 
 //pid
-float kp_angle = 0.80, ki_angle = 0.0, kd_angle = 4;
+float kp_angle = 0.20, ki_angle = 0.00001, kd_angle = 2.1;
 //delta V will control the car to correct the angle
 float delta_v = 0;
 
-uint8_t ID;  // the mpu-6050 ID
+extern uint8_t ID;  // the mpu-6050 ID
 int16_t AX, AY, AZ, GX, GY, GZ; //MPU-6050 raw data
 int16_t AX_CORR, AY_CORR, AZ_CORR, GX_CORR, GY_CORR, GZ_CORR; // MPU6050 zero point data correction.
 int16_t ax_corr_done, ay_corr_done, az_corr_done, gx_corr_done, gy_corr_done, gz_corr_done; // MPU-6050 correction data
@@ -114,8 +114,8 @@ void get_6050_data(void)
 {
 	MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
 	// Check the absolute values of the corrected data and set small values to 0.
-	ax_corr_done = abs(AX - AX_CORR) < LOW_PASS_FILTR ? 0 : AX - AX_CORR;
-	ay_corr_done = abs(AY - AY_CORR) < LOW_PASS_FILTR ? 0 : AY - AY_CORR;
+	// ax_corr_done = abs(AX - AX_CORR) < LOW_PASS_FILTR ? 0 : AX - AX_CORR;
+	// ay_corr_done = abs(AY - AY_CORR) < LOW_PASS_FILTR ? 0 : AY - AY_CORR;
 	// az_corr_done = abs(AZ - AZ_CORR - GRAVITY) < LOW_PASS_FILTR ? 0 : AZ - AZ_CORR - GRAVITY;
 	// gx_corr_done = abs(GX - GX_CORR) < LOW_PASS_FILTR ? 0 : GX - GX_CORR;
 	// gy_corr_done = abs(GY - GY_CORR) < LOW_PASS_FILTR ? 0 : GY - GY_CORR;
@@ -128,15 +128,15 @@ void get_6050_data(void)
 	// gx = low_pass_filter(gx_corr_done / 32768.0 * 1000.0, gx_prev);
 	// gy = low_pass_filter(gy_corr_done / 32768.0 * 1000.0, gy_prev);
 	// gz = low_pass_filter(gz_corr_done / 32768.0 * 1000.0, gz_prev);
-	ax = ax_corr_done / 32768.0 * 2.0;
-	ay = ay_corr_done / 32768.0 * 2.0;
+	// ax = ax_corr_done / 32768.0 * 2.0;
+	// ay = ay_corr_done / 32768.0 * 2.0;
 	// az = az_corr_done / 32768.0 * 2.0;
 	// gx = gx_corr_done / 32768.0 * 2000.0;
 	// gy = gy_corr_done / 32768.0 * 2000.0;
 	gz =gz_corr_done / 32768.0 * 2000.0;
 	//
-	ax = kalman_update(&state_ax, ax);
-	ay = kalman_update(&state_ay, ay);
+	// ax = kalman_update(&state_ax, ax);
+	// ay = kalman_update(&state_ay, ay);
 	gz = kalman_update(&state_gz, gz);
 
 	// Update the previous values for the next loop.
@@ -262,40 +262,40 @@ void TIM7_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM7, TIM_IT_Update) != RESET)
     {
-		interrupt_a++;
-		if(interrupt_a == 1000)
-		{
-			interrupt_a = 0;
-			interrupt_b++;
-		}
+		// interrupt_a++;
+		// if(interrupt_a == 1000)
+		// {
+		// 	interrupt_a = 0;
+		// 	interrupt_b++;
+		// }
 		// get_6050_data();
 		//get the 1ms data, make ax ay to the move distance of the x y, and the gz to the angle
 		angle_z -= gz * 0.001;
-		angle_z_encoder = kalman_update(&state_angle_z, angle_z_encoder);
-		angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
-		pid_compute_angle(&pid_angle, angle_z_filter); //get the pid output
+		// angle_z_encoder = kalman_update(&state_angle_z, angle_z_encoder);
+		// angle_z_filter = complementary_filter(angle_z_encoder, angle_z, ALPHA_Z);
+		pid_compute_angle(&pid_angle, angle_z); //get the pid output
 		delta_v = pid_angle.output;
 		//ax is the acceleration, 
 		//so it needs to be multiplied by t squared to obtain the displacement 
 		//during this period of time (discrete approximation).
-		speed_x += ax * 9.8 * (0.001) * 100; //
-		speed_y += ay * 9.8 * (0.001) * 100;
+		// speed_x += ax * 9.8 * (0.001) * 100; //
+		// speed_y += ay * 9.8 * (0.001) * 100;
 		// If multiple consecutive readings of acceleration values are detected as 0, the speed will be adjusted to
-		if (ax == 0) ax_zero ++;
-		if (ay == 0) ay_zero ++;
-		if (ay_zero > 10) 
-		{
-			ay_zero = 0;
-			speed_x = 0;
-		}
-		if (ax_zero > 10) 
-		{
-			ax_zero = 0;
-			speed_y = 0;
-		}
+		// if (ax == 0) ax_zero ++;
+		// if (ay == 0) ay_zero ++;
+		// if (ay_zero > 10) 
+		// {
+		// 	ay_zero = 0;
+		// 	speed_x = 0;
+		// }
+		// if (ax_zero > 10) 
+		// {
+		// 	ax_zero = 0;
+		// 	speed_y = 0;
+		// }
 		//values that are too small will not be accumulated.
-		if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
-		if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
+		// if (abs(speed_x) > 1)    distance_x += speed_x * 0.001; //cm
+		// if (abs(speed_y) > 1)    distance_y += speed_y * 0.001; //cm
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
     }
 }

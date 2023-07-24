@@ -8,7 +8,7 @@ uint8_t ID; // the mpu-6050 ID
 void MPU6050_WaitEvent(I2C_TypeDef *I2Cx, uint32_t I2C_EVENT)
 {
 	uint32_t Timeout;
-	Timeout = 10000;
+	Timeout = 100000;
 	while (I2C_CheckEvent(I2Cx, I2C_EVENT) != SUCCESS)
 	{
 		Timeout--;
@@ -117,25 +117,30 @@ void MPU6050_GetData(int16_t *AccX, int16_t *AccY, int16_t *AccZ,
 {
 	uint8_t DataH, DataL;
 
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_L);
-	*AccX = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_ACCEL_XOUT_L);
+	// *AccX = (DataH << 8) | DataL;
+	*AccX = 0;
 
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_L);
-	*AccY = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_ACCEL_YOUT_L);
+	// *AccY = (DataH << 8) | DataL;
+	*AccY = 0;
 
-	DataH = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);
-	*AccZ = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_ACCEL_ZOUT_L);
+	// *AccZ = (DataH << 8) | DataL;
+	*AccZ = 0;
 
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);
-	*GyroX = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_GYRO_XOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_GYRO_XOUT_L);
+	// *GyroX = (DataH << 8) | DataL;
+	*GyroX = 0;
 
-	DataH = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);
-	DataL = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);
-	*GyroY = (DataH << 8) | DataL;
+	// DataH = MPU6050_ReadReg(MPU6050_GYRO_YOUT_H);
+	// DataL = MPU6050_ReadReg(MPU6050_GYRO_YOUT_L);
+	// *GyroY = (DataH << 8) | DataL;
+	*GyroY = 0;
 
 	DataH = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_H);
 	DataL = MPU6050_ReadReg(MPU6050_GYRO_ZOUT_L);

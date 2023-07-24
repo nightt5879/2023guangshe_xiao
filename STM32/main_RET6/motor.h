@@ -42,7 +42,7 @@ extern uint8_t Serial_RxPacket[];
 #define MAX_OUTPUT 200 //max pwm
 #define MIN_OUTPUT 0  // min pwm
 #define POSITION_THRESHOLD_X 2.0f 
-#define POSITION_THRESHOLD_Y 2.0f
+#define POSITION_THRESHOLD_Y 3.0f
 #define SPEED_THRESHOLD 0.3f   
 #define X_FACTOR 11.6f
 #define Y_FACTOR 20.5f
@@ -50,16 +50,16 @@ extern uint8_t Serial_RxPacket[];
 #define ALPHA_X 1.0f
 #define ALPHA_Y 1.0f
 #define ALPHA_Z 1.0f
-#define CORNER_X 12.0f
-#define CORNER_Y 6.0f
+#define CORNER_X 10.0f
+#define CORNER_Y 4.0f
 #define CORR_TEST 1.5f
 #define DISTANCE_THRESHOLD_X 0.0f
 #define DISTANCE_THRESHOLD_Y 0.0f
 // when close to the corner you need a small speed, so we should use a biger KI
-#define X_KI 0.00001f
-#define Y_KI 0.00001f
-#define X_KI_CORNER 0.00001f
-#define Y_KI_CORNER 0.00001f
+#define X_KI 0.00000f
+#define Y_KI 0.00000f
+#define X_KI_CORNER 0.000000f
+#define Y_KI_CORNER 0.00000f
 /**
   * @brief  initialize the pid control structure
   * @param  None

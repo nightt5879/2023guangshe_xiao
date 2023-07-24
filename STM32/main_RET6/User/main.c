@@ -11,8 +11,8 @@
 #define TARGET_DISTANCE 40
 #define TEST_SPEED 3
 #define STBLE_TIME 30
-#define MOVE_X 80
-#define MOVE_Y -80.0f
+#define MOVE_X 45
+#define MOVE_Y 45.0f
 //below are the function define
 void stop_car(void);
 void init(void);
@@ -39,12 +39,13 @@ int main(void)
 {
 	init();
 	toggle_delta_v(1);
-	// distance_y_uart = MOVE_Y;
+	distance_y_uart = MOVE_Y;
 	// distance_x_uart = MOVE_X;
-	// one_move_flag = 1;
+	one_move_flag = 1;
+	corner_flag = 1;
 	while (1)
 	{	
-		// get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
+		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
 		// test_id = MPU6050_GetID();
 		send_to_win();
 		if(distance_flag == 1)

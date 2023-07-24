@@ -16,9 +16,9 @@ extern float angle_z, distance_x, distance_y, angle_z_filter; //the 6050 data di
 extern float delta_v; //angle pid return delta_v
 
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // 
-float kp = 20, ki = 4, kd = 10;  // the motor speed pid
-float move_kp_y = 0.13, move_ki_y = Y_KI, move_kd_y = 2;  // distance y pid
-float move_kp_x = 0.13, move_ki_x = X_KI, move_kd_x = 2  ;  // distance x pid
+float kp = 10, ki = 3, kd = 10;  // the motor speed pid
+float move_kp_y = 0.10, move_ki_y = Y_KI, move_kd_y = 0;  // distance y pid
+float move_kp_x = 0.10, move_ki_x = X_KI, move_kd_x = 0;  // distance x pid
 
 uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
 float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.
@@ -481,10 +481,10 @@ void TIM6_IRQHandler(void)
         fr_target_speed = pid_move_y.output - pid_move_x.output;
         bl_target_speed = pid_move_y.output - pid_move_x.output;
         br_target_speed = pid_move_y.output + pid_move_x.output;
-        if (corner_flag)
-        {
-           cheak_corner();
-        }
+        // if (corner_flag)
+        // {
+        //    cheak_corner();
+        // }
         test_time_flag ++;
         close_to_target(); // it is close to the target
         TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
@@ -567,14 +567,16 @@ void cheak_corner(void)
         stop_the_car_no_clear_speed();
         distance_x_uart = CORNER_X;
    }
-   else if((left_modle[0] || right_modle[0]) && distance_y_uart > 0) // move to the forward
+   else if((left_modle[2] || right_modle[2]) && distance_y_uart > 0 
+   && abs(move_target_distance_y - distance_y_filter) < 10) // move to the forward
    {
         corner_flag = 0;
         move_ki_y = Y_KI_CORNER;
         stop_the_car_no_clear_speed();
         distance_y_uart = CORNER_Y;
    }
-   else if((left_modle[4] || right_modle[4]) && distance_y_uart < 0) // move to the backward
+   else if((left_modle[2] || right_modle[2]) && distance_y_uart < 0
+   && abs(move_target_distance_y - distance_y_filter) < 10) // move to the backward
    {
         corner_flag = 0;
         move_ki_y = Y_KI_CORNER;
