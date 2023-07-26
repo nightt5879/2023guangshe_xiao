@@ -610,6 +610,8 @@ class pathPlaner:
                 # 寻找上一个角落点
                 last_step = abs(sum(x - y for x, y in zip(path['target_xy'], last_corner))) // 2
                 self.paths_list[-1]['action'][-1] = self.paths_list[-1]['action'][-1] + str(last_step)
+                # print(self.paths_list[3])
+                # exit()
         direct = self.direct
         action_list = []
         for Dict in self.paths_list:

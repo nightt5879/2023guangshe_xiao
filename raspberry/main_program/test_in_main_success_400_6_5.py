@@ -274,6 +274,7 @@ def hit_the_treasure(hit_treasure_time):
     time.sleep(0.5)
 
 if __name__ == '__main__':
+    cam = cv2.VideoCapture(-1)
     # team = select_team()  # 本次比赛的队伍颜色
     # mine_points = get_loc()  # 摄像头捕获视频识别出宝藏位置
     mine_points = [(7, 10), (3, 10), (7, 6), (3, 6), (8, 5), (4, 5), (8, 1), (4, 1)]
@@ -282,7 +283,7 @@ if __name__ == '__main__':
     c = move.Car()
     i = move.Infrared()
     S = gpio.Screen()
-    Cam = Vision.Camera(0, 320, 240)
+    Cam = Vision.Camera(0, 320, 240, camera=cam)
     cap = cv2.VideoCapture(1)
     cap.set(4, 240)
     cap.set(3, 320)
