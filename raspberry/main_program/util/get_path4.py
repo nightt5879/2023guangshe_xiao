@@ -596,6 +596,7 @@ class pathPlaner:
                 "direct": paths['direct']
             })
             last_corner = None
+            back = False
             for path in paths['action'][1:]:
                 """
                 如果这个点是角落就保留这个点直接append进去
@@ -608,22 +609,29 @@ class pathPlaner:
                     last_corner = path['now_xy']
             distance = get_distance(path['target_xy'][0], path['target_xy'][1], "上")
             is_corner = isCorner(distance)
+            if back:
+                self.paths_list[-1]['action'].pop(0)
             if is_corner is False:
                 # 寻找上一个角落点
                 last_step = abs(sum(x - y for x, y in zip(path['target_xy'], last_corner))) // 2
-                self.paths_list[-1]['action'][-1] = self.paths_list[-1]['action'][-1] + str(last_step)
+                self.paths_list[-1]['action'][-1] = str(last_step+1)
+                back=True
+            else:
+                self.paths_list[-1]['action'].append("1")
+                back=False
+                
+            
         for xy in self.eight_mines:
             obs.add(xy)
         direct = self.direct
         action_list = []
+        back ＝ False
         for Dict in self.paths_list:
             new_action = []
             for action in Dict['action']:
-                if len(action) > 2:
-                    num = action[2:]
-                    action = action[:2]
-                else:
-                    num = ''
+                if len(action) == 1:
+                    num = action
+                    continue
                 if direct == '上':
 
                     if action == '向左':
@@ -692,12 +700,10 @@ class pathPlaner:
                     elif Dict['direct'] == '左':
                         new_action.append("左转")
                         new_action.append("左转")
-            if num == "":
-                num = 1
-            else:
-                num = int(num)+1
-            if new_action[-1] ＝＝ "前进":
-                new_action.pop()
+                direct = Dict['direct']
+            
+
+        
             new_action.append(num)
             action_list.append(new_action)
 
