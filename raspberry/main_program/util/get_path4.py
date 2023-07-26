@@ -614,18 +614,17 @@ class pathPlaner:
             if is_corner is False:
                 # 寻找上一个角落点
                 last_step = abs(sum(x - y for x, y in zip(path['target_xy'], last_corner))) // 2
-                self.paths_list[-1]['action'][-1] = str(last_step+1)
-                back=True
+                self.paths_list[-1]['action'][-1] = str(last_step + 1)
+                back = True
             else:
                 self.paths_list[-1]['action'].append("1")
-                back=False
-                
-            
+                back = False
+
         for xy in self.eight_mines:
             obs.add(xy)
         direct = self.direct
         action_list = []
-        back ＝ False
+        back = False
         for Dict in self.paths_list:
             new_action = []
             for action in Dict['action']:
@@ -701,9 +700,7 @@ class pathPlaner:
                         new_action.append("左转")
                         new_action.append("左转")
                 direct = Dict['direct']
-            
 
-        
             new_action.append(num)
             action_list.append(new_action)
 
@@ -962,7 +959,6 @@ class pathPlaner:
         else:
             self.update_paths_dir()
             return None
-
 
 
 if __name__ == '__main__':
