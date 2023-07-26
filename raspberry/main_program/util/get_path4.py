@@ -597,7 +597,7 @@ class pathPlaner:
                 "direct": paths['direct']
             })
             last_corner = None
-            
+
             for path in paths['action'][1:]:
                 """
                 如果这个点是角落就保留这个点直接append进去
@@ -625,7 +625,6 @@ class pathPlaner:
             obs.add(xy)
         direct = self.direct
         action_list = []
-        back = False
         for Dict in self.paths_list:
             new_action = []
             for action in Dict['action']:
@@ -639,32 +638,36 @@ class pathPlaner:
                     elif action == '向右':
                         new_action.append("右转")
                     elif action == '向下':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 elif direct == '下':
                     if action == '向左':
                         new_action.append("右转")
                     elif action == '向右':
                         new_action.append("左转")
                     elif action == '向上':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 elif direct == '左':
                     if action == '向上':
                         new_action.append("右转")
                     elif action == '向下':
                         new_action.append("左转")
                     elif action == '向右':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 else:
                     if action == '向上':
                         new_action.append("左转")
                     elif action == '向下':
                         new_action.append("右转")
                     elif action == '向左':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 new_action.append("前进")
                 direct = action[-1]
             if direct != Dict['direct']:
@@ -674,32 +677,36 @@ class pathPlaner:
                     elif Dict['direct'] == '右':
                         new_action.append("右转")
                     elif Dict['direct'] == '下':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 elif direct == '下':
                     if Dict['direct'] == '左':
                         new_action.append("右转")
                     elif Dict['direct'] == '右':
                         new_action.append("左转")
                     elif Dict['direct'] == '上':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 elif direct == '左':
                     if Dict['direct'] == '上':
                         new_action.append("右转")
                     elif Dict['direct'] == '下':
                         new_action.append("左转")
                     elif Dict['direct'] == '右':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 else:
                     if Dict['direct'] == '上':
                         new_action.append("左转")
                     elif Dict['direct'] == '下':
                         new_action.append("右转")
                     elif Dict['direct'] == '左':
-                        new_action.append("左转")
-                        new_action.append("左转")
+                        # new_action.append("左转")
+                        # new_action.append("左转")
+                        new_action.append("掉头")
                 direct = Dict['direct']
 
             new_action.append(num)
