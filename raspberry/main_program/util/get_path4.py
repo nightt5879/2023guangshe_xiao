@@ -590,13 +590,14 @@ class pathPlaner:
         for xy in self.eight_mines:
             obs.remove(xy)
         self.paths_list = []
+        back = False
         for paths in self.paths:
             self.paths_list.append({
                 "action": [paths['action'][0]['move_mode']],
                 "direct": paths['direct']
             })
             last_corner = None
-            back = False
+            
             for path in paths['action'][1:]:
                 """
                 如果这个点是角落就保留这个点直接append进去
