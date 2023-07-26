@@ -34,6 +34,7 @@ rotate_angle = 0  # 云台旋转的角度
 TOP_ANGLE = 120  # 看宝藏的上面舵机角度
 servo_top = 0  # 云台舵机1
 callback_flag = 0  # 回调函数的标志位
+hit_mine_flag = 0 # 反映是否撞了宝藏
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -164,7 +165,23 @@ def create_new_process():
         # process = Process(target=main_program)
         # process.start()
         os.execl(sys.executable, sys.executable, *sys.argv)
-
+def filp(move_input):
+    """
+    反转一下装了宝藏之后的移动
+    Args:
+        move_input: 输入的第一个移动指令
+    Returns:
+        反转之后的指令
+    """
+    if move_input == "左转":
+        move_output = "右转"
+    elif move_input == "右转":
+        move_output = "左转"
+    elif move_input == "掉头":
+        move_output = "前进"
+    elif move_input == "前进":
+        move_output = "掉头"
+    return move_output
 
 # 回调函数，会在引脚状态改变时被调用
 def callback_function(channel):
@@ -238,41 +255,37 @@ if __name__ == '__main__':
     countdown(2)  # 倒计时
     img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
     show_lcd(img_start)
-    control_servo(180, 0)
+    control_servo(servo_top, 180, 0)
     GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
     while True:
         path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
-        action = path['action']
-        direct = path['direct']
-        print(direct)
-        # if direct == "上":
-        #     control_servo(servo_top, TOP_ANGLE, 180)
-        # elif direct == "下":
-        #     control_servo(servo_top, TOP_ANGLE, 0)
-        # elif direct == "左":
-        #     control_servo(servo_top, TOP_ANGLE, 270)
-        # elif direct == "右":
-        #     control_servo(servo_top, TOP_ANGLE, 90)
-        # while action:  # 执行一个路径
-        #     action_move = action.pop(0)
-        #     print(action_move)
-        time.sleep(1)
-
-        # 宝藏识别
-        # if true  撞宝藏
-        # elif fake 不撞
+        for i in range (len(path)):  # 读取一个路径的移动指令
+            move = path.pop(0)  # pop 出来指令
+            if hit_mine_flag:  # 如果装了宝藏 肯定是需要掉头回去 这时候有一个指令相反的（车头朝向问题）
+                hit_mine_flag = 0 # 清空撞了宝藏的标志位
+                move = filp(move)
+            if len(path) == 0: # 说明达到了最后一个移动指令 这个指令是朝向目标后还差几个格子
+                print("到达目标点，距离宝藏距离为:", move)
+                control_servo(servo_top, 90, 0)  # 抬起舵机
+                # 识别宝藏
+                mine = input("请输入宝藏情况：")# 对应关系--0：蓝色三角、1：蓝色圆形、2：红色圆形 、3：红色三角
+                control_servo(servo_top, 180, 0) # 低下舵机
+                # 如果是真的
+                    # 撞
+                # 如果不是真的
+                    # 走
+                print("之前的宝藏：", mine_points)
+                planer.update(mine=0)  # 更新路径
+                print(planer.ori_mines)
+                mine_points = [((x + 1) // 2, 11 - (y + 1) // 2) for (x, y) in planer.ori_mines] # 转换成新的mine_points
+                print("更新后的的宝藏：", mine_points)
+                with open('mine_points.pkl', 'wb') as f:  # 保存新的宝藏txt文件
+                    pickle.dump(mine_points, f)
+                break  # 完成之后就不用再执行了 直接跳出循环 准备读下一个路径
+            print("执行移动指令：", move) # 移动指令
+            time.sleep(1) # 等待一秒 测试用的
         if len(planer.paths_list) == 0:
             break
-        # 更新路劲
-        # 保存此时的宝藏位置
-        # mine = input("请输入宝藏情况：")
-        planer.update(mine=0)
-        print(planer.ori_mines)
-        print(mine_points)
-        # 转换成新的mine_points
-        mine_points = [((x + 1) // 2, 11 - (y + 1) // 2) for (x, y) in planer.ori_mines]
-        # 保存新的mine_points
-
         time.sleep(2)
     print("test done")
     # print(1)
