@@ -11,7 +11,7 @@ class Camera:
         self.cam: 初始化的摄像头
 
     """
-    def __init__(self, num = 0, X = 320, Y = 240):
+    def __init__(self, num = 0, X = 320, Y = 240, camera=None):
         """ 摄像头初始化
 
         Args:
@@ -27,7 +27,7 @@ class Camera:
         self.X = X
         self.Y = Y
         #摄像头初始化
-        self.cam = cv2.VideoCapture(num)
+        self.cam = camera if camera else cv2.VideoCapture(num) # GYJ_高端修改 适应各种使用情况
         self.cam.set(4, self.Y)
         self.cam.set(3, self.X)
 

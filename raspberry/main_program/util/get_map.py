@@ -204,9 +204,9 @@ def button_input():
     return button
 
 
-def get_loc():
+def get_loc(cam):
     """
-    根据摄像头捕获的图像进行四个角点识别、透视变换、宝藏识别。如果识别陈工，图像就会冻结，
+    根据摄像头捕获的图像进行四个角点识别、透视变换、宝藏识别。如果识别成功，图像就会冻结，
     如果发现识别出来的宝藏不对，就点一下按钮，就会继续捕获图像。
     如果发现识别出来的宝藏正确，那就长按按钮，即可结束这个函数并且得到所有宝藏的位置。
     :return:
@@ -214,9 +214,10 @@ def get_loc():
     T = Treasure(1)
 
     # cap = cv2.VideoCapture("./videos/output.avi")
-    cap = cv2.VideoCapture(-1) # -1就是使用默认摄像头 防止报错
+    # cap = cv2.VideoCapture(-1) # -1就是使用默认摄像头 防止报错
     while True:
-        success, img = cap.read()
+        success, img = cam.read()
+        # print(img.shape)  # (480, 640, 3)
         if success is False:
             continue
         show_lcd(img)
@@ -227,6 +228,7 @@ def get_loc():
             if flag3:
                 # cv2.imshow("crop", new_img2)
                 new_img3, loc = T.FindTreasure(new_img2, output_mode=1)
+                # print(len(loc))
                 if len(loc) == 8:
                     show_lcd(new_img3)
                     # cv2.imshow("treasure", new_img3)

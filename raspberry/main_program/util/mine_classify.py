@@ -49,6 +49,8 @@ if __name__ == "__main__":
     #for class_num in range(4):
     # img = cv2.imread(f"../img/测试图片/blue_true/0.png")
     cam = cv2.VideoCapture(-1)
+    cam.set(3, 320)
+    cam.set(4, 240)
     while True:
         success, img = cam.read()
         if success:

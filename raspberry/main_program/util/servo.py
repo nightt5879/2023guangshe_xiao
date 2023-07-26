@@ -52,9 +52,8 @@ class HalfCircleServo(Servo):
         if self.target != angle:
             self.target = angle
         self.pwm.ChangeDutyCycle(2.5 + 10 * angle / 180)
-
         # if the time too long, you can not use the two code below
-        time.sleep(0.5)
+        time.sleep(0.3)
         self.pwm.ChangeDutyCycle(0)
 
         # update the servo's angle

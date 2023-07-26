@@ -7,8 +7,8 @@ import os
 os.chdir("/home/pi/Desktop/main_program")
 from util.get_map import get_loc
 from util.get_map import show_lcd
-from util.get_path4 import pathPlaner
-# from util.lidar3 import Lidar
+from util.get_path1 import pathPlaner
+from util.lidar3 import Lidar
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
 from util.map_rec import MapArchRecognizer
@@ -28,44 +28,30 @@ import threading
 import pickle
 
 # 全局参数
-BUTTON_INPUT = 18  # 按钮连接的GPIO口
-SERVO_PIN_TOP = 17  # 云台舵机1连接的GPIO口
+BUTTON_INPUT = 21  # 按钮连接的GPIO口
+SERVO_PIN_TOP = 24  # 云台舵机1连接的GPIO口
+SERVO_PIN_MEDIUM = 23  # 云台舵机2连接的GPIO口
+SERVO_PIN_BOTTOM = 18  # 云台舵机3连接的GPIO口
 rotate_angle = 0  # 云台旋转的角度
 TOP_ANGLE = 120  # 看宝藏的上面舵机角度
-servo_top = 0  # 云台舵机1
-callback_flag = 0  # 回调函数的标志位
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-# 我也不知道为什么要在这里init input才行 用着用着就不行了 不管了 你就说能不能用把
-
-
-cam = cv2.VideoCapture(-1)  # -1就是使用默认摄像头 防止报错
-break_flag = 0
-# 读五次图像，如果都成功就跳出
-for i in range(5):
-    success, img = cam.read()
-    if success:
-        show_lcd(img)
-        break_flag += 1
-        if (break_flag >= 5):
-            print("摄像头来咯")
-            break
-    else:
-        print("摄像头出不来哦")
-        cam.release()  # 释放摄像头
-        os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 def GPIO_init():
     """
     初始化所有的树莓派GPIO引脚
     """
-    global rotate_angle, servo_top
+    global rotate_angle, servo_top, servo_medium, servo_bottom
     # 按键输入的init
+    GPIO.setmode(GPIO.BCM)
+    BUTTON_PIN = BUTTON_INPUT
+    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     servo_top = servo.HalfCircleServo(SERVO_PIN_TOP)
-    # # set the servo's rotate angle
-    # servo_top.target = 90
+    servo_medium = servo.HalfCircleServo(SERVO_PIN_MEDIUM)
+    servo_bottom = servo.HalfCircleServo(SERVO_PIN_BOTTOM)
+    # set the servo's rotate angle
+    servo_top.target = 90
+    servo_medium.target = 0
+    servo_bottom.target = 0
 
 
 def button_with_wait():
@@ -79,7 +65,7 @@ def button_with_wait():
     press_time = 0
     while True:
         # 如果按键被按下
-        # if GPIO.input(BUTTON_INPUT) == GPIO.HIGH:
+        # if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
         #     print('Button is not pressed')
         if press_flag == 1 and GPIO.input(BUTTON_INPUT) == GPIO.HIGH:  # 按下松开后开始计时
             press_time += 1
@@ -152,46 +138,43 @@ def thread_nodding():
         time.sleep(0.5)
 
 
-def create_new_process():
-    global process, process_temp
-    if process is not None and process_temp is None:
-        process.terminate()
-        # process_temp = Process(target=main_program)
-        # process_temp.start()
-        os.execl(sys.executable, sys.executable, *sys.argv)
-    elif process is None and process_temp is not None:
-        process_temp.terminate()
-        # process = Process(target=main_program)
-        # process.start()
-        os.execl(sys.executable, sys.executable, *sys.argv)
+def thread_rotating():
+    global rotate_angle
+    while True:
+        if rotate_angle != servo_medium.angle + servo_bottom.angle:
+            rotate_angle = servo_medium.clamp_number(rotate_angle, 0, 360)
+            if 0 <= rotate_angle <= 180:
+                # check the servo_bottom's angle
+                if servo_bottom.angle != 0:
+                    servo_bottom.set_angle(0)
+                servo_medium.set_angle(rotate_angle)
+            elif 180 < rotate_angle <= 360:
+                servo_medium.set_angle(180)
+                # print(rotate_angle)
+                servo_bottom.set_angle(rotate_angle - 180)
+        time.sleep(0.5)
 
 
 # 回调函数，会在引脚状态改变时被调用
 def callback_function(channel):
-    global process
     print('Detected edge on channel %s' % channel)
     GPIO.remove_event_detect(BUTTON_INPUT)
-    roll_back = button_with_wait()
-    if (roll_back == "one_press"):
-        print("不回退一个宝藏")
-        # 保存不回退的宝藏
-    elif (roll_back == "two_press"):
-        print("回退一个宝藏")
-        # 保存回退的宝藏
     with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
-    # 释放摄像头
-    cam.release()
-    # 重启程序
-    # os.execl(sys.executable, sys.executable, *sys.argv)
-    create_new_process()
+    os.execl(sys.executable, sys.executable, *sys.argv)
+    # os.system("python3 /home/pi/Desktop/main_program/test_in_main.py")
+
+
+# def main():
 
 if __name__ == '__main__':
     GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
     GPIO_init()  # 初始化GPIO
     # 启动舵机子线程
-    t1 = threading.Thread(target=thread_nodding)
+    t1 = threading.Thread(target=thread_rotating)
+    t2 = threading.Thread(target=thread_nodding)
     t1.start()
+    t2.start()
     # 查看状态
     if os.path.exists("restart.txt"):
         print("中断开始")
@@ -212,7 +195,7 @@ if __name__ == '__main__':
         print("正常的开始")
         team = select_team()  # 选择队伍
         control_servo(servo_top, 90, 90)
-        mine_points, mine_img = get_loc(cam)  # 摄像头捕获视频识别出宝藏位置
+        mine_points, mine_img = get_loc()  # 摄像头捕获视频识别出宝藏位置
         mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
         # 下面是保存的部分
         cv2.imwrite("mine_img.png", mine_img)  # 把识别出来的地图保存起来
@@ -229,7 +212,7 @@ if __name__ == '__main__':
     print(planer.paths_list)
     print(mine_points)
     print(team)
-    # lidar = Lidar(img=map_array, model_path='./model/ultra_simple')  # 初始化雷达
+    lidar = Lidar(img=map_array, model_path='./model/ultra_simple')  # 初始化雷达
     # MPU6050校准之类的工作
     # 准备出发
     img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
@@ -238,25 +221,24 @@ if __name__ == '__main__':
     countdown(2)  # 倒计时
     img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
     show_lcd(img_start)
-    control_servo(180, 0)
     GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
     while True:
         path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
         action = path['action']
         direct = path['direct']
         print(direct)
-        # if direct == "上":
-        #     control_servo(servo_top, TOP_ANGLE, 180)
-        # elif direct == "下":
-        #     control_servo(servo_top, TOP_ANGLE, 0)
-        # elif direct == "左":
-        #     control_servo(servo_top, TOP_ANGLE, 270)
-        # elif direct == "右":
-        #     control_servo(servo_top, TOP_ANGLE, 90)
-        # while action:  # 执行一个路径
-        #     action_move = action.pop(0)
-        #     print(action_move)
-        time.sleep(1)
+        if direct == "上":
+            control_servo(servo_top, TOP_ANGLE, 180)
+        elif direct == "下":
+            control_servo(servo_top, TOP_ANGLE, 0)
+        elif direct == "左":
+            control_servo(servo_top, TOP_ANGLE, 270)
+        elif direct == "右":
+            control_servo(servo_top, TOP_ANGLE, 90)
+        while action:  # 执行一个路径
+            action_move = action.pop(0)
+            print(action_move)
+            time.sleep(1)
 
         # 宝藏识别
         # if true  撞宝藏
