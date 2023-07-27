@@ -1,4 +1,7 @@
 # 包的导入
+#
+
+
 import sys
 
 sys.path.insert(0, "/home/pi/.local/lib/python3.7/site-packages")
@@ -317,149 +320,155 @@ def callback_function(channel):
     create_new_process()
 
 if __name__ == '__main__':
-    # Cam = Vision.Camera(camera=cam)  # 实例化摄像头
-    # hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
-    # exit(0)
-    GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
-    c.car_stop()
-    GPIO_init()  # 初始化GPIO
-    # 启动舵机子线程
-    t1 = threading.Thread(target=thread_nodding)
-    t1.start()
-    # 查看状态
-    if os.path.exists("restart.txt"):
-        print("中断开始")
-        # 读取宝藏位置和队伍颜色
-        with open('mine_points.pkl', 'rb') as f:
-            mine_points = pickle.load(f)
-        with open('team.pkl', 'rb') as f:
-            team = pickle.load(f)
-        mine_img = cv2.imread("mine_img.png")  # 读取"mine_img.png"文件
-        # 读取完成后是一样的操作
-        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
-        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
-        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
-        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
-        os.remove("restart.txt")  # 删除"restart.txt"文件
-        countdown(3)  # 倒计时
-    else:
-        print("正常的开始")
-        team = select_team()  # 选择队伍
-        control_servo(servo_top, 90, 90)
-        mine_points, mine_img = get_loc(cam)  # 摄像头捕获视频识别出宝藏位置
-        mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
-        # 下面是保存的部分
-        cv2.imwrite("mine_img.png", mine_img)  # 把识别出来的地图保存起来
-        with open('mine_points.pkl', 'wb') as f:
-            pickle.dump(mine_points, f)
-        with open('team.pkl', 'wb') as f:
-            pickle.dump(team, f)
-        # 下面是正常读取部分
-        map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
-        cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
-        planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
-        countdown(2)  # 倒计时
-    # time.sleep(1)
-    print(planer.paths_list)
-    print(mine_points)
-    print(team)
-    mine_classifier = MinesClassifier(paddle_model="./model/MobileNetV2_7_13.nb")
-    # lidar = Lidar(img=map_array, model_path='./model/ultra_simple')  # 初始化雷达
-    # MPU6050校准之类的工作
-    # 准备出发
-    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
-    show_lcd(img_start)
-    wait_the_press()  # 等待按键
-    img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
-    show_lcd(img_start)
-    control_servo(servo_top, 180, 0)
-    Cam = Vision.Camera(camera=cam) # 实例化摄像头
-    GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
-    c.car_forward(1000, 1000)
-    time.sleep(0.5)
-    c.car_stop()
-    while True:
-        path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
-        print("path是：", path)
-        for i in range (len(path)):  # 读取一个路径的移动指令
-            #
-            move = path.pop(0)  # pop 出来指令
-            # print("moved的元素是：", move)
-            if hit_mine_flag:  # 如果装了宝藏 肯定是需要掉头回去 这时候有一个指令相反的（车头朝向问题）
-                hit_mine_flag = 0 # 清空撞了宝藏的标志位
-                move = filp(move)
-            if len(path) == 0: # 说明达到了最后一个移动指令 这个指令是朝向目标后还差几个格子
-                if len(planer.paths_list) == 0:  # 说明到达了最后一个位置 要出去了 这里程序里还是会给到一个宝藏距离（n）
-                    print("到达最后了，直接前进")
-                    print("再多前进一点直接出去了")
+    try:
+        GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
+        c.car_stop()
+        GPIO_init()  # 初始化GPIO
+        # 启动舵机子线程
+        t1 = threading.Thread(target=thread_nodding)
+        t1.start()
+        # 查看状态
+        if os.path.exists("restart.txt"):
+            print("中断开始")
+            # 读取宝藏位置和队伍颜色
+            with open('mine_points.pkl', 'rb') as f:
+                mine_points = pickle.load(f)
+            with open('team.pkl', 'rb') as f:
+                team = pickle.load(f)
+            mine_img = cv2.imread("mine_img.png")  # 读取"mine_img.png"文件
+            # 读取完成后是一样的操作
+            mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+            map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+            cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+            planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+            os.remove("restart.txt")  # 删除"restart.txt"文件
+            countdown(3)  # 倒计时
+        else:
+            print("正常的开始")
+            team = select_team()  # 选择队伍
+            control_servo(servo_top, 90, 90)
+            mine_points, mine_img = get_loc(cam)  # 摄像头捕获视频识别出宝藏位置
+            mapAnalysiser = MapArchRecognizer(mine_img)  # 实例化一个地图架构解析对象
+            # 下面是保存的部分
+            cv2.imwrite("mine_img.png", mine_img)  # 把识别出来的地图保存起来
+            with open('mine_points.pkl', 'wb') as f:
+                pickle.dump(mine_points, f)
+            with open('team.pkl', 'wb') as f:
+                pickle.dump(team, f)
+            # 下面是正常读取部分
+            map_array = mapAnalysiser.analysis_map()  # 转换地图得到21 * 21的矩阵
+            cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
+            planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
+            countdown(2)  # 倒计时
+        # time.sleep(1)
+        print(planer.paths_list)
+        print(mine_points)
+        print(team)
+        mine_classifier = MinesClassifier(paddle_model="./model/MobileNetV2_7_13.nb")
+        # lidar = Lidar(img=map_array, model_path='./model/ultra_simple')  # 初始化雷达
+        # MPU6050校准之类的工作
+        # 准备出发
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
+        show_lcd(img_start)
+        wait_the_press()  # 等待按键
+        img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
+        show_lcd(img_start)
+        control_servo(servo_top, 180, 0)
+        Cam = Vision.Camera(camera=cam) # 实例化摄像头
+        GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
+        c.car_forward(1000, 1000)
+        time.sleep(0.5)
+        c.car_stop()
+        while True:
+            path = planer.paths_list.pop(0)  # 删除并返回列表中的第一个元素
+            print("path是：", path)
+            for i in range (len(path)):  # 读取一个路径的移动指令
+                #
+                move = path.pop(0)  # pop 出来指令
+                # print("moved的元素是：", move)
+                if hit_mine_flag:  # 如果装了宝藏 肯定是需要掉头回去 这时候有一个指令相反的（车头朝向问题）
+                    hit_mine_flag = 0 # 清空撞了宝藏的标志位
+                    move = filp(move)
+                if len(path) == 0: # 说明达到了最后一个移动指令 这个指令是朝向目标后还差几个格子
+                    if len(planer.paths_list) == 0:  # 说明到达了最后一个位置 要出去了 这里程序里还是会给到一个宝藏距离（n）
+                        print("到达最后了，直接前进")
+                        print("再多前进一点直接出去了")
+                        go_forward()
+                        c.car_forward(1000, 1000)
+                        time.sleep(1)
+                        c.car_stop()
+                        break
+                    print("到达目标点，距离宝藏距离为:", move)
+                    if move == '1':
+                        control_servo(servo_top, 110, 0)  # 抬起舵机
+                    else:  # 如果远的是
+                        control_servo(servo_top, 90, 0)  # 抬起舵机
+                    while servo_top.angle != servo_top.target:  # 等待舵机抬起
+                        pass
+                    # 识别宝藏
+                    flash_cam()
+                    success, img = cam.read()
+                    result = mine_classifier.recognize_img(img)
+                    cv2.imshow("img", img)
+                    print("识别的结果是 ：", result)
+                    # mine = input("请输入宝藏情况：")# 对应关系--0：蓝色三角、1：蓝色圆形、2：红色圆形 、3：红色三角
+                    control_servo(servo_top, 180, 0) # 低下舵机
+                    while servo_top.angle != servo_top.target:  # 完成移动
+                        pass
+                    if team == 'red':
+                        if result[0] == 3:
+                            print("真的宝藏哦")
+                            if move == '1': # 如果距离宝藏是1
+                                hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
+                            elif move == '2': # 如果距离宝藏是2
+                                hit_mine(break_time_set=40, move_time=0.5)
+                            hit_mine_flag = 1 # 设置撞了宝藏的标志位
+                        else:  # 假宝藏
+                            print("假的宝藏哦")
+                    elif team == 'blue':
+                        if result[0] == 1:
+                            print("真的宝藏哦")
+                            if move == '1': # 如果距离宝藏是1
+                                hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
+                            elif move == '2': # 如果距离宝藏是2
+                                hit_mine(break_time_set=40, move_time=0.5)
+                            hit_mine_flag = 1 # 设置撞了宝藏的标志位
+                        else:  # 假宝藏
+                            print("假的宝藏哦")
+                    print("之前的宝藏：", mine_points)
+                    old_mine_points_set = set(mine_points)
+                    with open('mine_points.pkl', 'wb') as f:  # 保存新的宝藏txt文件(回退一个的宝藏点 怕出问题）
+                        pickle.dump(mine_points, f)
+                    print("result的值", result[0])
+                    planer.update(mine=result[0])  # 更新路径
+                    # print(planer.ori_mines)
+                    mine_points = [((x + 1) // 2, 11 - (y + 1) // 2) for (x, y) in planer.ori_mines] # 转换成新的mine_points
+                    print("更新后的的宝藏：", mine_points)
+                    new_mine_points_set = set(mine_points)
+                    removed_points = old_mine_points_set - new_mine_points_set
+                    print("\33[31;1m被删除的宝藏点：", removed_points, "\33[0m")
+                    # print("更新之后的路径：", planer.paths_list)
+                    break  # 完成之后就不用再执行了 直接跳出循环 准备读下一个路径
+                # print("执行移动指令：", move) # 移动指令
+                if move == "前进":
                     go_forward()
-                    c.car_forward(1000, 1000)
-                    time.sleep(1)
-                    c.car_stop()
-                    break
-                print("到达目标点，距离宝藏距离为:", move)
-                if move == '1':
-                    control_servo(servo_top, 110, 0)  # 抬起舵机
-                else:  # 如果远的是
-                    control_servo(servo_top, 90, 0)  # 抬起舵机
-                while servo_top.angle != servo_top.target:  # 等待舵机抬起
-                    pass
-                # 识别宝藏
-                flash_cam()
-                success, img = cam.read()
-                result = mine_classifier.recognize_img(img)
-                cv2.imshow("img", img)
-                print("识别的结果是 ：", result)
-                # mine = input("请输入宝藏情况：")# 对应关系--0：蓝色三角、1：蓝色圆形、2：红色圆形 、3：红色三角
-                control_servo(servo_top, 180, 0) # 低下舵机
-                while servo_top.angle != servo_top.target:  # 完成移动
-                    pass
-                if team == 'red':
-                    if result[0] == 3:
-                        print("真的宝藏哦")
-                        if move == '1': # 如果距离宝藏是1
-                            hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
-                        elif move == '2': # 如果距离宝藏是2
-                            hit_mine(break_time_set=40, move_time=0.5)
-                        hit_mine_flag = 1 # 设置撞了宝藏的标志位
-                    else:  # 假宝藏
-                        print("假的宝藏哦")
-                elif team == 'blue':
-                    if result[0] == 1:
-                        print("真的宝藏哦")
-                        if move == '1': # 如果距离宝藏是1
-                            hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
-                        elif move == '2': # 如果距离宝藏是2
-                            hit_mine(break_time_set=40, move_time=0.5)
-                        hit_mine_flag = 1 # 设置撞了宝藏的标志位
-                    else:  # 假宝藏
-                        print("假的宝藏哦")
-                print("之前的宝藏：", mine_points)
-                old_mine_points_set = set(mine_points)
-                with open('mine_points.pkl', 'wb') as f:  # 保存新的宝藏txt文件(回退一个的宝藏点 怕出问题）
-                    pickle.dump(mine_points, f)
-                print("result的值", result[0])
-                planer.update(mine=result[0])  # 更新路径
-                # print(planer.ori_mines)
-                mine_points = [((x + 1) // 2, 11 - (y + 1) // 2) for (x, y) in planer.ori_mines] # 转换成新的mine_points
-                print("更新后的的宝藏：", mine_points)
-                new_mine_points_set = set(mine_points)
-                removed_points = old_mine_points_set - new_mine_points_set
-                print("\33[31;1m被删除的宝藏点：", removed_points, "\33[0m")
-                # print("更新之后的路径：", planer.paths_list)
-                break  # 完成之后就不用再执行了 直接跳出循环 准备读下一个路径
-            # print("执行移动指令：", move) # 移动指令
-            if move == "前进":
-                go_forward()
-            elif move == "右转":
-                turn_right()
-            elif move == "左转":
-                turn_left()
-            elif move == "掉头":
-                turn_back()
+                elif move == "右转":
+                    turn_right()
+                elif move == "左转":
+                    turn_left()
+                elif move == "掉头":
+                    turn_back()
 
-            # time.sleep(0.1) # 等待一秒 测试用的
-        if len(planer.paths_list) == 0:
-            break  # 这下是真的走了
-    print("test done")
+                # time.sleep(0.1) # 等待一秒 测试用的
+            if len(planer.paths_list) == 0:
+                break  # 这下是真的走了
+        print("test done")
+    except BaseException as e:
+        with open('./logs', 'w') as f:
+            print(e, file=f)
+        # # 释放摄像头
+        # cam.release()
+        # # 重启程序
+        # # os.execl(sys.executable, sys.executable, *sys.argv)
+        # create_new_process()
     # print(1)
