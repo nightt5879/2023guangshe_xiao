@@ -560,7 +560,6 @@ def isCorner(distance):
             return True
     return False
 
-
 class pathPlaner:
     def __init__(self, mine_points, our_color):
         global obs
@@ -570,8 +569,12 @@ class pathPlaner:
         self.our_color = our_color
         self.paths, self.quadrant_mines, self.ori_mines = get_paths(self.eight_mines.copy(), self.eight_mines.copy(),
                                                                     optimize=True)
+
         self.direct = '上'
         self.get_paths_list()
+        # for i in self.paths_list:
+        #     print(i)
+        # exit()
         # import json
         # print(json.dumps(self.paths_list, indent=4, ensure_ascii=False))
         # exit()
@@ -589,9 +592,15 @@ class pathPlaner:
         global obs
         for xy in self.eight_mines:
             obs.remove(xy)
+        try:
+            if isCorner(get_distance(self.last_mine[0][0], self.last_mine[0][1], '上')) is False:
+                self.paths[0]['action'].pop(0)
+        except:
+            pass
         self.paths_list = []
         back = False
         for paths in self.paths:
+            # print(paths)
             self.paths_list.append({
                 "action": [paths['action'][0]['move_mode']],
                 "direct": paths['direct']
@@ -620,10 +629,10 @@ class pathPlaner:
             else:
                 self.paths_list[-1]['action'].append("1")
                 back = False
-
         for xy in self.eight_mines:
             obs.add(xy)
-        direct = self.direct
+        direct = self.direct  # 上 、 左
+
         action_list = []
         for Dict in self.paths_list:
             new_action = []
@@ -656,8 +665,6 @@ class pathPlaner:
                     elif action == '向下':
                         new_action.append("左转")
                     elif action == '向右':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 else:
                     if action == '向上':
@@ -665,8 +672,6 @@ class pathPlaner:
                     elif action == '向下':
                         new_action.append("右转")
                     elif action == '向左':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 new_action.append("前进")
                 direct = action[-1]
@@ -677,8 +682,6 @@ class pathPlaner:
                     elif Dict['direct'] == '右':
                         new_action.append("右转")
                     elif Dict['direct'] == '下':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 elif direct == '下':
                     if Dict['direct'] == '左':
@@ -686,8 +689,6 @@ class pathPlaner:
                     elif Dict['direct'] == '右':
                         new_action.append("左转")
                     elif Dict['direct'] == '上':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 elif direct == '左':
                     if Dict['direct'] == '上':
@@ -695,8 +696,6 @@ class pathPlaner:
                     elif Dict['direct'] == '下':
                         new_action.append("左转")
                     elif Dict['direct'] == '右':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 else:
                     if Dict['direct'] == '上':
@@ -704,13 +703,12 @@ class pathPlaner:
                     elif Dict['direct'] == '下':
                         new_action.append("右转")
                     elif Dict['direct'] == '左':
-                        # new_action.append("左转")
-                        # new_action.append("左转")
                         new_action.append("掉头")
                 direct = Dict['direct']
 
             new_action.append(num)
             action_list.append(new_action)
+
 
         self.paths_list = action_list
 
@@ -724,20 +722,21 @@ class pathPlaner:
         # index = len(self.quadrant_mines) - len(self.paths)
         # now_xy, car_direct, quadrant = self.quadrant_mines[index]
         # 删除已经遇到过的宝藏
-        last_mine = None
+        self.last_mine = None
         for i in range(index + 1):
-            last_mine = self.quadrant_mines.pop(0)
+            self.last_mine = self.quadrant_mines.pop(0)
             self.ori_mines.pop(0)
-        if last_mine is not None:
-            direct = last_mine[1]
-            if direct == '上':
-                self.direct = '下'
-            elif direct == '下':
-                self.direct = '上'
-            elif direct == '左':
-                self.direct = '右'
-            else:
-                self.direct = '左'
+        if self.last_mine is not None:
+            direct = self.last_mine[1]
+            self.direct = direct
+            # if direct == '上':
+            #     self.direct = '下'
+            # elif direct == '下':
+            #     self.direct = '上'
+            # elif direct == '左':
+            #     self.direct = '右'
+            # else:
+            #     self.direct = '左'
         # 删除一些未探索过但是确定是对方宝藏的宝藏
         before_delete_num = len(self.ori_mines)
         for key, value in self.mine_status.items():
@@ -967,6 +966,7 @@ class pathPlaner:
         else:
             self.update_paths_dir()
             return None
+
 
 
 if __name__ == '__main__':
