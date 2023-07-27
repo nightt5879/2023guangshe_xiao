@@ -17,151 +17,202 @@ GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #     GPIO.setmode(GPIO.BCM)
 #     BUTTON_PIN = BUTTON_INPUT
 #     GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-def button_with_wait():
+def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
+                    user_max_time=2,set_break_flag=40):
     """
-    按下按钮后，等待一段时间，如果没有再次按下按钮，就返回one_press 此时对应的是红队
-    如果再次按下按钮，就返回two_press 此时对应的是蓝队
-    :return: one_press or two_press
+    PID巡线
+    :param K: 总体的缩放比例
+    :param Kp: 比例参数
+    :param Ki: 积分参数
+    :param Kd: 微分参数
+    :param Line: 需要巡线的线位置
+    :param SumMax: 黑色像素点max阈值
+    :param SumMin: 黑色像素点你min阈值
+    :param base_speed: 小车基本速度
+    :param break_mod: 是否需要在规定时间内停止
+    :param break_time: 规定的时间
+    :param back_mod: 倒车（没用了）
+    :param user_max_time: 达到max阈值的次数，满足后才会break。防止偶然误差
+    :return: no return
     """
-    press_flag = 0
-    press_flag_down = 0
-    press_time = 0
+    # 初始化摄像头
+    # global Cam
+    global one_path_done
+    break_flag = 0  # for the pid in time break
+    max_time = 0
+    # 初始化PID模块
+    PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
+    for i in range(1):  # Clear the buffer.
+        Cam.ReadImg(0, 320, 0, 150)
+        cv2.waitKey(1)
     while True:
-        # 如果按键被按下
-        # if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
-        #     print('Button is not pressed')
-        if press_flag == 1 and GPIO.input(BUTTON_INPUT) == GPIO.HIGH:  # 按下松开后开始计时
-            press_time += 1
-        if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
-            time.sleep(0.1)  # 按键消除抖动
-            if GPIO.input(BUTTON_INPUT) == GPIO.LOW:
-                press_flag = 1
-                if press_flag_down == 1:  # 第二次按下
-                    print("two_press")
-                    button = "two_press"
-                    break
-                # print('Button is pressed'
-        if GPIO.input(BUTTON_INPUT) == GPIO.HIGH and press_flag == 1:
-            time.sleep(0.1)
-            if GPIO.input(BUTTON_INPUT) == GPIO.HIGH:
-                press_flag_down = 1
-        if press_time > 10:
-            print("one_press")
-            button = "one_press"
+        Cam.ReadImg(0, 320, 0, 150)
+        Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
+        Cam.ShowImg(Cam.Img)
+        Cam.ShowImg(Dst, 'Dst')
+        # Cam.ShowImg(Cam.Img)
+        image = Dst
+        # image = image.filter(ImageFilter.SHARPEN)
+        # disp.ShowImage(image)
+        # print(Centre[Line],sum)
+        Now = int((Centre[Line] +
+                   Centre[Line - 5] + Centre[Line + 5] +
+                   Centre[Line - 4] + Centre[Line + 4] +
+                   Centre[Line - 3] + Centre[Line + 3] +
+                   Centre[Line - 2] + Centre[Line + 2] +
+                   Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
+        # D = Future - Now  # 差值
+        PWM = PID.OneDin(Now)
+        pwm = int(PWM)
+        # # print(pwm)
+        sum = int(
+            (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54] + Sum[Line - 55] + Sum[Line - 56] +
+             Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        # print(sum,Now,pwm,max_time)
+        if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
+            max_time += 1
+            # c.car_stop()
+            print("out max")
+            # print(sum)
+            # break
+        if max_time >= user_max_time:  # enough max time
             break
-        # print(press_time)
-        # 暂停一段时间
-        time.sleep(0.1)
-    # GPIO.cleanup()  lcd需要使用不能清除GPIO口
-    return button
+        if break_mod == 1 and break_flag >= break_time:
+            print("break time max")
+            c.car_stop()
+            break
+        pwm_1 = base_speed - pwm
+        pwm_2 = base_speed + pwm
+        # pwm range is 0-1000
+        pwm_1 = max(0, min(1000, pwm_1))
+        pwm_2 = max(0, min(1000, pwm_2))
+        c.car_forward(pwm_1, pwm_2)
+        break_flag += 1
+        Cam.Delay(1)
+    c.car_stop()
 
-GPIO.remove_event_detect(BUTTON_INPUT) # 关闭事件检测
-a = button_with_wait()
-print(a)
-print("test done")
-# def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
-#                     user_max_time=2,set_break_flag=40):
-#     """
-#     PID巡线
-#     :param K: 总体的缩放比例
-#     :param Kp: 比例参数
-#     :param Ki: 积分参数
-#     :param Kd: 微分参数
-#     :param Line: 需要巡线的线位置
-#     :param SumMax: 黑色像素点max阈值
-#     :param SumMin: 黑色像素点你min阈值
-#     :param base_speed: 小车基本速度
-#     :param break_mod: 是否需要在规定时间内停止
-#     :param break_time: 规定的时间
-#     :param back_mod: 倒车（没用了）
-#     :param user_max_time: 达到max阈值的次数，满足后才会break。防止偶然误差
-#     :return: no return
-#     """
-#     # 初始化摄像头
-#     # global Cam
-#     global one_path_done
-#     break_flag = 0  # for the pid in time break
-#     max_time = 0
-#     # 初始化PID模块
-#     PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
-#     for i in range(1):  # Clear the buffer.
-#         Cam.ReadImg(0, 320, 0, 150)
-#         cv2.waitKey(1)
-#     while True:
-#         Cam.ReadImg(0, 320, 0, 150)
-#         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
-#         Cam.ShowImg(Cam.Img)
-#         Cam.ShowImg(Dst, 'Dst')
-#         # Cam.ShowImg(Cam.Img)
-#         image = Dst
-#         # image = image.filter(ImageFilter.SHARPEN)
-#         # disp.ShowImage(image)
-#         # print(Centre[Line],sum)
-#         Now = int((Centre[Line] +
-#                    Centre[Line - 5] + Centre[Line + 5] +
-#                    Centre[Line - 4] + Centre[Line + 4] +
-#                    Centre[Line - 3] + Centre[Line + 3] +
-#                    Centre[Line - 2] + Centre[Line + 2] +
-#                    Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
-#         # D = Future - Now  # 差值
-#         PWM = PID.OneDin(Now)
-#         pwm = int(PWM)
-#         # # print(pwm)
-#         sum = int(
-#             (Sum[Line - 1] + Sum[Line - 2] + Sum[Line - 3] + Sum[Line - 4] + Sum[Line - 5] + Sum[Line - 6] +
-#              Sum[Line - 7] + Sum[Line - 8] + Sum[Line - 9]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
-#         # print(sum,Now,pwm,max_time)
-#         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
-#             max_time += 1
-#             # c.car_stop()
-#             print("out max")
-#             # print(sum)
-#             # break
-#         if max_time >= user_max_time:  # enough max time
-#             break
-#         # if break_mod == 1 and break_flag >= break_time:
-#         #     print("break time max")
-#         #     c.car_stop()
-#         #     break
-#         pwm_1 = base_speed - pwm
-#         pwm_2 = base_speed + pwm
-#         # pwm range is 0-1000
-#         pwm_1 = max(0, min(1000, pwm_1))
-#         pwm_2 = max(0, min(1000, pwm_2))
-#         c.car_forward(pwm_1, pwm_2)
-#         break_flag += 1
-#         Cam.Delay(1)
-#     c.car_stop()
-#
-# def go_forward():
-#     PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=100, SumMax=500, SumMin=100, base_speed=1000, break_mod=1,
-#                     set_break_flag=10, user_max_time=1)
-#     c.car_forward(1000, 1000)
-#     time.sleep(0.1)
-#     c.car_stop()
-#
+def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
+                    user_max_time=2,set_break_flag=40):
+    """
+    PID巡线
+    :param K: 总体的缩放比例
+    :param Kp: 比例参数
+    :param Ki: 积分参数
+    :param Kd: 微分参数
+    :param Line: 需要巡线的线位置
+    :param SumMax: 黑色像素点max阈值
+    :param SumMin: 黑色像素点你min阈值
+    :param base_speed: 小车基本速度
+    :param break_mod: 是否需要在规定时间内停止
+    :param break_time: 规定的时间
+    :param back_mod: 倒车（没用了）
+    :param user_max_time: 达到max阈值的次数，满足后才会break。防止偶然误差
+    :return: no return
+    """
+    # 初始化摄像头
+    # global Cam
+    global one_path_done
+    break_flag = 0  # for the pid in time break
+    max_time = 0
+    # 初始化PID模块
+    PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
+    for i in range(1):  # Clear the buffer.
+        Cam.ReadImg(0, 320, 0, 150)
+        cv2.waitKey(1)
+    while True:
+        Cam.ReadImg(0, 320, 0, 150)
+        Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
+        Cam.ShowImg(Cam.Img)
+        Cam.ShowImg(Dst, 'Dst')
+        # Cam.ShowImg(Cam.Img)
+        image = Dst
+        # image = image.filter(ImageFilter.SHARPEN)
+        # disp.ShowImage(image)
+        # print(Centre[Line],sum)
+        Now = int((Centre[Line] +
+                   Centre[Line - 5] + Centre[Line + 5] +
+                   Centre[Line - 4] + Centre[Line + 4] +
+                   Centre[Line - 3] + Centre[Line + 3] +
+                   Centre[Line - 2] + Centre[Line + 2] +
+                   Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
+        # D = Future - Now  # 差值
+        PWM = PID.OneDin(Now)
+        pwm = int(PWM)
+        # # print(pwm)
+        sum = int(
+            (Sum[Line - 1] + Sum[Line - 2] + Sum[Line - 3] + Sum[Line - 4] + Sum[Line - 5] + Sum[Line - 6] +
+             Sum[Line - 7] + Sum[Line - 8] + Sum[Line - 9]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        print(sum,Now,pwm,max_time)
+        if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
+            max_time += 1
+            # c.car_stop()
+            print("out max")
+            # print(sum)
+            # break
+        # if max_time >= user_max_time:  # enough max time
+        #     break
+        # if break_mod == 1 and break_flag >= break_time:
+        #     print("break time max")
+        #     c.car_stop()
+        #     break
+        pwm_1 = base_speed - pwm
+        pwm_2 = base_speed + pwm
+        # pwm range is 0-1000
+        pwm_1 = max(0, min(1000, pwm_1))
+        pwm_2 = max(0, min(1000, pwm_2))
+        # c.car_forward(pwm_1, pwm_2)
+        break_flag += 1
+        Cam.Delay(10)
+    c.car_stop()
+
+
+def go_forward():
+    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=100, SumMax=350, SumMin=100, base_speed=1000, break_mod=1,
+                    set_break_flag=10, user_max_time=1)
+    c.car_forward(1000, 1000)
+    time.sleep(0.3  )
+    c.car_stop()
+
 def turn_right():
-    c.car_turn_right_6050(2300, 1000)
+    c.car_turn_right_6050(2700, 1000)
     c.car_cheak_data()
     c.car_stop()
-#
-# def turn_left():
-#     c.car_turn_left_6050(2300, 1000)
-#     c.car_cheak_data()
-#     c.car_stop()
-# c = move.Car()
-# go_forward()
-# turn_right()
-# go_forward()
-# turn_left()
-# go_forward()
-# turn_right()
-# go_forward()
-# turn_right()
-# go_forward()
-# turn_right()
+
+def turn_left():
+    c.car_turn_left_6050(2700, 1000)
+    c.car_cheak_data()
+    c.car_stop()
+
+def turn_back():
+    c.car_turn_left_6050(9000,1000)
+    c.car_cheak_data()
+    c.car_stop()
+
+def hit_mine(break_time_set,move_time):
+    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=100, SumMax=500, SumMin=100, base_speed=1000, break_mod=1,
+                    set_break_flag=10, user_max_time=1, break_time=break_time_set)
+    c.car_forward(1000, 1000)
+    time.sleep(move_time)
+    turn_back()
+c = move.Car()
+# c.car_forward(1000, 1000)
 # time.sleep(1)
+PIDLineTracking_test(K=1, Kp=3, Ki=0, Kd=2, Line=140, SumMax=500, SumMin=100, base_speed=1000, break_mod=1,
+                     set_break_flag=10, user_max_time=1, break_time=17)
+# c.car_forward(1000,1000)
+# time.sleep(0.5)
+# turn_back()
+# c.car_stop()
+# go_forward()
+# turn_left()
+# go_forward()
+# turn_left()
+# go_forward()
+# turn_right()
+# go_forward()
+# turn_right()
+# go_forward()
+# turn_left()
 # turn_right()
 # go_forward()
 # turn_right()
@@ -179,14 +230,14 @@ def turn_right():
 # go_forward()
 # turn_right()
 # go_forward()
-#
-# # c.car_forward(400,400)
-# # time.sleep(1)
-# # c.car_back(400,400)
-# # time.sleep(1)
-#
-# print("Test done")
-#
+
+# c.car_forward(400,400)
+# time.sleep(1)
+# c.car_back(400,400)
+# time.sleep(1)
+c.car_stop()
+print("Test done")
+
 
 
 

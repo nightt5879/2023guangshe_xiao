@@ -35,6 +35,10 @@ int main(void)
 	OLED_ShowString(1, 1, "ID:");
 	ID = MPU6050_GetID();
 	OLED_ShowHexNum(1, 4, ID, 2);
+//	GPIO_Set(1);
+//	GPIO_Set(4);
+//	PWM_SetCompara(1,500);
+//	PWM_SetCompara(2,500);
 	while (1)
 	{
 		// below are the serial port

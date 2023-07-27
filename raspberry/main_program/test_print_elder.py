@@ -276,7 +276,7 @@ if __name__ == '__main__':
                 while servo_top.angle != servo_top.target:  # 等待舵机抬起
                     pass
                 # 识别宝藏
-                mine = input("请输入宝藏情况：")# 0-3分别是蓝假、蓝真、红假、红真
+                mine = input("请输入宝藏情况：")# 对应关系--0：蓝色三角、1：蓝色圆形、2：红色圆形 、3：红色三角
                 control_servo(servo_top, 180, 0) # 低下舵机
                 # 如果是真的
                     # 撞

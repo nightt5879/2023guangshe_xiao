@@ -111,7 +111,10 @@ class Camera:
         :return: None
         """
         cv2.imshow(WindowName, Img)
-        
+
+    def gamma_correction(self, img, correction):
+        img = np.power(img / float(np.max(img)), correction)
+        return img * 255
     def LineTracking(self, Img, Line = 100, Dilate = 1, condition = 0, IterationErode = 10, IterationDilate = 2):
         """ 视觉寻线图像处理
         将图像处理后二值化，具体用numpy数组逐行处理
@@ -133,9 +136,16 @@ class Camera:
         cv2.line(Img, (0, Line), (Img.shape[1] - 1, Line), (255, 0, 0))   #画基准线
         CentreDict = {}     #用于保存 某一行对应的中心点 的字典
         CentreLen = {}    #用于保存 某一行对应的满足要求的点的数量 的字典
+
         Gray = cv2.cvtColor(Img, cv2.COLOR_BGR2GRAY)    #灰度化
+        # Gray = cv2.cvtColor(Img, cv2.COLOR_BGR2GRAY).astype(np.float32)  # 灰度化并转为浮点型
+        # Gray = self.gamma_correction(Gray, 0.1)  # 进行伽马矫正，参数可调
+        # Gray = np.uint8(Gray)  # 将处理后的图像转回8位无符号整型
+        # 新增的直方图均衡化步骤
+        # Gray = cv2.equalizeHist(Gray)
         Blur = cv2.GaussianBlur(Gray, (5, 5), 0)    #高斯滤波
-        Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
+        _, Dst = cv2.threshold(Blur, 100, 255, cv2.THRESH_BINARY)
+        # Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
         if Dilate == 1:
             Dst = cv2.dilate(Dst, None, iterations=IterationDilate)   #膨胀操作，默认不进行，可选参数
         Dst = cv2.erode(Dst, None, iterations=IterationErode)    #腐蚀操作
