@@ -632,7 +632,6 @@ class pathPlaner:
         for xy in self.eight_mines:
             obs.add(xy)
         direct = self.direct  # 上 、 左
-
         action_list = []
         for Dict in self.paths_list:
             new_action = []
@@ -729,14 +728,6 @@ class pathPlaner:
         if self.last_mine is not None:
             direct = self.last_mine[1]
             self.direct = direct
-            # if direct == '上':
-            #     self.direct = '下'
-            # elif direct == '下':
-            #     self.direct = '上'
-            # elif direct == '左':
-            #     self.direct = '右'
-            # else:
-            #     self.direct = '左'
         # 删除一些未探索过但是确定是对方宝藏的宝藏
         before_delete_num = len(self.ori_mines)
         for key, value in self.mine_status.items():
@@ -794,9 +785,9 @@ class pathPlaner:
 
     def update_paths_dir(self):
         """
-        如果识别到这个宝藏朝向不对，就会调用这个函数，
-        此时应该依旧可以获取到这个错误朝向的宝藏位置并且根据这个位置找到宝藏可能的两个朝向，再根据小车此时的位置来得到另一个位置是多少
-        删除这个宝藏到下一个宝藏的那条路径，增加从这个宝藏走到另一个朝向的路径和另一个朝向到下一个宝藏的路径这两条路径
+        如果识别到这个宝藏朝向不对, 就会调用这个函数,
+        此时应该依旧可以获取到这个错误朝向的宝藏位置并且根据这个位置找到宝藏可能的两个朝向, 再根据小车此时的位置来得到另一个位置是多少
+        删除这个宝藏到下一个宝藏的那条路径, 增加从这个宝藏走到另一个朝向的路径和另一个朝向到下一个宝藏的路径这两条路径
         :return:
         """
         mine_x, mine_y, now_xy, car_direct, index, quadrant, _ = self.get_mine_xy()
@@ -935,7 +926,7 @@ class pathPlaner:
 
     def update(self, quadrant_opt: bool = True, mine=None):
         """
-        如果是我们的宝藏，那就查看这个宝藏的象限并抛弃该象限内的另一个点
+        如果是我们的宝藏, 那就查看这个宝藏的象限并抛弃该象限内的另一个点
             如果该宝藏朝向错误：那就修改路径前往去到宝藏的正确朝向。
         如果是对方的宝藏：无事发生
         当你找到一个宝藏后,如果发现这个宝藏是我们的宝藏,那你就把paths列表作为输入参数放到这个函数里面
@@ -953,7 +944,7 @@ class pathPlaner:
             如果我们是红方。那么false_mine_num+1
             如果我们是蓝方。那么下一个宝藏肯定是我们的。如果已经找到了一个蓝方假宝藏。那么下一个宝藏一定是真的。直接撞
         :param quadrant_opt: True的话就用象限优化,否则是修正朝向错误
-        :param mine:可选参数，就是说这个宝藏是红蓝真假四种情况的哪一个，只有quadrant_opt参数是True的情况下这个参数才会起作用
+        :param mine:可选参数, 就是说这个宝藏是红蓝真假四种情况的哪一个, 只有quadrant_opt参数是True的情况下这个参数才会起作用
         :return: None表示优化完成。没有其他要你做的。True表示下一个宝藏别识别直接装。False表示不优化路径
         """
         while len(self.paths) > len(self.paths_list):
