@@ -473,14 +473,14 @@ void TIM6_IRQHandler(void)
         move_target_distance_y = distance_y_uart;
         pid_move_x.setpoint = move_target_distance_x;
         pid_move_y.setpoint = move_target_distance_y;
-        pid_compute(&pid_move_x, distance_x_filter);
-        pid_compute(&pid_move_y, distance_y_filter);
+        // pid_compute(&pid_move_x, distance_x_filter);
+        // pid_compute(&pid_move_y, distance_y_filter);
         // if the distance is less than the threshold, then stop the motor
         // here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
-        fl_target_speed = pid_move_y.output + pid_move_x.output;
-        fr_target_speed = pid_move_y.output - pid_move_x.output;
-        bl_target_speed = pid_move_y.output - pid_move_x.output;
-        br_target_speed = pid_move_y.output + pid_move_x.output;
+        // fl_target_speed = pid_move_y.output + pid_move_x.output;
+        // fr_target_speed = pid_move_y.output - pid_move_x.output;
+        // bl_target_speed = pid_move_y.output - pid_move_x.output;
+        // br_target_speed = pid_move_y.output + pid_move_x.output;
         // if (corner_flag)
         // {
         //    cheak_corner();

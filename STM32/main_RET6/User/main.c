@@ -39,7 +39,12 @@ int main(void)
 {
 	init();
 	toggle_delta_v(1);
-	distance_y_uart = MOVE_Y;
+	// distance_y_uart = MOVE_Y;
+	distance_x_uart = -MOVE_X;
+	fl_target_speed = -TEST_SPEED;
+	fr_target_speed = TEST_SPEED;
+	bl_target_speed = TEST_SPEED;
+	br_target_speed = -TEST_SPEED;
 	// distance_x_uart = MOVE_X;
 	one_move_flag = 1;
 	corner_flag = 1;
