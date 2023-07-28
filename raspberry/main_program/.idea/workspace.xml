@@ -31,6 +31,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://D:/WeChat/data/WeChat Files/wxid_6q2ruh1a8b4722/FileStorage/File/2023-07/一种能够自动解决摄像头占用问题的摄像头初始化算法.py" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectId" id="2Sj4ftz1JEpmUvoXQPlK4OME6KB" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -77,6 +80,7 @@
       <workItem from="1690433573934" duration="10600000" />
       <workItem from="1690458961680" duration="16623000" />
       <workItem from="1690512476115" duration="12477000" />
+      <workItem from="1690539360238" duration="2011000" />
     </task>
     <servers />
   </component>

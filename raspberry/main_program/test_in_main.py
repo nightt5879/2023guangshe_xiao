@@ -1,6 +1,11 @@
 # 包的导入
 #
 
+import re
+import subprocess
+import os
+import cv2
+import time
 
 import sys
 
@@ -40,7 +45,7 @@ callback_flag = 0  # 回调函数的标志位
 hit_mine_flag = 0 # 反映是否撞了宝藏
 # 下面是装宝藏的相关参数
 hit_mine_time_set = 0.7
-hit_1_time = 20
+hit_1_time = 15
 hit_2_time = 40
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -63,6 +68,27 @@ for i in range(5):
         cam.release()  # 释放摄像头
         os.execl(sys.executable, sys.executable, *sys.argv)
 
+
+# def VideoCapture_fix(id: int) -> cv2.VideoCapture:
+#     """
+#     修复版本的打开摄像头,会检测这个摄像头是否被占用了,如果被占用了就先把占用的进程杀死然后再重新打开
+#     :param id: 摄像头的id
+#     :return:
+#     """
+#     if isinstance(id, int) is False:
+#         raise ValueError('摄像头的id必须是int类型')
+#     command = f"sudo fuser /dev/video{id}"
+#     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+#     output, _ = process.communicate()
+#
+#     pid_num = output.decode("utf-8").strip()
+#
+#     if pid_num != "":
+#         os.system(f"kill {pid_num}")
+#         # 杀死进程需要一定时间。所以sleep一会儿然后再打开摄像头
+#         time.sleep(1)
+#     return cv2.VideoCapture(id)
+# cam = VideoCapture_fix(0)  # -1就是使用默认摄像头 防止报错
 
 c = move.Car()  # 初始化小车
 
@@ -273,10 +299,10 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     c.car_stop()
 
 def go_forward():
-    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=0,
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=0,
                     set_break_flag=20, user_max_time=1)
     c.car_forward(1000, 1000)
-    time.sleep(0.2)
+    time.sleep(0.17)
     c.car_stop()
 
 def turn_right():
@@ -290,12 +316,12 @@ def turn_left():
     c.car_stop()
 
 def turn_back():
-    c.car_turn_left_6050(9000,1000)
+    c.car_turn_left_6050(9600,1000)
     c.car_cheak_data()
     c.car_stop()
 
 def hit_mine(break_time_set,move_time):
-    PIDLineTracking(K=1, Kp=6, Ki=0, Kd=2, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=1,
+    PIDLineTracking(K=1, Kp=6, Ki=0, Kd=2, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=1,
                     set_break_flag=10, user_max_time=1, break_time=break_time_set)
     print("寻仙部分结束")
     # c.car_stop()
@@ -307,8 +333,8 @@ def hit_mine(break_time_set,move_time):
     time.sleep(move_time + 0.2)
     c.car_stop()
     turn_back()
-    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=4, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=0,
-                    set_break_flag=5, user_max_time=1)
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=4, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=0,
+                    set_break_flag=10, user_max_time=1)
     c.car_forward(1000, 1000)
     time.sleep(0.2)
     c.car_stop()
@@ -363,7 +389,7 @@ if __name__ == '__main__':
             cv2.imwrite("./imgs/small_labyrinth.png", map_array)  # 把识别出来的21 * 21矩阵保存起来
             planer = pathPlaner(mine_points, team)  # 根据宝藏位置得到最终的总运动指令,optimize=True的话。最终路径就是真正最短的，但是用时可能更长)
             os.remove("restart.txt")  # 删除"restart.txt"文件
-            countdown(3)  # 倒计时
+            # countdown(3)  # 倒计时
         else:
             print("正常的开始")
             team = select_team()  # 选择队伍
