@@ -185,23 +185,23 @@ def filp(move_input):
 
 # 回调函数，会在引脚状态改变时被调用
 def callback_function(channel):
-    global process
+    # global process
     print('Detected edge on channel %s' % channel)
     GPIO.remove_event_detect(BUTTON_INPUT)
-    roll_back = button_with_wait()
-    if (roll_back == "one_press"):
-        print("不回退一个宝藏")
-        # 保存不回退的宝藏
-    elif (roll_back == "two_press"):
-        print("回退一个宝藏")
-        # 保存回退的宝藏
+    # roll_back = button_with_wait()
+    # if (roll_back == "one_press"):
+    #     print("不回退一个宝藏")
+    #     # 保存不回退的宝藏
+    # elif (roll_back == "two_press"):
+    #     print("回退一个宝藏")
+    #     # 保存回退的宝藏
     with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
     # 释放摄像头
     cam.release()
     # 重启程序
-    # os.execl(sys.executable, sys.executable, *sys.argv)
-    create_new_process()
+    os.execl(sys.executable, sys.executable, *sys.argv)
+    # create_new_process()
 
 if __name__ == '__main__':
     GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测

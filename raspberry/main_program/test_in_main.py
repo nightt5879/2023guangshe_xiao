@@ -38,7 +38,10 @@ TOP_ANGLE = 120  # 看宝藏的上面舵机角度
 servo_top = 0  # 云台舵机1
 callback_flag = 0  # 回调函数的标志位
 hit_mine_flag = 0 # 反映是否撞了宝藏
-
+# 下面是装宝藏的相关参数
+hit_mine_time_set = 0.7
+hit_1_time = 20
+hit_2_time = 40
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # 我也不知道为什么要在这里init input才行 用着用着就不行了 不管了 你就说能不能用把
@@ -183,7 +186,7 @@ def filp(move_input):
     elif move_input == "右转":
         move_output = "左转"
     elif move_input == "掉头":
-        move_output = "前进"
+        move_output = ''
     elif move_input == "前进":
         move_output = "掉头"
     return move_output
@@ -218,10 +221,10 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     # 初始化PID模块
     PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
     for i in range(1):  # Clear the buffer.
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         cv2.waitKey(1)
     while True:
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         Cam.ShowImg(Cam.Img)
         Cam.ShowImg(Dst, 'Dst')
@@ -242,7 +245,10 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         # # print(pwm)
         sum = int(
             (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
-             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
+                                                                      + Sum[Line - 55] + Sum[Line - 56] +
+             Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+
         # print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
             max_time += 1
@@ -267,7 +273,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     c.car_stop()
 
 def go_forward():
-    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=140, SumMax=300, SumMin=100, base_speed=1000, break_mod=0,
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=0,
                     set_break_flag=20, user_max_time=1)
     c.car_forward(1000, 1000)
     time.sleep(0.2)
@@ -279,7 +285,7 @@ def turn_right():
     c.car_stop()
 
 def turn_left():
-    c.car_turn_left_6050(2800, 1000)
+    c.car_turn_left_6050(2600, 1000)
     c.car_cheak_data()
     c.car_stop()
 
@@ -289,38 +295,53 @@ def turn_back():
     c.car_stop()
 
 def hit_mine(break_time_set,move_time):
-    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=140, SumMax=400, SumMin=100, base_speed=1000, break_mod=1,
+    PIDLineTracking(K=1, Kp=6, Ki=0, Kd=2, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=1,
                     set_break_flag=10, user_max_time=1, break_time=break_time_set)
     print("寻仙部分结束")
     # c.car_stop()
     c.car_forward(1000, 1000)
     time.sleep(move_time)
+    c.car_stop()
+    time.sleep(0.3)
+    c.car_back(800, 800)
+    time.sleep(move_time + 0.2)
+    c.car_stop()
     turn_back()
-    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=140, SumMax=300, SumMin=100, base_speed=1000, break_mod=0,
-                    set_break_flag=10, user_max_time=1)
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=4, Line=180, SumMax=350, SumMin=100, base_speed=1000, break_mod=0,
+                    set_break_flag=5, user_max_time=1)
+    c.car_forward(1000, 1000)
+    time.sleep(0.2)
+    c.car_stop()
     
 # 回调函数，会在引脚状态改变时被调用
+# 回调函数，会在引脚状态改变时被调用
 def callback_function(channel):
-    global process
+    # global process
     print('Detected edge on channel %s' % channel)
     GPIO.remove_event_detect(BUTTON_INPUT)
-    roll_back = button_with_wait()
-    if (roll_back == "one_press"):
-        print("不回退一个宝藏")
-        # 保存不回退的宝藏
-    elif (roll_back == "two_press"):
-        print("回退一个宝藏")
-        # 保存回退的宝藏
+    # roll_back = button_with_wait()
+    # if (roll_back == "one_press"):
+    #     print("不回退一个宝藏")
+    #     # 保存不回退的宝藏
+    # elif (roll_back == "two_press"):
+    #     print("回退一个宝藏")
+    #     # 保存回退的宝藏
     with open("restart.txt", "w") as file:  # 创建"restart.txt"文件
         pass
     # 释放摄像头
     cam.release()
     # 重启程序
-    # os.execl(sys.executable, sys.executable, *sys.argv)
-    create_new_process()
+    os.execl(sys.executable, sys.executable, *sys.argv)
+    # create_new_process()
 
 if __name__ == '__main__':
     try:
+        # Cam = Vision.Camera(camera=cam) # 实例化摄像头
+        # print(1)
+        # hit_mine(break_time_set=17, move_time=0.5)  # 装宝藏
+        # print(2)
+        # print("装完了")
+        # exit(0)
         GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
         c.car_stop()
         GPIO_init()  # 初始化GPIO
@@ -370,12 +391,14 @@ if __name__ == '__main__':
         # 准备出发
         img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/ready_to_go.jpg")
         show_lcd(img_start)
+        Cam = Vision.Camera(camera=cam)  # 实例化摄像头
         wait_the_press()  # 等待按键
         img_start = cv2.imread("/home/pi/Desktop/main_program/util/imgs/go.jpg")
         show_lcd(img_start)
         control_servo(servo_top, 180, 0)
-        Cam = Vision.Camera(camera=cam) # 实例化摄像头
         GPIO.add_event_detect(BUTTON_INPUT, GPIO.FALLING, callback=callback_function, bouncetime=300)
+
+        time_start = time.time()
         c.car_forward(1000, 1000)
         time.sleep(0.5)
         c.car_stop()
@@ -419,9 +442,11 @@ if __name__ == '__main__':
                         if result[0] == 3:
                             print("真的宝藏哦")
                             if move == '1': # 如果距离宝藏是1
-                                hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
+                                hit_mine(break_time_set=hit_1_time, move_time=hit_mine_time_set) # 装宝藏
                             elif move == '2': # 如果距离宝藏是2
-                                hit_mine(break_time_set=40, move_time=0.5)
+                                hit_mine(break_time_set=hit_2_time, move_time=hit_mine_time_set)
+                            else:  # 真有不一样的么。。。。
+                                hit_mine(break_time_set=hit_1_time + hit_1_time, move_time=hit_mine_time_set)
                             hit_mine_flag = 1 # 设置撞了宝藏的标志位
                         else:  # 假宝藏
                             print("假的宝藏哦")
@@ -429,9 +454,11 @@ if __name__ == '__main__':
                         if result[0] == 1:
                             print("真的宝藏哦")
                             if move == '1': # 如果距离宝藏是1
-                                hit_mine(break_time_set=17, move_time=0.5) # 装宝藏
-                            elif move == '2': # 如果距离宝藏是2
-                                hit_mine(break_time_set=40, move_time=0.5)
+                                hit_mine(break_time_set=hit_1_time, move_time=hit_mine_time_set) # 装宝藏
+                            elif move == '2':  # 如果距离宝藏是2
+                                hit_mine(break_time_set=hit_2_time, move_time=hit_mine_time_set)
+                            else:  # 真有不一样的么。。。。
+                                hit_mine(break_time_set=hit_1_time + hit_1_time, move_time=hit_mine_time_set)
                             hit_mine_flag = 1 # 设置撞了宝藏的标志位
                         else:  # 假宝藏
                             print("假的宝藏哦")
@@ -462,10 +489,17 @@ if __name__ == '__main__':
                 # time.sleep(0.1) # 等待一秒 测试用的
             if len(planer.paths_list) == 0:
                 break  # 这下是真的走了
-        print("test done")
+        time_end = time.time()
+        print("test done，时间是:", time_end - time_start)
+        with open('./logs', 'w') as f:
+            print(time_end - time_start, file=f)
+        GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
     except BaseException as e:
         with open('./logs', 'w') as f:
             print(e, file=f)
+        os.execl(sys.executable, sys.executable, *sys.argv)
+        # write the time into the file
+
         # # 释放摄像头
         # cam.release()
         # # 重启程序

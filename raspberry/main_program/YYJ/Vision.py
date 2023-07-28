@@ -144,8 +144,8 @@ class Camera:
         # 新增的直方图均衡化步骤
         # Gray = cv2.equalizeHist(Gray)
         Blur = cv2.GaussianBlur(Gray, (5, 5), 0)    #高斯滤波
-        _, Dst = cv2.threshold(Blur, 100, 255, cv2.THRESH_BINARY)
-        # Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
+        # _, Dst = cv2.threshold(Blur, 100, 255, cv2.THRESH_BINARY)
+        Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
         if Dilate == 1:
             Dst = cv2.dilate(Dst, None, iterations=IterationDilate)   #膨胀操作，默认不进行，可选参数
         Dst = cv2.erode(Dst, None, iterations=IterationErode)    #腐蚀操作

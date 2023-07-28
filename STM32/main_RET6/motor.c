@@ -18,7 +18,7 @@ extern float delta_v; //angle pid return delta_v
 // float kp = 0.5, ki = 0.6, kd = 0.5;  // 
 float kp = 10, ki = 3, kd = 10;  // the motor speed pid
 float move_kp_y = 0.10, move_ki_y = Y_KI, move_kd_y = 0;  // distance y pid
-float move_kp_x = 0.10, move_ki_x = X_KI, move_kd_x = 0;  // distance x pid
+float move_kp_x = 0.2, move_ki_x = 0.001, move_kd_x = 1;  // distance x pid
 
 uint16_t fl_counter = 0,fr_counter = 0, bl_counter = 0, br_counter = 0; //counter of the encoder
 float fl_speed = 0, fr_speed = 0, bl_speed = 0, br_speed = 0;;  // all speeds are the vertical component velocity of the wheel, measured in r/s.
@@ -37,6 +37,7 @@ float move_target_distance_y = 0;
 uint8_t distance_flag = 0; //distance flag
 uint8_t left_modle[5], right_modle[5], front_modle[5], back_modle[5]; //gray input
 uint8_t corner_flag = 0;  //the flag of the conner
+uint8_t pid_distance_flag = 0,slow_flag = 1;
 
 PID_Controller pid_fl, pid_fr, pid_bl, pid_br;  //the 4 motors pid controller
 PID_Controller pid_move_x, pid_move_y;  //the distance pid controller
@@ -473,20 +474,24 @@ void TIM6_IRQHandler(void)
         move_target_distance_y = distance_y_uart;
         pid_move_x.setpoint = move_target_distance_x;
         pid_move_y.setpoint = move_target_distance_y;
-        // pid_compute(&pid_move_x, distance_x_filter);
-        // pid_compute(&pid_move_y, distance_y_filter);
-        // if the distance is less than the threshold, then stop the motor
-        // here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
-        // fl_target_speed = pid_move_y.output + pid_move_x.output;
-        // fr_target_speed = pid_move_y.output - pid_move_x.output;
-        // bl_target_speed = pid_move_y.output - pid_move_x.output;
-        // br_target_speed = pid_move_y.output + pid_move_x.output;
-        // if (corner_flag)
-        // {
-        //    cheak_corner();
-        // }
-        test_time_flag ++;
+        if (pid_distance_flag)
+        {
+            pid_compute(&pid_move_x, distance_x_filter);
+            pid_compute(&pid_move_y, distance_y_filter);
+            // if the distance is less than the threshold, then stop the motor
+            // here in the aixs Y the motor all the positive and in the X aixs bl and fr are negative. need to be stacked together
+            fl_target_speed = pid_move_y.output + pid_move_x.output;
+            fr_target_speed = pid_move_y.output - pid_move_x.output;
+            bl_target_speed = pid_move_y.output - pid_move_x.output;
+            br_target_speed = pid_move_y.output + pid_move_x.output;
+        }
         close_to_target(); // it is close to the target
+        if (corner_flag)
+        {
+            cheak_corner();
+        }
+        test_time_flag ++;
+        
         TIM_ClearITPendingBit(TIM6, TIM_IT_Update); // Clear the interrupt flag
     }
 		
@@ -519,14 +524,25 @@ float complementary_filter(float input1, float input2, float alpha) {
   * @param  None
   * @retval None
   */
+//  &&
+//           abs(fl_target_speed) < SPEED_THRESHOLD &&
+//           abs(fr_target_speed) < SPEED_THRESHOLD &&
+//           abs(bl_target_speed) < SPEED_THRESHOLD &&
+//           abs(br_target_speed) < SPEED_THRESHOLD
 void close_to_target(void)
 {
+    if (abs(move_target_distance_x - distance_x_filter) < 10 &&
+          abs(move_target_distance_y - distance_y_filter) < 10 &&
+          slow_flag == 1)
+        {
+          slow_flag = 0;
+          fl_target_speed *= 0.5;
+          fr_target_speed *= 0.5;
+          bl_target_speed *= 0.5;
+          br_target_speed *= 0.5;
+        }
     if (abs(move_target_distance_x - distance_x_filter) < POSITION_THRESHOLD_X &&
-          abs(move_target_distance_y - distance_y_filter) < POSITION_THRESHOLD_Y &&
-          abs(fl_speed) < SPEED_THRESHOLD &&
-          abs(fr_speed) < SPEED_THRESHOLD &&
-          abs(bl_speed) < SPEED_THRESHOLD &&
-          abs(br_speed) < SPEED_THRESHOLD) 
+          abs(move_target_distance_y - distance_y_filter) < POSITION_THRESHOLD_Y )
         {
           move_ki_x = X_KI;
           move_ki_y = Y_KI;
@@ -537,6 +553,7 @@ void close_to_target(void)
               distance_x_uart = 0;
               distance_y_uart = 0;
           }
+          pid_distance_flag = 0; // stop the pid control
           stop_the_car();
           // Serial_SendByte(0x01);
           // Serial_SendPacket(); // send to the raspberry
@@ -552,37 +569,47 @@ void close_to_target(void)
 void cheak_corner(void)
 {
    read_gray_scale_module(right_modle, left_modle,front_modle,back_modle);
+  //  if (left_modle[0] || left_modle[4] || right_modle[0] || right_modle[4])  // if find the corner stop the car
+  //  {
+  //       stop_the_car();
+  //  }
    // close_to_target();
-   if ((left_modle[0] || left_modle[4]) && distance_x_uart < 0) // move to the left
-   {
-        corner_flag = 0;
-        move_ki_x = X_KI_CORNER;
-        stop_the_car_no_clear_speed();
-        distance_x_uart = -CORNER_X;
-   }
-   else if((right_modle[0] || right_modle[4]) && distance_x_uart > 0) // move to the right
-   {
-        corner_flag = 0;
-        move_ki_x = X_KI_CORNER;
-        stop_the_car_no_clear_speed();
-        distance_x_uart = CORNER_X;
-   }
-   else if((left_modle[2] || right_modle[2]) && distance_y_uart > 0 
-   && abs(move_target_distance_y - distance_y_filter) < 10) // move to the forward
-   {
-        corner_flag = 0;
-        move_ki_y = Y_KI_CORNER;
-        stop_the_car_no_clear_speed();
-        distance_y_uart = CORNER_Y;
-   }
-   else if((left_modle[2] || right_modle[2]) && distance_y_uart < 0
-   && abs(move_target_distance_y - distance_y_filter) < 10) // move to the backward
-   {
-        corner_flag = 0;
-        move_ki_y = Y_KI_CORNER;
-        stop_the_car_no_clear_speed();
-        distance_y_uart = -CORNER_Y;
-   }
+  //  if (abs(move_target_distance_x - distance_x_filter) < CORNER_X_TH &&
+  //         abs(move_target_distance_y - distance_y_filter) < CORNER_Y_TH)  // enough close to the target
+  //   {
+  //       if ((left_modle[0] || left_modle[4]) && distance_x_uart < 0) // move to the left
+  //       {
+  //             // pid_distance_flag = 1;
+  //             corner_flag = 0;
+  //             // move_ki_x = X_KI_CORNER;
+  //             stop_the_car();
+  //             // distance_x_uart = -CORNER_X;
+  //       }
+  //       else if((right_modle[0] || right_modle[4]) && distance_x_uart > 0) // move to the right
+  //       {
+  //             pid_distance_flag = 1;
+  //             corner_flag = 0;
+  //             // move_ki_x = X_KI_CORNER;
+  //             stop_the_car_no_clear_speed();
+  //             distance_x_uart = CORNER_X;
+  //       }
+  //       else if((left_modle[2] || right_modle[2]) && distance_y_uart > 0 ) // move to the forward
+  //       {
+  //             pid_distance_flag = 1;
+  //             corner_flag = 0;
+  //             // move_ki_y = Y_KI_CORNER;
+  //             stop_the_car_no_clear_speed();
+  //             distance_y_uart = CORNER_Y;
+  //       }
+  //       else if((left_modle[2] || right_modle[2]) && distance_y_uart < 0) // move to the backward
+  //       {
+  //             pid_distance_flag = 1;
+  //             corner_flag = 0;
+  //             // move_ki_y = Y_KI_CORNER;
+  //             stop_the_car_no_clear_speed();
+  //             distance_y_uart = -CORNER_Y;
+  //       }
+  //   }
 }
 
 /**
@@ -601,6 +628,8 @@ void stop_the_car(void)
     br_target_speed = 0;
     distance_x_encoder = 0;
     distance_y_encoder = 0;
+    distance_x_uart = 0;
+    distance_y_uart = 0;
     // angle_z_encoder = 0;
     distance_x = 0;
     distance_y = 0;

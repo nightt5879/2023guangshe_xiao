@@ -11,7 +11,7 @@
 #define TARGET_DISTANCE 40
 #define TEST_SPEED 3
 #define STBLE_TIME 30
-#define MOVE_X 45
+#define MOVE_X 40
 #define MOVE_Y 45.0f
 //below are the function define
 void stop_car(void);
@@ -30,7 +30,7 @@ extern float fr_target_speed, fl_target_speed, br_target_speed, bl_target_speed;
 // the flag and the modle input of the gray
 extern uint8_t distance_flag, corner_flag, right_modle[], left_modle[], front_modle[], back_modle[];
 extern int16_t distance_x_uart, distance_y_uart; // get the disatnce target from the uart
-extern uint8_t one_move_flag;  // when the uart send a message, this flag will turning to 1, you can find it in the UART.X
+extern uint8_t one_move_flag, pid_distance_flag;  // when the uart send a message, this flag will turning to 1, you can find it in the UART.X
 float data[CH_COUNT]; // the data send to the computer
 uint8_t send_flag = 0; // when into the motor interrupt, this flag will turning to 1, send the data to the computer
 uint16_t test_flag = 0, break_flag = 0, test_time_flag = 0;   // using for test
@@ -40,14 +40,18 @@ int main(void)
 	init();
 	toggle_delta_v(1);
 	// distance_y_uart = MOVE_Y;
-	distance_x_uart = -MOVE_X;
+	// distance_x_uart = -MOVE_X;
 	fl_target_speed = -TEST_SPEED;
 	fr_target_speed = TEST_SPEED;
 	bl_target_speed = TEST_SPEED;
 	br_target_speed = -TEST_SPEED;
-	// distance_x_uart = MOVE_X;
+	distance_x_uart = -MOVE_X;
 	one_move_flag = 1;
 	corner_flag = 1;
+	// pid_distance_flag = 1;
+	// corner_flag = 0;
+	// stop_the_car();
+	// distance_x_uart = -CORNER_X;
 	while (1)
 	{	
 		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt

@@ -41,7 +41,7 @@ extern uint8_t Serial_RxPacket[];
 #define COS45 0.707f //cos45 for the speed calculate
 #define MAX_OUTPUT 200 //max pwm
 #define MIN_OUTPUT 0  // min pwm
-#define POSITION_THRESHOLD_X 2.0f 
+#define POSITION_THRESHOLD_X 1.0f 
 #define POSITION_THRESHOLD_Y 3.0f
 #define SPEED_THRESHOLD 0.3f   
 #define X_FACTOR 11.6f
@@ -50,7 +50,7 @@ extern uint8_t Serial_RxPacket[];
 #define ALPHA_X 1.0f
 #define ALPHA_Y 1.0f
 #define ALPHA_Z 1.0f
-#define CORNER_X 10.0f
+#define CORNER_X 3.0f
 #define CORNER_Y 4.0f
 #define CORR_TEST 1.5f
 #define DISTANCE_THRESHOLD_X 0.0f
@@ -60,6 +60,8 @@ extern uint8_t Serial_RxPacket[];
 #define Y_KI 0.00000f
 #define X_KI_CORNER 0.000000f
 #define Y_KI_CORNER 0.00000f
+#define CORNER_X_TH 40.0f
+#define CORNER_Y_TH 5.0f
 /**
   * @brief  initialize the pid control structure
   * @param  None

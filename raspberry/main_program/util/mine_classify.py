@@ -45,7 +45,7 @@ class MinesClassifier:
 
 
 if __name__ == "__main__":
-    mine_classifier = MinesClassifier(paddle_model="../model/MobileNetV2_7_13.nb")
+    mine_classifier = MinesClassifier(paddle_model="../model/MobileNetV2_728.nb")
     #for class_num in range(4):
     # img = cv2.imread(f"../img/测试图片/blue_true/0.png")
     cam = cv2.VideoCapture(-1)

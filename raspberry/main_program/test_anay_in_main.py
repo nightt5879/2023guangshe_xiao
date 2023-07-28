@@ -43,10 +43,10 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     # 初始化PID模块
     PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
     for i in range(1):  # Clear the buffer.
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         cv2.waitKey(1)
     while True:
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         Cam.ShowImg(Cam.Img)
         Cam.ShowImg(Dst, 'Dst')
@@ -66,19 +66,22 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         pwm = int(PWM)
         # # print(pwm)
         sum = int(
-            (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54] + Sum[Line - 55] + Sum[Line - 56] +
-             Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+            (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
+             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
+                                                                      + Sum[Line - 55] + Sum[Line - 56] +
+             Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+
         # print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
             max_time += 1
             # c.car_stop()
-            print("out max")
+            # print("out max")
             # print(sum)
             # break
         if max_time >= user_max_time:  # enough max time
             break
         if break_mod == 1 and break_flag >= break_time:
-            print("break time max")
+            # print("break time max")
             c.car_stop()
             break
         pwm_1 = base_speed - pwm
@@ -88,7 +91,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         pwm_2 = max(0, min(1000, pwm_2))
         c.car_forward(pwm_1, pwm_2)
         break_flag += 1
-        Cam.Delay(1)
+        Cam.Delay(10)
     c.car_stop()
 
 def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0, break_time=0, back_mod=0,
@@ -117,10 +120,10 @@ def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_
     # 初始化PID模块
     PID = GPIO_RPi.PID(K, Kp, Ki, Kd, 160)
     for i in range(1):  # Clear the buffer.
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         cv2.waitKey(1)
     while True:
-        Cam.ReadImg(0, 320, 0, 150)
+        Cam.ReadImg(0, 320, 0, 200)
         Centre, Sum, Dst = Cam.LineTracking(Cam.Img, Line)
         Cam.ShowImg(Cam.Img)
         Cam.ShowImg(Dst, 'Dst')
@@ -140,8 +143,8 @@ def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_
         pwm = int(PWM)
         # # print(pwm)
         sum = int(
-            (Sum[Line - 1] + Sum[Line - 2] + Sum[Line - 3] + Sum[Line - 4] + Sum[Line - 5] + Sum[Line - 6] +
-             Sum[Line - 7] + Sum[Line - 8] + Sum[Line - 9]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+            (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
+             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
             max_time += 1
@@ -167,10 +170,10 @@ def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_
 
 
 def go_forward():
-    PIDLineTracking(K=1, Kp=3, Ki=0, Kd=2, Line=100, SumMax=350, SumMin=100, base_speed=1000, break_mod=1,
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=180, SumMax=290, SumMin=100, base_speed=1000, break_mod=0,
                     set_break_flag=10, user_max_time=1)
     c.car_forward(1000, 1000)
-    time.sleep(0.3  )
+    time.sleep(0.1)
     c.car_stop()
 
 def turn_right():
@@ -197,7 +200,7 @@ def hit_mine(break_time_set,move_time):
 c = move.Car()
 # c.car_forward(1000, 1000)
 # time.sleep(1)
-PIDLineTracking_test(K=1, Kp=3, Ki=0, Kd=2, Line=140, SumMax=500, SumMin=100, base_speed=1000, break_mod=1,
+PIDLineTracking_test(K=1, Kp=3, Ki=0, Kd=2, Line=180, SumMax=500, SumMin=100, base_speed=1000, break_mod=1,
                      set_break_flag=10, user_max_time=1, break_time=17)
 # c.car_forward(1000,1000)
 # time.sleep(0.5)
