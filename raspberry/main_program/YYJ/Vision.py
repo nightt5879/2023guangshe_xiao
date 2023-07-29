@@ -143,19 +143,18 @@ class Camera:
         # Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
         # 下面是GPT写的
         # 转换到HSV颜色空间
-        HSV = cv2.cvtColor(Img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(Img, cv2.COLOR_BGR2HSV)
 
-        # 设置黑色的阈值范围
+        # 设置黑色的HSV阈值范围
         lower_black = np.array([0, 0, 0])
-        upper_black = np.array([180, 255, 46])
-
-        # 阈值化保留黑色部分
-        mask = cv2.inRange(HSV, lower_black, upper_black)
-
-        # 使用高斯自适应阈值化
-        blockSize = 11  # 可调整
-        C = 2  # 可调整
-        Dst = cv2.adaptiveThreshold(mask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
+        upper_black = np.array([180, 255, 80])
+        # 使用HSV阈值过滤黑色
+        mask = cv2.inRange(hsv, lower_black, upper_black)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        mask = cv2.dilate(mask, kernel, iterations=3)
+        mask = cv2.erode(mask, kernel, iterations=1)
+        mask = cv2.bitwise_not(mask)  # 反转一下图像
+        Dst = mask  # 我需要的就是遮罩之后的图像
         if Dilate == 1:
             Dst = cv2.dilate(Dst, None, iterations=IterationDilate)   #膨胀操作，默认不进行，可选参数
         Dst = cv2.erode(Dst, None, iterations=IterationErode)    #腐蚀操作

@@ -4,35 +4,52 @@ import numpy as np
 def main():
     # 打开默认摄像头
     cap = cv2.VideoCapture(0)
+    # 设置成320乘以240的摄像头窗口
+    cap.set(3, 320)
+    cap.set(4, 240)
+
 
     # 设置黑色的HSV阈值范围
     lower_black = np.array([0, 0, 0])
-    upper_black = np.array([180, 255, 46])
+    upper_black = np.array([180, 255, 80])
 
     while True:
         # 读取一帧图像
+        # Cam.ReadImg(0, 320, 0, 200) 读取0到320 和0 到200 的图像
+
         ret, frame = cap.read()
+        # 剪切图像变成 0到320 和 0到200 的图像
+        frame = frame[0:200, 0:320]
         if not ret:
             print("无法读取图像")
             break
 
+        # 输入图像高斯滤波
+        frame = cv2.GaussianBlur(frame, (5, 5), 0)
         # 转换到HSV颜色空间
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # 使用HSV阈值过滤黑色
         mask = cv2.inRange(hsv, lower_black, upper_black)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        mask = cv2.dilate(mask, kernel, iterations=3)
+        mask = cv2.erode(mask, kernel, iterations=1)
+        mask = cv2.bitwise_not(mask)  # 反转一下图像
+        # 灰度化并应用高斯滤波
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray_blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # 灰度化遮罩后的图像并应用高斯滤波
+        masked_gray = cv2.bitwise_and(gray_blurred, gray_blurred, mask=mask)
+        masked_gray_blurred = cv2.GaussianBlur(masked_gray, (5, 5), 0)
+
 
         # 高斯滤波
         blur = cv2.GaussianBlur(mask, (5, 5), 0)
 
         # 高斯自适应阈值化
-        blockSize = 11
-        C = 2
+        blockSize = 31
+        C = 5
         adaptive_thresholded = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
-
-        # 灰度化并应用高斯滤波
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray_blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
         # OTSU阈值化
         _, otsu_thresholded = cv2.threshold(gray_blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -40,9 +57,7 @@ def main():
         # 固定阈值化
         _, fixed_thresholded = cv2.threshold(gray_blurred, 95, 255, cv2.THRESH_BINARY)
 
-        # 灰度化遮罩后的图像并应用高斯滤波
-        masked_gray = cv2.bitwise_and(gray_blurred, gray_blurred, mask=mask)
-        masked_gray_blurred = cv2.GaussianBlur(masked_gray, (5, 5), 0)
+
 
         # 遮罩后的灰度图像的OTSU阈值化
         _, masked_otsu_thresholded = cv2.threshold(masked_gray_blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
