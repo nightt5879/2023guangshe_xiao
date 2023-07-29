@@ -5,6 +5,7 @@ from YYJ import GPIO_RPi
 from YYJ import Vision
 Cam = Vision.Camera(0, 320, 240)
 import cv2
+import numpy as np
 BUTTON_INPUT = 18  # 按钮连接的GPIO口
 GPIO.setmode(GPIO.BCM)
 BUTTON_PIN = BUTTON_INPUT
@@ -142,9 +143,10 @@ def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_
         PWM = PID.OneDin(Now)
         pwm = int(PWM)
         # # print(pwm)
-        sum = int(
-            (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
-             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        sum = np.sum(Sum[Line - 100:Line])
+        # sum = int(
+        #     (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
+        #      Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
         print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
             max_time += 1

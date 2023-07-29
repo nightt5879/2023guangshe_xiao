@@ -137,15 +137,25 @@ class Camera:
         CentreDict = {}     #用于保存 某一行对应的中心点 的字典
         CentreLen = {}    #用于保存 某一行对应的满足要求的点的数量 的字典
 
-        Gray = cv2.cvtColor(Img, cv2.COLOR_BGR2GRAY)    #灰度化
-        # Gray = cv2.cvtColor(Img, cv2.COLOR_BGR2GRAY).astype(np.float32)  # 灰度化并转为浮点型
-        # Gray = self.gamma_correction(Gray, 0.1)  # 进行伽马矫正，参数可调
-        # Gray = np.uint8(Gray)  # 将处理后的图像转回8位无符号整型
-        # 新增的直方图均衡化步骤
-        # Gray = cv2.equalizeHist(Gray)
-        Blur = cv2.GaussianBlur(Gray, (5, 5), 0)    #高斯滤波
-        # _, Dst = cv2.threshold(Blur, 100, 255, cv2.THRESH_BINARY)
-        Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
+        # Gray = cv2.cvtColor(Img, cv2.COLOR_BGR2GRAY)    #灰度化
+        # Blur = cv2.GaussianBlur(Gray, (5, 5), 0)    #高斯滤波
+        # _, Dst = cv2.threshold(Blur, 95, 255, cv2.THRESH_BINARY)
+        # Retval, Dst = cv2.threshold(Blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)  #二值化
+        # 下面是GPT写的
+        # 转换到HSV颜色空间
+        HSV = cv2.cvtColor(Img, cv2.COLOR_BGR2HSV)
+
+        # 设置黑色的阈值范围
+        lower_black = np.array([0, 0, 0])
+        upper_black = np.array([180, 255, 46])
+
+        # 阈值化保留黑色部分
+        mask = cv2.inRange(HSV, lower_black, upper_black)
+
+        # 使用高斯自适应阈值化
+        blockSize = 11  # 可调整
+        C = 2  # 可调整
+        Dst = cv2.adaptiveThreshold(mask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
         if Dilate == 1:
             Dst = cv2.dilate(Dst, None, iterations=IterationDilate)   #膨胀操作，默认不进行，可选参数
         Dst = cv2.erode(Dst, None, iterations=IterationErode)    #腐蚀操作

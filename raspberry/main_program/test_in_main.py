@@ -1,18 +1,17 @@
 # 包的导入
 #
-
-import re
-import subprocess
-import os
-import cv2
-import time
-
 import sys
 
 sys.path.insert(0, "/home/pi/.local/lib/python3.7/site-packages")
 import os
 
 os.chdir("/home/pi/Desktop/main_program")
+import re
+import subprocess
+import cv2
+import time
+
+
 from util.get_map import get_loc
 from util.get_map import show_lcd
 from util.get_path4 import pathPlaner
@@ -20,6 +19,7 @@ from util.get_path4 import pathPlaner
 from util.mine_classify import MinesClassifier
 from util.get_map import button_input
 from util.map_rec import MapArchRecognizer
+import numpy as np
 
 # below is the other import
 import cv2
@@ -47,6 +47,8 @@ hit_mine_flag = 0 # 反映是否撞了宝藏
 hit_mine_time_set = 0.7
 hit_1_time = 15
 hit_2_time = 40
+# 巡线相关的参数
+sum_max_set = 1000  # 巡线的黑色像素点阈值
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # 我也不知道为什么要在这里init input才行 用着用着就不行了 不管了 你就说能不能用把
@@ -266,14 +268,15 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
                    Centre[Line - 2] + Centre[Line + 2] +
                    Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
         # D = Future - Now  # 差值
-        PWM = PID.OneDin(Now)
+        PWM = PID.OneDin(Now)sum = np.sum(Sum[Line - 100:Line])
         pwm = int(PWM)
         # # print(pwm)
-        sum = int(
-            (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
-             Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
-                                                                      + Sum[Line - 55] + Sum[Line - 56] +
-             Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        sum = np.sum(Sum[Line - 100:Line])
+        # sum = int(
+        #     (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
+        #      Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
+        #                                                               + Sum[Line - 55] + Sum[Line - 56] +
+        #      Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
 
         # print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
@@ -299,8 +302,8 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
     c.car_stop()
 
 def go_forward():
-    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=0,
-                    set_break_flag=20, user_max_time=1)
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=170, SumMax=sum_max_set, SumMin=100, base_speed=1000, break_mod=0,
+                    set_break_flag=15, user_max_time=1)
     c.car_forward(1000, 1000)
     time.sleep(0.17)
     c.car_stop()
@@ -321,7 +324,7 @@ def turn_back():
     c.car_stop()
 
 def hit_mine(break_time_set,move_time):
-    PIDLineTracking(K=1, Kp=6, Ki=0, Kd=2, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=1,
+    PIDLineTracking(K=1, Kp=6, Ki=0, Kd=2, Line=180, SumMax=sum_max_set, SumMin=100, base_speed=1000, break_mod=1,
                     set_break_flag=10, user_max_time=1, break_time=break_time_set)
     print("寻仙部分结束")
     # c.car_stop()
@@ -333,7 +336,7 @@ def hit_mine(break_time_set,move_time):
     time.sleep(move_time + 0.2)
     c.car_stop()
     turn_back()
-    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=4, Line=180, SumMax=360, SumMin=100, base_speed=1000, break_mod=0,
+    PIDLineTracking(K=1, Kp=4, Ki=0, Kd=4, Line=180, SumMax=sum_max_set, SumMin=100, base_speed=1000, break_mod=0,
                     set_break_flag=10, user_max_time=1)
     c.car_forward(1000, 1000)
     time.sleep(0.2)
@@ -517,8 +520,8 @@ if __name__ == '__main__':
                 break  # 这下是真的走了
         time_end = time.time()
         print("test done，时间是:", time_end - time_start)
-        with open('./logs', 'w') as f:
-            print(time_end - time_start, file=f)
+        # with open('./logs', 'w') as f:
+        #     print(time_end - time_start, file=f)
         GPIO.remove_event_detect(BUTTON_INPUT)  # 关闭事件检测
     except BaseException as e:
         with open('./logs', 'w') as f:
