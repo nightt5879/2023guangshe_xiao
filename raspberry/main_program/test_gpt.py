@@ -31,7 +31,7 @@ def main():
         adaptive_thresholded = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
 
         # 灰度化并应用高斯滤波
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray_blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
         # OTSU阈值化
@@ -43,6 +43,12 @@ def main():
         # 灰度化遮罩后的图像并应用高斯滤波
         masked_gray = cv2.bitwise_and(gray_blurred, gray_blurred, mask=mask)
         masked_gray_blurred = cv2.GaussianBlur(masked_gray, (5, 5), 0)
+
+        # 遮罩后的灰度图像的OTSU阈值化
+        _, masked_otsu_thresholded = cv2.threshold(masked_gray_blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        # 遮罩后的灰度图像的固定阈值化
+        _, masked_fixed_thresholded = cv2.threshold(masked_gray_blurred, 95, 255, cv2.THRESH_BINARY)
 
         # 显示原始图像
         cv2.imshow("Original Image", frame)
@@ -64,6 +70,12 @@ def main():
 
         # 显示遮罩后的灰度图像
         cv2.imshow("Masked Gray Image", masked_gray_blurred)
+
+        # 显示遮罩后的OTSU阈值化图像
+        cv2.imshow("Masked OTSU Thresholded", masked_otsu_thresholded)
+
+        # 显示遮罩后的固定阈值化图像
+        cv2.imshow("Masked Fixed Thresholded", masked_fixed_thresholded)
 
         # 按'q'键退出
         if cv2.waitKey(1) & 0xFF == ord('q'):
