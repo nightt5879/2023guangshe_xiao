@@ -28,7 +28,21 @@ def main():
         # 高斯自适应阈值化
         blockSize = 11
         C = 2
-        thresholded = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
+        adaptive_thresholded = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize, C)
+
+        # 灰度化并应用高斯滤波
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        gray_blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        # OTSU阈值化
+        _, otsu_thresholded = cv2.threshold(gray_blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        # 固定阈值化
+        _, fixed_thresholded = cv2.threshold(gray_blurred, 95, 255, cv2.THRESH_BINARY)
+
+        # 灰度化遮罩后的图像并应用高斯滤波
+        masked_gray = cv2.bitwise_and(gray_blurred, gray_blurred, mask=mask)
+        masked_gray_blurred = cv2.GaussianBlur(masked_gray, (5, 5), 0)
 
         # 显示原始图像
         cv2.imshow("Original Image", frame)
@@ -36,8 +50,20 @@ def main():
         # 显示HSV过滤后的图像
         cv2.imshow("HSV Filtered", mask)
 
-        # 显示二值化后的图像
-        cv2.imshow("Thresholded Image", thresholded)
+        # 显示灰度图像
+        cv2.imshow("Gray Image", gray_blurred)
+
+        # 显示OTSU阈值化后的图像
+        cv2.imshow("OTSU Thresholded Image", otsu_thresholded)
+
+        # 显示固定阈值化后的图像
+        cv2.imshow("Fixed Thresholded Image", fixed_thresholded)
+
+        # 显示自适应阈值化后的图像
+        cv2.imshow("Adaptive Thresholded Image", adaptive_thresholded)
+
+        # 显示遮罩后的灰度图像
+        cv2.imshow("Masked Gray Image", masked_gray_blurred)
 
         # 按'q'键退出
         if cv2.waitKey(1) & 0xFF == ord('q'):
