@@ -48,13 +48,13 @@ hit_mine_time_set = 0.7
 hit_1_time = 15
 hit_2_time = 40
 # 巡线相关的参数
-sum_max_set = 1000  # 巡线的黑色像素点阈值
+sum_max_set = 2000  # 巡线的黑色像素点阈值
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_INPUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # 我也不知道为什么要在这里init input才行 用着用着就不行了 不管了 你就说能不能用把
 
 
-cam = cv2.VideoCapture(-1)  # -1就是使用默认摄像头 防止报错
+cam = cv2.VideoCapture(0)  # -1就是使用默认摄像头 防止报错
 break_flag = 0
 # 读五次图像，如果都成功就跳出
 for i in range(5):
@@ -268,15 +268,18 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
                    Centre[Line - 2] + Centre[Line + 2] +
                    Centre[Line - 1] + Centre[Line + 1]) / 11)  # 十个附近点的值求平均
         # D = Future - Now  # 差值
-        PWM = PID.OneDin(Now)sum = np.sum(Sum[Line - 100:Line])
+        PWM = PID.OneDin(Now)
         pwm = int(PWM)
         # # print(pwm)
-        sum = np.sum(Sum[Line - 100:Line])
+        sum = 0
+        for i in range(20):
+            sum += int(Sum[Line - i])
         # sum = int(
         #     (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
-        #      Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
-        #                                                               + Sum[Line - 55] + Sum[Line - 56] +
-        #      Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2# 黑色像素点的数量 取9个点的平均值 原来是三个点的值
+        #      Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3 + (
+        #                 Sum[Line - 51] + Sum[Line - 52] + Sum[Line - 53] + Sum[Line - 54]
+        #                 + Sum[Line - 55] + Sum[Line - 56] +
+        #                 Sum[Line - 57] + Sum[Line - 58] + Sum[Line - 59]) / 3) / 2  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
 
         # print(sum,Now,pwm,max_time)
         if sum >= SumMax and break_flag > set_break_flag:  # 不要再刚转弯开始巡线就break
@@ -300,6 +303,7 @@ def PIDLineTracking(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_mod=0
         break_flag += 1
         Cam.Delay(10)
     c.car_stop()
+
 
 def go_forward():
     PIDLineTracking(K=1, Kp=4, Ki=0, Kd=2, Line=170, SumMax=sum_max_set, SumMin=100, base_speed=1000, break_mod=0,
@@ -526,11 +530,11 @@ if __name__ == '__main__':
     except BaseException as e:
         with open('./logs', 'w') as f:
             print(e, file=f)
-        os.execl(sys.executable, sys.executable, *sys.argv)
+        # os.execl(sys.executable, sys.executable, *sys.argv)
         # write the time into the file
-
-        # # 释放摄像头
-        # cam.release()
+    finally:
+        # 释放摄像头
+        cam.release()
         # # 重启程序
         # # os.execl(sys.executable, sys.executable, *sys.argv)
         # create_new_process()

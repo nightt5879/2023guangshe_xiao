@@ -146,12 +146,12 @@ class Camera:
         hsv = cv2.cvtColor(Img, cv2.COLOR_BGR2HSV)
 
         # 设置黑色的HSV阈值范围
-        lower_black = np.array([0, 0, 0])
-        upper_black = np.array([180, 255, 80])
+        lower_black = np.array([0, 40, 0])
+        upper_black = np.array([180, 255, 110])
         # 使用HSV阈值过滤黑色
         mask = cv2.inRange(hsv, lower_black, upper_black)
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        mask = cv2.dilate(mask, kernel, iterations=3)
+        mask = cv2.dilate(mask, kernel, iterations=1)
         mask = cv2.erode(mask, kernel, iterations=1)
         mask = cv2.bitwise_not(mask)  # 反转一下图像
         Dst = mask  # 我需要的就是遮罩之后的图像

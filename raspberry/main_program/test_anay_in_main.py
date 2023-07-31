@@ -143,7 +143,10 @@ def PIDLineTracking_test(K, Kp, Ki, Kd, Line, SumMax, SumMin, base_speed, break_
         PWM = PID.OneDin(Now)
         pwm = int(PWM)
         # # print(pwm)
-        sum = np.sum(Sum[Line - 100:Line])
+        sum = 0
+        for i in range (20):
+            sum += int(Sum[Line - i])
+        # sum = np.sum(Sum.values()[Line - 100:Line])
         # sum = int(
         #     (Sum[Line - 21] + Sum[Line - 22] + Sum[Line - 23] + Sum[Line - 24] + Sum[Line - 25] + Sum[Line - 26] +
         #      Sum[Line - 27] + Sum[Line - 28] + Sum[Line - 29]) / 3)  # 黑色像素点的数量 取9个点的平均值 原来是三个点的值
