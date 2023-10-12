@@ -274,7 +274,7 @@ void USART2_IRQHandler(void)
                     if (Serial_RxPacket[1] == 0) // stop the angle and correction
                     {
                         toggle_delta_v(0);
-                        mpu_6050_corretion();
+//                        mpu_6050_corretion();
                     }
                     else if (Serial_RxPacket[1] == 1)
                     {

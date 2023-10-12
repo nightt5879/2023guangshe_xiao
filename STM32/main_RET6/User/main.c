@@ -53,15 +53,16 @@ int main(void)
 	// stop_the_car();
 	// distance_x_uart = -CORNER_X;
 	while (1)
-	{	
-		get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
+	{
+		Serial_SendByte(0x01);
+		//get_6050_data(); //I2C communication is too low, we get the data in main and use data in interrupt
 		// test_id = MPU6050_GetID();
 		send_to_win();
-		if(distance_flag == 1)
-		{
-			distance_flag = 0;
-			Serial_SendByte(0x01);
-		}
+//		if(distance_flag == 1)
+//		{
+//			distance_flag = 0;
+//			Serial_SendByte(0x01);
+//		}
 		// if (test_time_flag >= 100)
 		// {
 		// 	stop_car();
@@ -82,8 +83,10 @@ void init(void)
 {
 	SystemInit();
 	Delay_ms(100);
+	Serial_Init();
+	Serial_SendByte(0x01);
 	//6050
-	init_6050();
+//	init_6050();
 	//control of the motor, include 4PWM and 4DIR
 	motor_init();
 	//init the gray input
@@ -99,11 +102,12 @@ void init(void)
 	TIM6_Configuration();
 	//UART init
 	UART4_Init();
+	send_data(data, CH_COUNT);
 	//init the angle pid and interrupt init (1ms)
 	init_pid_angle();
 	TIM7_Configuration();
 	//serial to the raspberry
-	Serial_Init();
+	
 	//get the system clock
 }
 
